@@ -384,6 +384,7 @@ EOF
         fi
     done
 
+    mkdir -p "$HOME/.java/.userPrefs/jormungandr" "$HOME/.java/.userPrefs/indoctrinatedrecluse/jormungandr" 2>/dev/null || true
     mkdir -p "$HOME/.config/JetBrains/consentOptions" 2>/dev/null || true
     echo "rsch.send.usage.stat:1.1:0:$now_ms" > "$HOME/.config/JetBrains/consentOptions/accepted" 2>/dev/null || true
     ok "Sandbox EULA & first-run configuration initialized."
@@ -421,6 +422,7 @@ fi
 
 if [[ $BUILD_ONLY -eq 0 && $RUN_TESTS -eq 0 && "$TASK" == *"runIde"* ]]; then
     TASKS+=(
+        "-Didea.vendor.name=indoctrinatedrecluse"
         "-Djb.consents.confirmation.enabled=false"
         "-Deua.consents.confirmation.enabled=false"
         "-Didea.initially.ask.config=false"

@@ -86,7 +86,7 @@ object JormungandrSplashScreen {
 
                 // If any IDE UI frame is already showing, dismiss immediately
                 for (frame in Frame.getFrames()) {
-                    if (frame !== splashWindow && frame.isShowing) {
+                    if (frame !== splashWindow && frame.isShowing && isMainIdeUiWindow(frame)) {
                         LOG.info("Main IDE UI frame already visible (${frame.javaClass.simpleName}). Dismissing splash immediately.")
                         dismiss()
                         return@invokeLater
@@ -130,7 +130,7 @@ object JormungandrSplashScreen {
                 val listener = AWTEventListener { event ->
                     if (event is WindowEvent && event.id == WindowEvent.WINDOW_OPENED) {
                         val win = event.window
-                        if (win != null && win !== splashWindow && win.isShowing) {
+                        if (win != null && win !== splashWindow && win.isShowing && isMainIdeUiWindow(win)) {
                             LOG.info("Detected main IDE window opened (${win.javaClass.simpleName}). Dismissing splash screen immediately.")
                             dismiss()
                         }
@@ -198,6 +198,13 @@ object JormungandrSplashScreen {
                 awtEventListener = null
             }
         }
+    }
+
+    private fun isMainIdeUiWindow(win: Window): Boolean {
+        val name = win.javaClass.simpleName
+        // Do not dismiss for other splash windows or invisible popups
+        if (name.contains("Splash", ignoreCase = true)) return false
+        return win is Frame || win is Dialog
     }
 
     /**

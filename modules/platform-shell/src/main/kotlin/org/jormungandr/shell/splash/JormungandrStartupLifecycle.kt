@@ -24,6 +24,7 @@ class JormungandrAppInitializer : ApplicationInitializedListener {
 
     override suspend fun execute() {
         LOG.info("Jörmungandr application initializing; launching animated splash screen.")
+        org.jormungandr.shell.registry.JormungandrRegistry.initialize()
         JormungandrSplashScreen.show()
 
         val extensionManager = ApplicationManager.getApplication().getService(ExtensionManager::class.java)

@@ -45,6 +45,7 @@ tasks {
     runIde {
         jvmArgumentProviders.add(CommandLineArgumentProvider {
             listOf(
+                "-Didea.vendor.name=indoctrinatedrecluse",
                 "-Djb.consents.confirmation.enabled=false",
                 "-Deua.consents.confirmation.enabled=false",
                 "-Didea.initially.ask.config=false",

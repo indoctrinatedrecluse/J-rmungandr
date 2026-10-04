@@ -416,13 +416,36 @@ function Initialize-SandboxEula {
         }
     }
 
+    # 1. Jörmungandr Dedicated Product & Vendor Registry Keys
+    $jormRegPaths = @(
+        "HKCU:\SOFTWARE\JavaSoft\Prefs\jormungandr",
+        "HKCU:\SOFTWARE\JavaSoft\Prefs\jormungandr\privacy_policy",
+        "HKCU:\SOFTWARE\JavaSoft\Prefs\indoctrinatedrecluse\jormungandr",
+        "HKCU:\SOFTWARE\Jormungandr"
+    )
+    foreach ($path in $jormRegPaths) {
+        try {
+            if (-not (Test-Path $path)) {
+                New-Item -Path $path -Force | Out-Null
+            }
+            Set-ItemProperty -Path $path -Name "eua_accepted_version" -Value "2.0" -Force
+            Set-ItemProperty -Path $path -Name "privacy_policy_accepted_version" -Value "2.0" -Force
+            Set-ItemProperty -Path $path -Name "vendor" -Value "indoctrinatedrecluse" -Force
+            Set-ItemProperty -Path $path -Name "version" -Value "0.1.0-SNAPSHOT" -Force
+        } catch {
+            Write-Warn "Could not write Jörmungandr registry key $path (non-fatal): $_"
+        }
+    }
+    Write-Ok "Configured dedicated Jörmungandr product registry keys."
+
+    # 2. Upstream IntelliJ Platform Compatibility Bridge
     try {
         $regPath = "HKCU:\SOFTWARE\JavaSoft\Prefs\jetbrains\privacy_policy"
         if (-not (Test-Path $regPath)) {
             New-Item -Path $regPath -Force | Out-Null
         }
         Set-ItemProperty -Path $regPath -Name "eua_accepted_version" -Value "2.0" -Force
-        Write-Ok "Verified Windows Registry EUA acceptance key."
+        Write-Ok "Verified upstream IntelliJ Platform EUA acceptance bridge."
     } catch {
         Write-Warn "Could not write Windows Registry EUA key (non-fatal): $_"
     }
@@ -467,6 +490,7 @@ if ($Test) {
 
 if (-not $BuildOnly -and -not $Test -and ($Task -match "runIde")) {
     $tasksToRun += @(
+        "-Didea.vendor.name=indoctrinatedrecluse",
         "-Djb.consents.confirmation.enabled=false",
         "-Deua.consents.confirmation.enabled=false",
         "-Didea.initially.ask.config=false",
