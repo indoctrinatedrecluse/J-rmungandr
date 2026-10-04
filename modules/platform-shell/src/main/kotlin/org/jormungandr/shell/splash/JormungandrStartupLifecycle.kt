@@ -9,9 +9,14 @@ import org.jormungandr.shell.icon.JormungandrIcons
 import java.awt.Frame
 import javax.swing.SwingUtilities
 
+import com.intellij.openapi.application.ApplicationManager
+import org.jormungandr.core.extension.ExtensionManager
+import org.jormungandr.shell.extension.CoreExtensionsRegistry
+
 /**
  * Early application bootstrap listener.
- * Launches the animated Solarized splash screen immediately as IntelliJ starts up.
+ * Launches the animated Solarized splash screen immediately as IntelliJ starts up,
+ * and initializes core extensions in ExtensionManager.
  */
 class JormungandrAppInitializer : ApplicationInitializedListener {
 
@@ -20,6 +25,11 @@ class JormungandrAppInitializer : ApplicationInitializedListener {
     override suspend fun execute() {
         LOG.info("Jörmungandr application initializing; launching animated splash screen.")
         JormungandrSplashScreen.show()
+
+        val extensionManager = ApplicationManager.getApplication().getService(ExtensionManager::class.java)
+        if (extensionManager != null) {
+            CoreExtensionsRegistry.ensureCoreExtensionsRegistered(extensionManager)
+        }
     }
 }
 

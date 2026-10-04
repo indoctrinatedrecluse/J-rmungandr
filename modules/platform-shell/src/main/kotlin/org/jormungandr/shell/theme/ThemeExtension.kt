@@ -32,6 +32,8 @@ class ThemeExtension : JormungandrExtension, ThemeManager {
         version = "0.1.0",
         description = "Provides universal theme token distribution and styling propagation across all UI elements and extensions.",
         author = "indoctrinatedrecluse",
+        supportedLanguages = listOf("CSS", "JSON", "XML"),
+        associatedStacks = listOf("IntelliJ LookAndFeel", "JCEF WebViews", "Solarized Light", "Bubblegum Barbie"),
         quota = ResourceQuota(
             maxHeapBytes = 64L * 1024 * 1024,
             maxOffHeapBytes = 0L,

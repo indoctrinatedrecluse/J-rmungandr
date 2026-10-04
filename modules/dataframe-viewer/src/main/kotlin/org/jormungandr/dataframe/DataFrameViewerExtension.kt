@@ -18,6 +18,8 @@ class DataFrameViewerExtension : JormungandrExtension {
         version = "0.1.0",
         description = "Provides virtualized high-performance tabular grid display and Apache Arrow memory buffers.",
         author = "indoctrinatedrecluse",
+        supportedLanguages = listOf("Python", "R", "SQL"),
+        associatedStacks = listOf("Apache Arrow", "Pandas", "Polars", "DuckDB"),
         quota = ResourceQuota(
             maxHeapBytes = 512L * 1024 * 1024,
             maxOffHeapBytes = 3L * 1024 * 1024 * 1024, // 3 GB for large zero-copy Arrow memory maps

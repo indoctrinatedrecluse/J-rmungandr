@@ -23,6 +23,8 @@ data class ExtensionMetadata(
     val version: String,
     val description: String,
     val author: String = "indoctrinatedrecluse",
+    val supportedLanguages: List<String> = emptyList(),
+    val associatedStacks: List<String> = emptyList(),
     val dependencies: Set<ExtensionId> = emptySet(),
     val quota: ResourceQuota = ResourceQuota()
 )

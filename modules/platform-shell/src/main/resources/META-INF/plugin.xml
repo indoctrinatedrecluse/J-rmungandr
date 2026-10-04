@@ -52,5 +52,31 @@
                     text="Code Mode (Standard IDE)"
                     description="Switch to code editor perspective"/>
         </group>
+
+        <!-- View Menu Actions -->
+        <action id="Jormungandr.View.Extensions"
+                class="org.jormungandr.shell.ui.extensions.ExtensionsAction"
+                text="Extensions..."
+                description="View active modular extensions, language stacks, and memory quotas"
+                icon="/icons/jormungandr_16.png">
+            <add-to-group group-id="ViewMenu" anchor="after" relative-to-action="Jormungandr.PerspectiveGroup"/>
+        </action>
+
+        <action id="Jormungandr.View.Themes"
+                class="org.jormungandr.shell.ui.theme.ThemesAction"
+                text="Themes..."
+                description="View available visual themes and switch active theme in real time"
+                icon="/icons/jormungandr_16.png">
+            <add-to-group group-id="ViewMenu" anchor="after" relative-to-action="Jormungandr.View.Extensions"/>
+        </action>
+
+        <!-- Help Menu Action -->
+        <action id="Jormungandr.Help.About"
+                class="org.jormungandr.shell.ui.about.AboutAction"
+                text="About Jörmungandr"
+                description="About Jörmungandr, author attribution, and license"
+                icon="/icons/jormungandr_16.png">
+            <add-to-group group-id="HelpMenu" anchor="first"/>
+        </action>
     </actions>
 </idea-plugin>

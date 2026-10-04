@@ -20,6 +20,8 @@ class JupyterExtension : JormungandrExtension {
         version = "0.1.0",
         description = "Provides ZeroMQ client protocol, kernel discovery, and interactive execution.",
         author = "indoctrinatedrecluse",
+        supportedLanguages = listOf("Python", "Julia", "R"),
+        associatedStacks = listOf("Jupyter", "IPython Kernel", "ZeroMQ", "nbformat"),
         quota = ResourceQuota(
             maxHeapBytes = 512L * 1024 * 1024,
             maxOffHeapBytes = 1L * 1024 * 1024 * 1024, // 1 GB for kernel outputs/buffers
