@@ -45,13 +45,16 @@ class ThemeExtension : JormungandrExtension, ThemeManager {
     private var context: ExtensionContext? = null
 
     private val themeRegistry = mutableMapOf<String, JormungandrTheme>(
-        JormungandrTheme.SOLARIZED_LIGHT.id to JormungandrTheme.SOLARIZED_LIGHT
+        JormungandrTheme.SOLARIZED_LIGHT.id to JormungandrTheme.SOLARIZED_LIGHT,
+        JormungandrTheme.BUBBLEGUM_BARBIE.id to JormungandrTheme.BUBBLEGUM_BARBIE
     )
 
     private val _currentTheme = MutableStateFlow(JormungandrTheme.SOLARIZED_LIGHT)
     override val currentTheme: StateFlow<JormungandrTheme> = _currentTheme.asStateFlow()
 
-    private val _availableThemes = MutableStateFlow(listOf(JormungandrTheme.SOLARIZED_LIGHT))
+    private val _availableThemes = MutableStateFlow(
+        listOf(JormungandrTheme.SOLARIZED_LIGHT, JormungandrTheme.BUBBLEGUM_BARBIE)
+    )
     override val availableThemes: StateFlow<List<JormungandrTheme>> = _availableThemes.asStateFlow()
 
     private val listeners = CopyOnWriteArrayList<ThemeChangeListener>()

@@ -145,5 +145,59 @@ data class JormungandrTheme(
                 "#6C71C4"  // violet
             )
         )
+
+        /**
+         * "Bubblegum Barbie" theme celebrating vibrant and pastel shades of pink,
+         * with rich berry and plum accents for ultra-crisp legibility.
+         */
+        val BUBBLEGUM_BARBIE = JormungandrTheme(
+            id = "bubblegum.barbie",
+            name = "Bubblegum Barbie",
+            isDark = false,
+            colors = ColorTokens(
+                background = "#FFF5F8",          // Soft bubblegum blush
+                secondaryBackground = "#FFE4EC", // Misty rose
+                surface = "#FFF0F5",             // Lavender blush
+                foreground = "#4A154B",          // Deep berry plum for high contrast
+                mutedForeground = "#9C27B0",     // Rich orchid purple
+                border = "#F8BBD0",              // Soft carnation border
+                accent = "#E0218A",              // Iconic Barbie pink
+                accentHover = "#FF4081",         // Vibrant hot pink
+                selectionBackground = "#FFD1DC", // Pastel pink
+                selectionForeground = "#2D0A24", // Midnight plum
+                error = "#D81B60",               // Deep magenta/raspberry
+                warning = "#FF80AB",             // Neon flamingo
+                success = "#00BFA5",             // Mint/teal accent
+                info = "#E0218A"                 // Barbie pink
+            ),
+            dataGrid = DataGridThemeTokens(
+                headerBackground = "#F8BBD0",    // Carnation pink header
+                headerForeground = "#3D0C2E",    // Deep berry
+                rowEvenBackground = "#FFF5F8",   // Light pink even rows
+                rowOddBackground = "#FFE8F1",    // Rose odd rows
+                gridLineColor = "#F48FB1",       // Soft rose grid lines
+                selectionBackground = "#FF80AB", // Hot pink cell highlight
+                selectionForeground = "#FFFFFF"
+            ),
+            syntax = SyntaxThemeTokens(
+                keyword = "#D81B60",             // Hot fuchsia
+                string = "#E91E63",              // Barbie rose pink
+                number = "#AB47BC",              // Bubblegum purple orchid
+                comment = "#CE93D8",             // Soft mauve lavender
+                function = "#E0218A",            // Iconic Barbie pink
+                variable = "#AD1457",            // Deep raspberry
+                type = "#880E4F"                 // Burgundy rose
+            ),
+            chartPalette = listOf(
+                "#E0218A", // Barbie pink
+                "#FF4081", // Hot pink
+                "#F06292", // Carnation
+                "#EC407A", // Bubblegum
+                "#D81B60", // Deep fuchsia
+                "#BA68C8", // Pinkish orchid
+                "#FF80AB", // Neon flamingo
+                "#FFB6C1"  // Light pink
+            )
+        )
     }
 }

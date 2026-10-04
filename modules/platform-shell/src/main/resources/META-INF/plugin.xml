@@ -27,8 +27,9 @@
             serviceInterface="org.jormungandr.core.theme.ThemeManager"
             serviceImplementation="org.jormungandr.shell.theme.ThemeExtension"/>
 
-        <!-- Universal Theme Provider -->
+        <!-- Universal Theme Providers -->
         <themeProvider id="org.jormungandr.theme.solarized.light" path="/themes/SolarizedLight.theme.json"/>
+        <themeProvider id="org.jormungandr.theme.bubblegum.barbie" path="/themes/BubblegumBarbie.theme.json"/>
 
         <!-- Animated Splash Screen & Branding Lifecycle -->
         <applicationInitializedListener implementation="org.jormungandr.shell.splash.JormungandrAppInitializer"/>

@@ -1,0 +1,107 @@
+{
+  "name": "Bubblegum Barbie",
+  "author": "indoctrinatedrecluse",
+  "dark": false,
+  "editorScheme": "/themes/BubblegumBarbie.xml",
+  "colors": {
+    "background": "#FFF5F8",
+    "foreground": "#4A154B",
+    "primary": "#E0218A",
+    "secondary": "#FF4081",
+    "accent": "#E0218A",
+    "border": "#F8BBD0",
+    "selectionBackground": "#FFD1DC",
+    "selectionForeground": "#2D0A24"
+  },
+  "ui": {
+    "*": {
+      "background": "#FFF5F8",
+      "foreground": "#4A154B",
+      "inactiveForeground": "#9C27B0",
+      "selectionBackground": "#FFD1DC",
+      "selectionForeground": "#2D0A24",
+      "selectionInactiveBackground": "#FFE4EC",
+      "selectionInactiveForeground": "#6A1B9A",
+      "borderColor": "#F8BBD0",
+      "separatorColor": "#F8BBD0"
+    },
+    "Borders": {
+      "color": "#F8BBD0",
+      "ContrastBorderColor": "#F48FB1"
+    },
+    "Button": {
+      "startBackground": "#FFE4EC",
+      "endBackground": "#FFE4EC",
+      "startBorderColor": "#F8BBD0",
+      "endBorderColor": "#F8BBD0",
+      "focusedBorderColor": "#E0218A",
+      "foreground": "#4A154B",
+      "default": {
+        "startBackground": "#E0218A",
+        "endBackground": "#E0218A",
+        "foreground": "#FFFFFF",
+        "focusedBorderColor": "#FF4081"
+      }
+    },
+    "ComboBox": {
+      "background": "#FFF5F8",
+      "nonEditableBackground": "#FFF5F8",
+      "selectionBackground": "#FFD1DC",
+      "selectionForeground": "#2D0A24"
+    },
+    "Editor": {
+      "background": "#FFF5F8",
+      "foreground": "#4A154B",
+      "shortcutForeground": "#E0218A"
+    },
+    "EditorTabs": {
+      "background": "#FFE4EC",
+      "underlinedTabBackground": "#FFF5F8",
+      "underlineColor": "#E0218A",
+      "underlineHeight": 2,
+      "inactiveUnderlineColor": "#F48FB1",
+      "hoverBackground": "#FFEBF2"
+    },
+    "Panel": {
+      "background": "#FFF5F8"
+    },
+    "ScrollBar": {
+      "trackColor": "#FFF5F8",
+      "thumbColor": "#F8BBD0",
+      "thumbHoverColor": "#F06292"
+    },
+    "StatusBar": {
+      "background": "#FFE4EC",
+      "borderColor": "#F8BBD0",
+      "foreground": "#4A154B"
+    },
+    "Table": {
+      "background": "#FFF5F8",
+      "foreground": "#4A154B",
+      "gridColor": "#F48FB1",
+      "selectionBackground": "#FF80AB",
+      "selectionForeground": "#FFFFFF",
+      "headerBackground": "#F8BBD0",
+      "headerForeground": "#3D0C2E",
+      "stripeColor": "#FFE8F1"
+    },
+    "ToolWindow": {
+      "Header": {
+        "background": "#FFE4EC",
+        "borderColor": "#F8BBD0",
+        "inactiveBackground": "#FFF0F5"
+      },
+      "HeaderTab": {
+        "underlineColor": "#E0218A",
+        "selectedBackground": "#FFF5F8",
+        "hoverBackground": "#FFEBF2"
+      }
+    },
+    "Tree": {
+      "background": "#FFF5F8",
+      "foreground": "#4A154B",
+      "selectionBackground": "#FFD1DC",
+      "selectionForeground": "#2D0A24"
+    }
+  }
+}
