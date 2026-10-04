@@ -30,6 +30,17 @@ class DataFrameViewerExtension : JormungandrExtension {
 
     private var context: ExtensionContext? = null
 
+    /** Active tabular styling tokens provided by ThemeManager */
+    var currentGridTheme: org.jormungandr.core.theme.DataGridThemeTokens =
+        org.jormungandr.core.theme.JormungandrTheme.SOLARIZED_LIGHT.dataGrid
+        private set
+
+    /** Applies theme tokens across all virtualized table columns */
+    fun applyTheme(theme: org.jormungandr.core.theme.JormungandrTheme) {
+        currentGridTheme = theme.dataGrid
+        LOG.info("DataFrameViewer updated grid theme: ${theme.name} (HeaderBg=${theme.dataGrid.headerBackground})")
+    }
+
     override suspend fun initialize(context: ExtensionContext) {
         this.context = context
         _state = ExtensionState.INITIALIZED

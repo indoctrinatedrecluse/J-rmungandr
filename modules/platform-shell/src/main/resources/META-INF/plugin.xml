@@ -23,6 +23,12 @@
         <applicationService
             serviceInterface="org.jormungandr.core.extension.ExtensionManager"
             serviceImplementation="org.jormungandr.core.extension.impl.ExtensionManagerImpl"/>
+        <applicationService
+            serviceInterface="org.jormungandr.core.theme.ThemeManager"
+            serviceImplementation="org.jormungandr.shell.theme.ThemeExtension"/>
+
+        <!-- Universal Theme Provider -->
+        <themeProvider id="org.jormungandr.theme.solarized.light" path="/themes/SolarizedLight.theme.json"/>
     </extensions>
 
     <actions>

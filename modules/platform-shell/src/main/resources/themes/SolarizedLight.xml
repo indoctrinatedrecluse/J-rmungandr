@@ -1,0 +1,76 @@
+<scheme name="Solarized Light" version="142" parent_scheme="Default">
+  <metaInfo>
+    <property name="created">2026-10-04T00:00:00</property>
+    <property name="ide">Jormungandr</property>
+    <property name="ideVersion">2024.3.2</property>
+    <property name="originalScheme">Solarized Light</property>
+  </metaInfo>
+  <colors>
+    <option name="CARET_COLOR" value="657b83" />
+    <option name="CARET_ROW_COLOR" value="eee8d5" />
+    <option name="GUTTER_BACKGROUND" value="eee8d5" />
+    <option name="INDENT_GUIDE" value="e0d8c3" />
+    <option name="LINE_NUMBERS_COLOR" value="93a1a1" />
+    <option name="SELECTED_INDENT_GUIDE" value="93a1a1" />
+    <option name="SELECTION_BACKGROUND" value="eee8d5" />
+    <option name="SELECTION_FOREGROUND" value="073642" />
+  </colors>
+  <attributes>
+    <option name="DEFAULT_BLOCK_COMMENT">
+      <value>
+        <option name="FOREGROUND" value="93a1a1" />
+        <option name="FONT_TYPE" value="2" />
+      </value>
+    </option>
+    <option name="DEFAULT_CLASS_NAME">
+      <value>
+        <option name="FOREGROUND" value="cb4b16" />
+      </value>
+    </option>
+    <option name="DEFAULT_DOC_COMMENT">
+      <value>
+        <option name="FOREGROUND" value="93a1a1" />
+        <option name="FONT_TYPE" value="2" />
+      </value>
+    </option>
+    <option name="DEFAULT_FUNCTION_CALL">
+      <value>
+        <option name="FOREGROUND" value="268bd2" />
+      </value>
+    </option>
+    <option name="DEFAULT_FUNCTION_DECLARATION">
+      <value>
+        <option name="FOREGROUND" value="268bd2" />
+        <option name="FONT_TYPE" value="1" />
+      </value>
+    </option>
+    <option name="DEFAULT_KEYWORD">
+      <value>
+        <option name="FOREGROUND" value="859900" />
+        <option name="FONT_TYPE" value="1" />
+      </value>
+    </option>
+    <option name="DEFAULT_LINE_COMMENT">
+      <value>
+        <option name="FOREGROUND" value="93a1a1" />
+        <option name="FONT_TYPE" value="2" />
+      </value>
+    </option>
+    <option name="DEFAULT_NUMBER">
+      <value>
+        <option name="FOREGROUND" value="d33682" />
+      </value>
+    </option>
+    <option name="DEFAULT_STRING">
+      <value>
+        <option name="FOREGROUND" value="2aa198" />
+      </value>
+    </option>
+    <option name="TEXT">
+      <value>
+        <option name="BACKGROUND" value="fdf6e3" />
+        <option name="FOREGROUND" value="657b83" />
+      </value>
+    </option>
+  </attributes>
+</scheme>
