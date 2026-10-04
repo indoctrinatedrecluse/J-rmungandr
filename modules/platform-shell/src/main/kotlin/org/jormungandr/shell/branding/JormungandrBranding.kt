@@ -8,6 +8,7 @@ import java.awt.*
 import java.awt.event.AWTEventListener
 import java.awt.event.WindowEvent
 import java.lang.reflect.Field
+import java.lang.reflect.Proxy
 import javax.swing.*
 
 /**
@@ -16,9 +17,11 @@ import javax.swing.*
  * Replaces upstream IntelliJ IDEA and JetBrains branding throughout the application:
  * 1. Mutates ApplicationNamesInfo (product name, full name, edition, script, motto).
  * 2. Mutates ApplicationInfoImpl (company name, company URL, copyright, logos, doc URLs).
- * 3. Enforces Jörmungandr multi-resolution window icons on title bars and taskbars.
- * 4. Intercepts and transforms window titles and UI labels across all frames, dialogs, and menus.
- * 5. Replaces upstream About action with Jörmungandr About action.
+ * 3. Intercepts and shields ConsentOptions against NPE on white-labeled vendor configurations.
+ * 4. Enforces Jörmungandr multi-resolution window icons on title bars and taskbars.
+ * 5. Intercepts and transforms window titles and UI labels across all frames, dialogs, and menus.
+ * 6. Replaces upstream About action with Jörmungandr About action.
+ * 7. Rebrands ActionManager action template presentations and descriptions.
  */
 object JormungandrBranding {
 
@@ -33,9 +36,16 @@ object JormungandrBranding {
     private val REPLACEMENT_MAP = listOf(
         "Welcome to IntelliJ IDEA" to "Welcome to $PRODUCT_NAME",
         "IntelliJ IDEA Community Edition" to PRODUCT_NAME,
+        "IntelliJ IDEA Ultimate Edition" to PRODUCT_NAME,
         "IntelliJ IDEA Ultimate" to PRODUCT_NAME,
         "IntelliJ IDEA" to PRODUCT_NAME,
+        "IntelliJ Platform" to "$PRODUCT_NAME Core Platform",
+        "IntelliJ" to PRODUCT_NAME,
         "JetBrains s.r.o." to COMPANY_NAME,
+        "JetBrains Community" to "$PRODUCT_NAME Community",
+        "JetBrains Account" to "$PRODUCT_NAME Account",
+        "JetBrains Marketplace" to "$PRODUCT_NAME Plugin Registry",
+        "JetBrains Privacy Policy" to "$PRODUCT_NAME Privacy Policy",
         "JetBrains" to PRODUCT_NAME,
         "IDEA" to PRODUCT_NAME
     )
@@ -57,7 +67,9 @@ object JormungandrBranding {
 
         patchApplicationNamesInfo()
         patchApplicationInfo()
+        patchConsentOptions()
         replaceUpstreamAboutAction()
+        rebrandActionManager()
         installGlobalWindowInterceptor()
         rebrandAllWindows()
 
@@ -115,6 +127,88 @@ object JormungandrBranding {
             LOG.info("Successfully patched ApplicationInfoImpl to '$COMPANY_NAME' ($COMPANY_URL).")
         } catch (e: Throwable) {
             LOG.warn("Could not patch ApplicationInfoImpl", e)
+        }
+    }
+
+    /**
+     * Reflectively guards and intercepts ConsentOptions to guarantee that GDPR and usage statistics
+     * consent queries never throw NullPointerException on custom/white-labeled vendor builds.
+     */
+    fun patchConsentOptions() {
+        try {
+            val consentOptionsClass = Class.forName("com.intellij.ide.gdpr.ConsentOptions")
+            val getInstanceMethod = consentOptionsClass.getMethod("getInstance")
+            val instance = getInstanceMethod.invoke(null) ?: return
+
+            val backendField = consentOptionsClass.getDeclaredField("myBackend").apply { isAccessible = true }
+            val originalBackend = backendField.get(instance)
+
+            val backendInterface = Class.forName("com.intellij.ide.gdpr.ConsentOptions\$IOBackend")
+            val fallbackJson = """[{"consentId":"rsch.send.usage.stat","version":"1.1","text":"Help improve Jörmungandr by sending anonymous usage statistics and diagnostics.","printableName":"Send Usage Statistics","accepted":"false"},{"consentId":"eap","version":"2021.2","text":"Send feedback requests and survey participation.","printableName":"Send feedback requests and surveys","accepted":"false"}]"""
+            val fallbackConfirmed = "rsch.send.usage.stat:1.1:0:${System.currentTimeMillis()};eap:2021.2:0:${System.currentTimeMillis()};"
+
+            val proxyBackend = Proxy.newProxyInstance(
+                backendInterface.classLoader,
+                arrayOf(backendInterface)
+            ) { _, method, args ->
+                when (method.name) {
+                    "readBundledConsents", "readDefaultConsents" -> {
+                        val res = try {
+                            if (originalBackend != null) method.invoke(originalBackend, *(args ?: emptyArray())) as? String else null
+                        } catch (_: Throwable) { null }
+                        if (res.isNullOrBlank()) fallbackJson else res
+                    }
+                    "readConfirmedConsents" -> {
+                        val res = try {
+                            if (originalBackend != null) method.invoke(originalBackend, *(args ?: emptyArray())) as? String else null
+                        } catch (_: Throwable) { null }
+                        if (res.isNullOrBlank()) fallbackConfirmed else res
+                    }
+                    else -> {
+                        if (originalBackend != null) {
+                            try {
+                                method.invoke(originalBackend, *(args ?: emptyArray()))
+                            } catch (_: Throwable) { null }
+                        } else null
+                    }
+                }
+            }
+
+            backendField.set(instance, proxyBackend)
+            LOG.info("Successfully patched ConsentOptions IOBackend with resilient fallback provider.")
+        } catch (e: Throwable) {
+            LOG.warn("Could not patch ConsentOptions IOBackend (non-fatal)", e)
+        }
+    }
+
+    /**
+     * Inspects all registered actions in ActionManager and replaces IntelliJ/JetBrains
+     * substrings in their template text and description.
+     */
+    fun rebrandActionManager() {
+        try {
+            val actionManager = ActionManager.getInstance() ?: return
+            val actionIds = actionManager.getActionIdList("")
+            for (id in actionIds) {
+                val action = actionManager.getAction(id) ?: continue
+                val text = action.templatePresentation.text
+                if (text != null) {
+                    val rebranded = rebrandText(text)
+                    if (rebranded != text) {
+                        action.templatePresentation.setText(rebranded)
+                    }
+                }
+                val desc = action.templatePresentation.description
+                if (desc != null) {
+                    val rebranded = rebrandText(desc)
+                    if (rebranded != desc) {
+                        action.templatePresentation.description = rebranded
+                    }
+                }
+            }
+            LOG.info("Successfully rebranded ActionManager action presentations (${actionIds.size} inspected).")
+        } catch (e: Throwable) {
+            LOG.warn("Could not rebrand ActionManager actions (non-fatal)", e)
         }
     }
 
@@ -217,6 +311,11 @@ object JormungandrBranding {
      * Recursively traverses a component container to substitute upstream branding substrings.
      */
     fun rebrandComponents(container: Container) {
+        // Inspect for CustomHeader
+        if (container.javaClass.name.contains("CustomHeader")) {
+            patchCustomHeader(container)
+        }
+
         for (comp in container.components) {
             when (comp) {
                 is JLabel -> {
@@ -226,6 +325,14 @@ object JormungandrBranding {
                         if (rebranded != text) {
                             comp.text = rebranded
                         }
+                    }
+                    val accessibleName = comp.accessibleContext?.accessibleName
+                    if (accessibleName == "Application icon" ||
+                        comp.javaClass.name.contains("CustomHeader") ||
+                        comp.javaClass.name.contains("createProductIcon") ||
+                        comp.name == "productIcon") {
+                        comp.icon = JormungandrIcons.APP_ICON
+                        comp.repaint()
                     }
                 }
                 is AbstractButton -> {
@@ -237,10 +344,48 @@ object JormungandrBranding {
                         }
                     }
                 }
+                is JTabbedPane -> {
+                    for (i in 0 until comp.tabCount) {
+                        val title = comp.getTitleAt(i)
+                        if (title != null) {
+                            val rebranded = rebrandText(title)
+                            if (rebranded != title) {
+                                comp.setTitleAt(i, rebranded)
+                            }
+                        }
+                    }
+                }
+                is JToolTip -> {
+                    val tip = comp.tipText
+                    if (tip != null) {
+                        val rebranded = rebrandText(tip)
+                        if (rebranded != tip) {
+                            comp.tipText = rebranded
+                        }
+                    }
+                }
             }
             if (comp is Container && comp.componentCount > 0) {
                 rebrandComponents(comp)
             }
+        }
+    }
+
+    /**
+     * Reflectively updates the iconProvider of IntelliJ's CustomHeader
+     * to provide the Jörmungandr World Serpent icon.
+     */
+    private fun patchCustomHeader(customHeader: Container) {
+        try {
+            val field = customHeader.javaClass.getDeclaredField("iconProvider").apply { isAccessible = true }
+            val scaleContextCacheClass = Class.forName("com.intellij.ui.scale.ScaleContextCache")
+            val constructor = scaleContextCacheClass.getConstructor(kotlin.jvm.functions.Function1::class.java)
+            val lambda: (Any?) -> Icon = { JormungandrIcons.APP_ICON }
+            val provider = constructor.newInstance(lambda)
+            field.set(customHeader, provider)
+            customHeader.repaint()
+        } catch (_: Throwable) {
+            // Non-fatal if CustomHeader layout differs
         }
     }
 

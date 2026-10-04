@@ -61,9 +61,39 @@ tasks {
         doFirst {
             val platformVer = providers.gradleProperty("platformVersion").get()
             val sandboxConfigDir = layout.buildDirectory.dir("idea-sandbox/IC-$platformVer/config").get().asFile
-            val consentDir = File(sandboxConfigDir, "consentOptions")
-            consentDir.mkdirs()
-            File(consentDir, "accepted").writeText("rsch.send.usage.stat:1.1:0:${System.currentTimeMillis()}\n")
+            val nowMs = System.currentTimeMillis()
+            val acceptedStr = "rsch.send.usage.stat:1.1:0:$nowMs;eap:2021.2:0:$nowMs;\n"
+            val cachedJson = """[{"consentId":"rsch.send.usage.stat","version":"1.1","text":"Help improve Jörmungandr.","printableName":"Send Usage Statistics","accepted":"false"},{"consentId":"eap","version":"2021.2","text":"Surveys","printableName":"Feedback","accepted":"false"}]"""
+
+            // 1. Sandbox configuration paths
+            listOf(
+                File(sandboxConfigDir, "consentOptions"),
+                File(sandboxConfigDir, "jormungandr/consentOptions"),
+                File(sandboxConfigDir, "idea/consentOptions")
+            ).forEach { dir ->
+                dir.mkdirs()
+                File(dir, "accepted").writeText(acceptedStr)
+                File(dir, "cached").writeText(cachedJson)
+            }
+
+            // 2. User AppData paths for both custom vendor and JetBrains fallback
+            val appData = System.getenv("APPDATA")
+            if (appData != null) {
+                listOf(
+                    File(appData, "indoctrinatedrecluse/consentOptions"),
+                    File(appData, "indoctrinatedrecluse/jormungandr/consentOptions"),
+                    File(appData, "indoctrinatedrecluse/idea/consentOptions"),
+                    File(appData, "JetBrains/consentOptions"),
+                    File(appData, "JetBrains/jormungandr/consentOptions"),
+                    File(appData, "JetBrains/idea/consentOptions")
+                ).forEach { dir ->
+                    try {
+                        dir.mkdirs()
+                        File(dir, "accepted").writeText(acceptedStr)
+                        File(dir, "cached").writeText(cachedJson)
+                    } catch (_: Throwable) {}
+                }
+            }
 
             val optionsDir = File(sandboxConfigDir, "options")
             optionsDir.mkdirs()

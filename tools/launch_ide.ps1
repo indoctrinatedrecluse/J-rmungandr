@@ -68,10 +68,38 @@ $systemDir = Join-Path $sandboxDir.FullName "system"
 $pluginsDir = Join-Path $sandboxDir.FullName "plugins"
 $logDir = Join-Path $sandboxDir.FullName "log"
 
-$consentDir = Join-Path $configDir "consentOptions"
-if (-not (Test-Path $consentDir)) { New-Item -ItemType Directory -Path $consentDir -Force | Out-Null }
-$consentFile = Join-Path $consentDir "accepted"
-Set-Content -Path $consentFile -Value "rsch.send.usage.stat:1.1:0:$([DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds())`n" -Encoding UTF8
+$nowMs = [DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds()
+$acceptedStr = "rsch.send.usage.stat:1.1:0:$nowMs;eap:2021.2:0:$nowMs;`n"
+$cachedJson = '[{"consentId":"rsch.send.usage.stat","version":"1.1","text":"Help improve Jörmungandr.","printableName":"Send Usage Statistics","accepted":"false"},{"consentId":"eap","version":"2021.2","text":"Surveys","printableName":"Feedback","accepted":"false"}]'
+
+# Pre-populate in sandbox config paths
+@(
+    (Join-Path $configDir "consentOptions"),
+    (Join-Path $configDir "jormungandr\consentOptions"),
+    (Join-Path $configDir "idea\consentOptions")
+) | ForEach-Object {
+    if (-not (Test-Path $_)) { New-Item -ItemType Directory -Path $_ -Force | Out-Null }
+    Set-Content -Path (Join-Path $_ "accepted") -Value $acceptedStr -Encoding UTF8
+    Set-Content -Path (Join-Path $_ "cached") -Value $cachedJson -Encoding UTF8
+}
+
+# Pre-populate in User AppData paths for both custom vendor and JetBrains fallback
+if ($env:APPDATA) {
+    @(
+        (Join-Path $env:APPDATA "indoctrinatedrecluse\consentOptions"),
+        (Join-Path $env:APPDATA "indoctrinatedrecluse\jormungandr\consentOptions"),
+        (Join-Path $env:APPDATA "indoctrinatedrecluse\idea\consentOptions"),
+        (Join-Path $env:APPDATA "JetBrains\consentOptions"),
+        (Join-Path $env:APPDATA "JetBrains\jormungandr\consentOptions"),
+        (Join-Path $env:APPDATA "JetBrains\idea\consentOptions")
+    ) | ForEach-Object {
+        try {
+            if (-not (Test-Path $_)) { New-Item -ItemType Directory -Path $_ -Force | Out-Null }
+            Set-Content -Path (Join-Path $_ "accepted") -Value $acceptedStr -Encoding UTF8
+            Set-Content -Path (Join-Path $_ "cached") -Value $cachedJson -Encoding UTF8
+        } catch {}
+    }
+}
 
 $optionsDir = Join-Path $configDir "options"
 if (-not (Test-Path $optionsDir)) { New-Item -ItemType Directory -Path $optionsDir -Force | Out-Null }
@@ -141,7 +169,8 @@ $libJars = @(
     (Join-Path $libDir "nio-fs.jar"),
     (Join-Path $libDir "trove.jar")
 ) | Where-Object { Test-Path $_ }
-$cpString = ($libJars -join ";")
+$resourcesDir = Join-Path $ProjectRoot "modules\platform-shell\src\main\resources"
+$cpString = "$resourcesDir;" + ($libJars -join ";")
 
 $vmArgs = @(
     "-Xms256m",

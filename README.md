@@ -414,6 +414,16 @@ To safely reset or inspect Jörmungandr registry entries without affecting other
 
 ---
 
+### 🐍 White-Label Branding & Identity System
+
+Jörmungandr features a comprehensive runtime white-labeling and branding overhaul engine ([`JormungandrBranding`](file:///D:/Projects/J%C3%B6rmungandr/modules/platform-shell/src/main/kotlin/org/jormungandr/shell/branding/JormungandrBranding.kt)):
+- **Universal Window & Title Bar Branding**: Automatically applies the Jörmungandr World Serpent emblem (`jormungandr.ico`, multi-resolution rasters 16px–512px, and vector SVGs) beside the application name on native OS title bars, custom frame headers (`CustomHeader`), and taskbars.
+- **Identity & Attribution Mutation**: Reflectively mutates `ApplicationNamesInfo` and `ApplicationInfoImpl` to report Jörmungandr product identity, Indoctrinated Recluse vendor attribution, version metadata, and custom issue/support URLs.
+- **Dynamic UI Text & Menu Rebranding**: Recursively intercepts and transforms upstream IntelliJ/JetBrains strings across all frames, dialogs, menus, status bars, and `ActionManager` action presentations into Jörmungandr equivalents.
+- **Resilient GDPR & Telemetry Guard**: Shields `ConsentOptions` using a dynamic `IOBackend` proxy and bundled consent definitions, guaranteeing seamless startup and zero telemetry leaks.
+
+---
+
 ## 📄 10. License & Open Source Attribution
 
 Jörmungandr is free, open-source software licensed under the [Apache License 2.0](LICENSE).  

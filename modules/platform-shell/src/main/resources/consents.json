@@ -1,0 +1,16 @@
+[
+  {
+    "consentId": "rsch.send.usage.stat",
+    "version": "1.1",
+    "text": "Help improve Jörmungandr by sending anonymous data about features and plugins used, hardware and software configuration, statistics on types of files, number of files per project, etc.\nPlease note that this will not include personal data or any sensitive information, such as source code, file names, etc. The data sent complies with the <a href=\"https://github.com/indoctrinatedrecluse/Jormungandr\">Jörmungandr Privacy Policy</a>.",
+    "printableName": "Send Usage Statistics",
+    "accepted": "false"
+  },
+  {
+    "consentId": "eap",
+    "version": "2021.2",
+    "text": "By subscribing, I understand Indoctrinated Recluse will process my email address for this purpose in accordance with the <a href=\"https://github.com/indoctrinatedrecluse/Jormungandr\">Privacy Policy</a>.",
+    "printableName": "Send me feedback requests and surveys",
+    "accepted": "false"
+  }
+]

@@ -350,16 +350,21 @@ function Initialize-SandboxEula {
     }
 
     $nowMs = [DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds()
+    $acceptedStr = "rsch.send.usage.stat:1.1:0:$nowMs;eap:2021.2:0:$nowMs;`n"
+    $cachedJson = '[{"consentId":"rsch.send.usage.stat","version":"1.1","text":"Help improve Jörmungandr.","printableName":"Send Usage Statistics","accepted":"false"},{"consentId":"eap","version":"2021.2","text":"Surveys","printableName":"Feedback","accepted":"false"}]'
 
     foreach ($cfgDir in $sandboxDirs) {
         try {
-            $consentDir = Join-Path $cfgDir "consentOptions"
-            if (-not (Test-Path $consentDir)) {
-                New-Item -ItemType Directory -Path $consentDir -Force | Out-Null
+            @(
+                (Join-Path $cfgDir "consentOptions"),
+                (Join-Path $cfgDir "jormungandr\consentOptions"),
+                (Join-Path $cfgDir "idea\consentOptions")
+            ) | ForEach-Object {
+                if (-not (Test-Path $_)) { New-Item -ItemType Directory -Path $_ -Force | Out-Null }
+                Set-Content -Path (Join-Path $_ "accepted") -Value $acceptedStr -Encoding UTF8
+                Set-Content -Path (Join-Path $_ "cached") -Value $cachedJson -Encoding UTF8
             }
-            $consentFile = Join-Path $consentDir "accepted"
-            Set-Content -Path $consentFile -Value "rsch.send.usage.stat:1.1:0:$nowMs`n" -NoNewline -Encoding ASCII
-            Write-Ok "Pre-configured consent options at: $consentFile"
+            Write-Ok "Pre-configured consent options in: $cfgDir"
 
             $optionsDir = Join-Path $cfgDir "options"
             if (-not (Test-Path $optionsDir)) {
@@ -413,6 +418,24 @@ function Initialize-SandboxEula {
             }
         } catch {
             Write-Warn "Could not write sandbox EULA in $($cfgDir): $_"
+        }
+    }
+
+    # Pre-populate in User AppData paths for both custom vendor and JetBrains fallback
+    if ($env:APPDATA) {
+        @(
+            (Join-Path $env:APPDATA "indoctrinatedrecluse\consentOptions"),
+            (Join-Path $env:APPDATA "indoctrinatedrecluse\jormungandr\consentOptions"),
+            (Join-Path $env:APPDATA "indoctrinatedrecluse\idea\consentOptions"),
+            (Join-Path $env:APPDATA "JetBrains\consentOptions"),
+            (Join-Path $env:APPDATA "JetBrains\jormungandr\consentOptions"),
+            (Join-Path $env:APPDATA "JetBrains\idea\consentOptions")
+        ) | ForEach-Object {
+            try {
+                if (-not (Test-Path $_)) { New-Item -ItemType Directory -Path $_ -Force | Out-Null }
+                Set-Content -Path (Join-Path $_ "accepted") -Value $acceptedStr -Encoding UTF8
+                Set-Content -Path (Join-Path $_ "cached") -Value $cachedJson -Encoding UTF8
+            } catch {}
         }
     }
 

@@ -80,4 +80,18 @@ class JormungandrBrandingTest {
             assertEquals("Copyright Indoctrinated Recluse", label2.text)
         }
     }
+
+    @Test
+    fun `test patchConsentOptions prevents NPE and returns safe permission`() {
+        JormungandrBranding.patchConsentOptions()
+
+        val consentOptionsClass = Class.forName("com.intellij.ide.gdpr.ConsentOptions")
+        val getInstance = consentOptionsClass.getMethod("getInstance")
+        val instance = getInstance.invoke(null)
+        assertNotNull(instance, "ConsentOptions.getInstance() must not be null")
+
+        val isSendingAllowedMethod = consentOptionsClass.getMethod("isSendingUsageStatsAllowed")
+        val permission = isSendingAllowedMethod.invoke(instance)
+        assertNotNull(permission, "isSendingUsageStatsAllowed() must return valid Permission enum without NPE")
+    }
 }
