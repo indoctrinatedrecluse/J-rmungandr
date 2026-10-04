@@ -174,9 +174,16 @@ object JormungandrSplashScreen {
                     if (win.title != null && win.title.contains("IntelliJ IDEA")) {
                         win.title = win.title.replace("IntelliJ IDEA", "Jörmungandr")
                     }
+                    win.setLocationRelativeTo(null)
                 }
+                win.isAlwaysOnTop = true
                 win.toFront()
                 win.requestFocus()
+                SwingUtilities.invokeLater {
+                    try {
+                        win.isAlwaysOnTop = false
+                    } catch (_: Exception) {}
+                }
             } catch (e: Exception) {
                 LOG.warn("Could not brand/activate main IDE window", e)
             }
