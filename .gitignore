@@ -1,0 +1,139 @@
+# ==============================================================================
+# PyData Studio - Git Ignore Configuration
+# Covers: Gradle, IntelliJ Platform SDK, Kotlin, Java, Python, Jupyter, DB, OS
+# ==============================================================================
+
+# --- Gradle & Build Outputs ---
+.gradle/
+build/
+out/
+bin/
+**/build/
+**/out/
+
+# Preserve Gradle Wrapper jar
+!gradle/wrapper/gradle-wrapper.jar
+
+# --- JetBrains & IntelliJ IDEA ---
+# User-specific configs and caches
+.idea/workspace.xml
+.idea/tasks.xml
+.idea/usage.statistics.xml
+.idea/shelf/
+.idea/sonarlint/
+.idea/httpRequests/
+.idea/caches/
+.idea/compiler.xml
+.idea/jarRepositories.xml
+.idea/modules.xml
+*.iws
+*.iml
+*.ipr
+
+# IntelliJ Platform sandbox & plugin test environments
+sandbox/
+build/idea-sandbox/
+**/sandbox/
+
+# --- Java & Kotlin ---
+*.class
+*.jar
+*.war
+*.ear
+*.nar
+*.zip
+*.tar.gz
+*.rar
+hs_err_pid*
+replay_pid*
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environments
+.env
+.venv
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+.conda/
+
+# Python Tooling Caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+
+# --- Jupyter Notebooks ---
+.ipynb_checkpoints
+*-checkpoint.ipynb
+
+# --- Local Databases & Data Cache Files ---
+*.db
+*.sqlite
+*.sqlite3
+*.duckdb
+*.parquet
+*.arrow
+*.feather
+*.h5
+*.hdf5
+
+# --- R Language (Future Integration) ---
+.Rhistory
+.RData
+.Ruserdata
+.Rproj.user/
+
+# --- Operating System & Editor Files ---
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+[Dd]esktop.ini
+*.swp
+*.swo
+*~
+
+# --- Logs & Crash Dumps ---
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# --- Environment & Secret Credentials ---
+.env*.local
+*.pem
+*.key
+*.cert
