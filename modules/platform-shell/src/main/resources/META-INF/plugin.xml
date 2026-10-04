@@ -29,10 +29,14 @@
 
         <!-- Universal Theme Provider -->
         <themeProvider id="org.jormungandr.theme.solarized.light" path="/themes/SolarizedLight.theme.json"/>
+
+        <!-- Animated Splash Screen & Branding Lifecycle -->
+        <applicationInitializedListener implementation="org.jormungandr.shell.splash.JormungandrAppInitializer"/>
+        <postStartupActivity implementation="org.jormungandr.shell.splash.JormungandrStartupActivity"/>
     </extensions>
 
     <actions>
-        <group id="Jormungandr.PerspectiveGroup" text="Perspective" popup="true" icon="AllIcons.Actions.GroupBy">
+        <group id="Jormungandr.PerspectiveGroup" text="Perspective" popup="true" icon="/icons/jormungandr_16.png">
             <add-to-group group-id="ViewMenu" anchor="first"/>
             <action id="Jormungandr.Perspective.Analysis"
                     class="org.jormungandr.shell.perspective.SwitchToAnalysisPerspectiveAction"
