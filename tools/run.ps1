@@ -483,6 +483,13 @@ if ($Test) {
         exit 1
     }
     Write-Ok "Found existing built target: $($targetPlugin.FullName)"
+
+    if ($Task -eq ":modules:platform-shell:runIde") {
+        Write-Info "Launching existing binary directly via native launcher (launch_ide.ps1)..."
+        & (Join-Path $ScriptDir "launch_ide.ps1") @ExtraArgs
+        exit $LASTEXITCODE
+    }
+
     Write-Info "Target task: $Task (run-only mode: skipping compilation and rebuild tasks)"
     $tasksToRun += $Task
     $tasksToRun += @(
