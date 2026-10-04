@@ -319,6 +319,120 @@ if ($RunOnly) {
 }
 
 # ---------------------------------------------------------------------------
+# Sandbox EULA & First-Run Initialization
+# ---------------------------------------------------------------------------
+function Initialize-SandboxEula {
+    param([string]$ProjectRoot)
+
+    Write-Host "`n--- Initializing Sandbox EULA & First-Run Configuration ---" -ForegroundColor White
+
+    $platformVer = "2024.3.2"
+    $propsFile = Join-Path $ProjectRoot "gradle.properties"
+    if (Test-Path $propsFile) {
+        $verLine = Get-Content $propsFile | Where-Object { $_ -match '^platformVersion\s*=\s*(.+)$' } | Select-Object -First 1
+        if ($verLine) {
+            $platformVer = $Matches[1].Trim()
+        }
+    }
+
+    $sandboxDirs = @(
+        Join-Path $ProjectRoot "modules\platform-shell\build\idea-sandbox\IC-$platformVer\config"
+    )
+
+    $ideaSandboxRoot = Join-Path $ProjectRoot "modules\platform-shell\build\idea-sandbox"
+    if (Test-Path $ideaSandboxRoot) {
+        Get-ChildItem -Path $ideaSandboxRoot -Directory -Filter "IC-*" -ErrorAction SilentlyContinue | ForEach-Object {
+            $cfg = Join-Path $_.FullName "config"
+            if ($sandboxDirs -notcontains $cfg) {
+                $sandboxDirs += $cfg
+            }
+        }
+    }
+
+    $nowMs = [DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds()
+
+    foreach ($cfgDir in $sandboxDirs) {
+        try {
+            $consentDir = Join-Path $cfgDir "consentOptions"
+            if (-not (Test-Path $consentDir)) {
+                New-Item -ItemType Directory -Path $consentDir -Force | Out-Null
+            }
+            $consentFile = Join-Path $consentDir "accepted"
+            Set-Content -Path $consentFile -Value "rsch.send.usage.stat:1.1:0:$nowMs`n" -NoNewline -Encoding ASCII
+            Write-Ok "Pre-configured consent options at: $consentFile"
+
+            $optionsDir = Join-Path $cfgDir "options"
+            if (-not (Test-Path $optionsDir)) {
+                New-Item -ItemType Directory -Path $optionsDir -Force | Out-Null
+            }
+
+            $otherXmlFile = Join-Path $optionsDir "other.xml"
+            if (Test-Path $otherXmlFile) {
+                $xmlContent = Get-Content -Raw -Path $otherXmlFile
+                if (-not ($xmlContent -match "eua_accepted_version")) {
+                    $xmlContent = $xmlContent -replace '"keyToString": \{', @"
+"keyToString": {
+    "eua_accepted_version": "2.0",
+    "privacy_policy_accepted_version": "2.0",
+    "previous_eua_accepted_version": "2.0",
+    "ask.about.tip.of.the.day": "false",
+    "show.tips.on.startup": "false",
+"@
+                    Set-Content -Path $otherXmlFile -Value $xmlContent -Encoding UTF8
+                    Write-Ok "Updated EUA properties in: $otherXmlFile"
+                }
+            } else {
+                $otherXmlContent = @"
+<application>
+  <component name="PropertyService"><![CDATA[{
+  "keyToString": {
+    "eua_accepted_version": "2.0",
+    "privacy_policy_accepted_version": "2.0",
+    "previous_eua_accepted_version": "2.0",
+    "ask.about.tip.of.the.day": "false",
+    "show.tips.on.startup": "false"
+  }
+}]]></component>
+</application>
+"@
+                Set-Content -Path $otherXmlFile -Value $otherXmlContent -Encoding UTF8
+                Write-Ok "Created EUA configuration in: $otherXmlFile"
+            }
+
+            $generalLocalFile = Join-Path $optionsDir "ide.general.local.xml"
+            if (-not (Test-Path $generalLocalFile)) {
+                $generalLocalContent = @"
+<application>
+  <component name="GeneralLocalSettings">
+    <option name="showTipsOnStartup" value="false" />
+  </component>
+</application>
+"@
+                Set-Content -Path $generalLocalFile -Value $generalLocalContent -Encoding UTF8
+                Write-Ok "Created startup tips configuration in: $generalLocalFile"
+            }
+        } catch {
+            Write-Warn "Could not write sandbox EULA in $($cfgDir): $_"
+        }
+    }
+
+    try {
+        $regPath = "HKCU:\SOFTWARE\JavaSoft\Prefs\jetbrains\privacy_policy"
+        if (-not (Test-Path $regPath)) {
+            New-Item -Path $regPath -Force | Out-Null
+        }
+        Set-ItemProperty -Path $regPath -Name "eua_accepted_version" -Value "2.0" -Force
+        Write-Ok "Verified Windows Registry EUA acceptance key."
+    } catch {
+        Write-Warn "Could not write Windows Registry EUA key (non-fatal): $_"
+    }
+}
+
+if (-not $BuildOnly -and -not $Test -and ($Task -match "runIde")) {
+    Initialize-SandboxEula -ProjectRoot $ProjectRoot
+}
+
+# ---------------------------------------------------------------------------
 # Build & Execution
 # ---------------------------------------------------------------------------
 Write-Host "`n--- Executing Gradle ---" -ForegroundColor White
@@ -349,6 +463,15 @@ if ($Test) {
 } else {
     Write-Info "Target task: $Task"
     $tasksToRun += $Task
+}
+
+if (-not $BuildOnly -and -not $Test -and ($Task -match "runIde")) {
+    $tasksToRun += @(
+        "-Djb.consents.confirmation.enabled=false",
+        "-Deua.consents.confirmation.enabled=false",
+        "-Didea.initially.ask.config=false",
+        "-Dide.show.tips.on.startup=false"
+    )
 }
 
 $allArgs = $tasksToRun + $ExtraArgs

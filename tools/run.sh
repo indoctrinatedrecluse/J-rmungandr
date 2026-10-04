@@ -315,6 +315,85 @@ if [[ $RUN_ONLY -eq 1 ]]; then
 fi
 
 # ---------------------------------------------------------------------------
+# Sandbox EULA & First-Run Initialization
+# ---------------------------------------------------------------------------
+init_sandbox_eula() {
+    local project_root="$1"
+    info "Initializing sandbox EULA & first-run configuration..."
+
+    local platform_ver="2024.3.2"
+    local props_file="$project_root/gradle.properties"
+    if [[ -f "$props_file" ]]; then
+        local matched
+        matched=$(grep -E '^platformVersion\s*=' "$props_file" | head -n 1 | cut -d'=' -f2 | tr -d '[:space:]' || true)
+        if [[ -n "$matched" ]]; then
+            platform_ver="$matched"
+        fi
+    fi
+
+    local now_ms
+    now_ms=$(date +%s%3N 2>/dev/null || echo "1790799343000")
+
+    local sandbox_dirs=(
+        "$project_root/modules/platform-shell/build/idea-sandbox/IC-$platform_ver/config"
+    )
+
+    local sandbox_base="$project_root/modules/platform-shell/build/idea-sandbox"
+    if [[ -d "$sandbox_base" ]]; then
+        for ic_dir in "$sandbox_base"/IC-*/; do
+            if [[ -d "$ic_dir" ]]; then
+                sandbox_dirs+=("${ic_dir}config")
+            fi
+        done
+    fi
+
+    for cfg in "${sandbox_dirs[@]}"; do
+        mkdir -p "$cfg/consentOptions" "$cfg/options"
+        echo "rsch.send.usage.stat:1.1:0:$now_ms" > "$cfg/consentOptions/accepted"
+
+        local other_xml="$cfg/options/other.xml"
+        if [[ -f "$other_xml" ]]; then
+            if ! grep -q "eua_accepted_version" "$other_xml"; then
+                sed -i 's/"keyToString": {/"keyToString": {\n    "eua_accepted_version": "2.0",\n    "privacy_policy_accepted_version": "2.0",\n    "previous_eua_accepted_version": "2.0",\n    "ask.about.tip.of.the.day": "false",\n    "show.tips.on.startup": "false",/' "$other_xml" 2>/dev/null || true
+            fi
+        else
+            cat << 'EOF' > "$other_xml"
+<application>
+  <component name="PropertyService"><![CDATA[{
+  "keyToString": {
+    "eua_accepted_version": "2.0",
+    "privacy_policy_accepted_version": "2.0",
+    "previous_eua_accepted_version": "2.0",
+    "ask.about.tip.of.the.day": "false",
+    "show.tips.on.startup": "false"
+  }
+}]]></component>
+</application>
+EOF
+        fi
+
+        local general_local="$cfg/options/ide.general.local.xml"
+        if [[ ! -f "$general_local" ]]; then
+            cat << 'EOF' > "$general_local"
+<application>
+  <component name="GeneralLocalSettings">
+    <option name="showTipsOnStartup" value="false" />
+  </component>
+</application>
+EOF
+        fi
+    done
+
+    mkdir -p "$HOME/.config/JetBrains/consentOptions" 2>/dev/null || true
+    echo "rsch.send.usage.stat:1.1:0:$now_ms" > "$HOME/.config/JetBrains/consentOptions/accepted" 2>/dev/null || true
+    ok "Sandbox EULA & first-run configuration initialized."
+}
+
+if [[ $BUILD_ONLY -eq 0 && $RUN_TESTS -eq 0 && "$TASK" == *"runIde"* ]]; then
+    init_sandbox_eula "$PROJECT_ROOT"
+fi
+
+# ---------------------------------------------------------------------------
 # Build & Execution
 # ---------------------------------------------------------------------------
 echo -e "\n--- Executing Gradle ---"
@@ -340,5 +419,15 @@ else
     TASKS+=("$TASK")
 fi
 
+if [[ $BUILD_ONLY -eq 0 && $RUN_TESTS -eq 0 && "$TASK" == *"runIde"* ]]; then
+    TASKS+=(
+        "-Djb.consents.confirmation.enabled=false"
+        "-Deua.consents.confirmation.enabled=false"
+        "-Didea.initially.ask.config=false"
+        "-Dide.show.tips.on.startup=false"
+    )
+fi
+
 info "Executing: ./gradlew ${TASKS[*]} ${EXTRA_ARGS[*]:-}"
 ./gradlew "${TASKS[@]}" "${EXTRA_ARGS[@]:-}"
+
