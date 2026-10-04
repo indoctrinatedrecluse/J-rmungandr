@@ -1,6 +1,6 @@
-# 📊 PyData Studio 🚀
+# 🐍 Jörmungandr 🌊
 
-### *The Open-Source, Modularity-First IDE for Python, Data Science & Analytics*
+### *The Modular, Open-Source IDE for Python, Data Science & Analytics*
 
 [![Platform](https://img.shields.io/badge/Platform-IntelliJ_Platform_CE-blue.svg?logo=intellijidea)](https://github.com/JetBrains/intellij-community)
 [![Language](https://img.shields.io/badge/Language-Kotlin_2.1_|_Java_21-purple.svg?logo=kotlin)](https://kotlinlang.org)
@@ -16,7 +16,7 @@ Modern data practitioners are caught between two disparate worlds:
 - **Web-based Notebooks** (e.g. JupyterLab) offer immediate visualization and exploratory freedom, but fall short on refactoring, static typing, deep debugging, and enterprise-grade VCS.
 - **Traditional Software Engineering IDEs** provide industrial-strength code intelligence, but treat notebooks, dataframes, and database exploration as secondary utilities or lock them behind expensive commercial paywalls.
 
-**PyData Studio** bridges this divide. Built atop the open-source **IntelliJ Platform Community Edition** and JetBrains' open-source **Python Community** plugins, PyData Studio delivers a purpose-built, responsive environment tailored specifically for **Data Scientists**, **Analytics Engineers**, and **Machine Learning Practitioners**.
+**Jörmungandr** bridges this divide. Built atop the open-source **IntelliJ Platform Community Edition** and JetBrains' open-source **Python Community** plugins, Jörmungandr delivers a purpose-built, responsive environment tailored specifically for **Data Scientists**, **Analytics Engineers**, and **Machine Learning Practitioners**.
 
 ```
    ┌────────────────────────────────────────────────────────────────────────┐
@@ -27,7 +27,7 @@ Modern data practitioners are caught between two disparate worlds:
    │   • SQL/NoSQL Live Analytics         • Git & Merge Conflict Tools      │
    │   • In-Memory DuckDB / Polars        • Strict Typing & Linting (Ruff)  │
    │                                                                        │
-   │                     ⚡ UNITED IN PYDATA STUDIO ⚡                      │
+   │                     ⚡ UNITED IN JÖRMUNGANDR ⚡                        │
    └────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -37,12 +37,12 @@ Modern data practitioners are caught between two disparate worlds:
 
 > [!IMPORTANT]
 > **🚧 Work-in-Progress (WIP) Notice: Concept Mockups Only**  
-> The images shown below are **planned conceptual mockups and UI design targets**, **NOT** actual screenshots of the running software. PyData Studio is currently an active work-in-progress (WIP). These visual mockups illustrate the target user experience, interface layout, and aesthetic direction. As functional milestones are completed, these mockups will be progressively replaced with actual screenshots from live builds.
+> The images shown below are **planned conceptual mockups and UI design targets**, **NOT** actual screenshots of the running software. Jörmungandr is currently an active work-in-progress (WIP). These visual mockups illustrate the target user experience, interface layout, and aesthetic direction. As functional milestones are completed, these mockups will be progressively replaced with actual screenshots from live builds.
 
 ### 🖼️ Planned Mockup 1: Primary IDE Workspace (Interactive Notebook & Tabular Dataframe Explorer)
 > *⚠️ Note: Planned Concept Mockup — Not an actual screenshot (Product WIP)*
 
-![PyData Studio IDE Workspace Planned Mockup](assets/mockups/ide_overview_mockup.jpg)
+![Jörmungandr IDE Workspace Planned Mockup](assets/mockups/ide_overview_mockup.jpg)
 
 **Planned Layout Highlights:**
 1. **Left Activity Bar & Tree**: Project explorer, active Jupyter kernel manager, and live database connection status.
@@ -55,7 +55,7 @@ Modern data practitioners are caught between two disparate worlds:
 ### 🖼️ Planned Mockup 2: Analytical SQL/NoSQL Console & Visualizer
 > *⚠️ Note: Planned Concept Mockup — Not an actual screenshot (Product WIP)*
 
-![PyData Studio Database Console Planned Mockup](assets/mockups/db_query_mockup.jpg)
+![Jörmungandr Database Console Planned Mockup](assets/mockups/db_query_mockup.jpg)
 
 **Layout Highlights:**
 1. **Unified Schema Explorer**: Hierarchical introspection of PostgreSQL tables, DuckDB parquet catalogs, and MongoDB collections.
@@ -69,7 +69,7 @@ Modern data practitioners are caught between two disparate worlds:
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────────────────────┐
-│ 🧩 PyData Studio — Extension & Memory Manager                                    [—][□][✕]│
+│ 🧩 Jörmungandr — Extension & Memory Manager                                      [—][□][✕]│
 ├──────────────────────────────────────────────────────────────────────────────────────────┤
 │ Filter Extensions: [ Search active plugins...            ]   [ 🔄 Refresh ] [ ⚙️ Quotas ] │
 ├────────────────────────────────┬─────────┬──────────────┬──────────────┬────────────────┤
@@ -120,7 +120,7 @@ Modern data practitioners are caught between two disparate worlds:
 
 ## 🏗️ 4. Planned Architecture
 
-PyData Studio is structured into five decoupled layers to ensure that high-memory data operations never freeze the core editor or leak system resources:
+Jörmungandr is structured into five decoupled layers to ensure that high-memory data operations never freeze the core editor or leak system resources:
 
 ```mermaid
 flowchart TD
@@ -130,7 +130,7 @@ flowchart TD
     classDef pyLayer fill:#78350f,stroke:#fbbf24,stroke-width:2px,color:#f8fafc;
     classDef coreLayer fill:#1f2937,stroke:#9ca3af,stroke-width:2px,color:#f8fafc;
 
-    subgraph Layer5["🎨 Layer 5: PyData Studio UI & Shell"]
+    subgraph Layer5["🎨 Layer 5: Jörmungandr UI & Shell"]
         UI["Custom IDE Perspectives: Analysis Mode | Notebook Mode | Database Console"]
         UI_Widgets["Compose Desktop & JCEF Hardware-Accelerated Canvases"]
     end
@@ -185,7 +185,7 @@ flowchart TD
 
 ## 🔄 5. Extension Manager & Lifecycle Specification
 
-Data science workflows manipulate multi-gigabyte memory buffers and long-lived network sockets. Unlike conventional plugins, extensions in PyData Studio operate under a **deterministic lifecycle state machine** governed by IntelliJ's `Disposable` infrastructure:
+Data science workflows manipulate multi-gigabyte memory buffers and long-lived network sockets. Unlike conventional plugins, extensions in Jörmungandr operate under a **deterministic lifecycle state machine** governed by IntelliJ's `Disposable` infrastructure:
 
 ```mermaid
 stateDiagram-v2
@@ -315,8 +315,8 @@ flowchart LR
 ### 🛠️ Building and Launching
 ```bash
 # Clone the repository
-git clone https://github.com/your-org/pydata-studio.git
-cd pydata-studio
+git clone https://github.com/indoctrinatedrecluse/J-rmungandr.git
+cd J-rmungandr
 
 # Build all modules
 ./gradlew build
@@ -329,7 +329,7 @@ cd pydata-studio
 
 ## 📄 10. License & Open Source Attribution
 
-PyData Studio is distributed under the **Apache License 2.0**.
+Jörmungandr is distributed under the **Apache License 2.0**.
 - Built upon the **IntelliJ Platform Community Edition** ([Apache 2.0](https://www.jetbrains.com/legal/licenses/open-source-licenses/)).
 - Integrates the **IntelliJ Python Community Plugin** ([Apache 2.0](https://github.com/JetBrains/intellij-community/tree/master/python)).
 - Implements the open-source **Jupyter Messaging Protocol** ([BSD 3-Clause](https://github.com/jupyter/jupyter_core/blob/main/COPYING.md)).
