@@ -36,6 +36,9 @@ object JormungandrSplashScreen {
     /** Backward-compatibility alias for tests and external callers */
     const val MIN_RUNTIME_MS: Long = MAX_RUNTIME_MS
 
+    /** Minimum display duration in milliseconds to ensure visual feedback before auto-dismissal on fast systems */
+    const val MIN_DISPLAY_MS: Long = 1500L
+
     private const val SPLASH_RESOURCE = "/splash/splash.gif"
 
     @Volatile
@@ -59,7 +62,7 @@ object JormungandrSplashScreen {
 
     /**
      * Initializes and displays the splash screen window on the Swing Event Dispatch Thread.
-     * Enforces the "3000ms or UI ready, whichever is faster" lifecycle.
+     * Enforces the "3000ms or UI ready, whichever is faster" lifecycle with a 1500ms minimum display threshold.
      */
     fun show() {
         startTimeMs = System.currentTimeMillis()
@@ -84,11 +87,14 @@ object JormungandrSplashScreen {
             try {
                 if (splashWindow != null) return@invokeLater
 
-                // If any IDE UI frame is already showing, dismiss immediately
+                // If any IDE UI frame is already showing, brand it and schedule dismissal after minimum display
                 for (frame in Frame.getFrames()) {
                     if (frame !== splashWindow && frame.isShowing && isMainIdeUiWindow(frame)) {
-                        LOG.info("Main IDE UI frame already visible (${frame.javaClass.simpleName}). Dismissing splash immediately.")
-                        dismiss()
+                        LOG.info("Main IDE UI frame already visible (${frame.javaClass.simpleName}). Scheduling splash dismissal after minimum display.")
+                        brandAndActivateWindow(frame)
+                        scheduleDismissalAfterMinDisplay {
+                            brandAndActivateWindow(frame)
+                        }
                         return@invokeLater
                     }
                 }
@@ -122,17 +128,21 @@ object JormungandrSplashScreen {
 
                     pack()
                     setLocationRelativeTo(null) // Center on screen
+                    isAlwaysOnTop = true
                 }
 
                 splashWindow = window
 
-                // Register global AWT listener to dismiss the instant any IDE UI window opens
+                // Register global AWT listener to dismiss after minimum display once any IDE UI window opens
                 val listener = AWTEventListener { event ->
                     if (event is WindowEvent && event.id == WindowEvent.WINDOW_OPENED) {
                         val win = event.window
                         if (win != null && win !== splashWindow && win.isShowing && isMainIdeUiWindow(win)) {
-                            LOG.info("Detected main IDE window opened (${win.javaClass.simpleName}). Dismissing splash screen immediately.")
-                            dismiss()
+                            LOG.info("Detected main IDE window opened (${win.javaClass.simpleName}). Branding and scheduling splash dismissal.")
+                            brandAndActivateWindow(win)
+                            scheduleDismissalAfterMinDisplay {
+                                brandAndActivateWindow(win)
+                            }
                         }
                     }
                 }
@@ -142,10 +152,50 @@ object JormungandrSplashScreen {
                 window.isVisible = true
                 window.toFront()
 
-                LOG.info("Jörmungandr animated splash screen displayed (MaxRuntime: ${MAX_RUNTIME_MS}ms or UI ready).")
+                LOG.info("Jörmungandr animated splash screen displayed (MaxRuntime: ${MAX_RUNTIME_MS}ms, MinDisplay: ${MIN_DISPLAY_MS}ms).")
             } catch (e: Exception) {
                 LOG.error("Failed to display Jörmungandr splash screen", e)
             }
+        }
+    }
+
+    /**
+     * Brands and brings the IDE frame to the foreground.
+     */
+    fun brandAndActivateWindow(win: Window) {
+        SwingUtilities.invokeLater {
+            try {
+                if (win is Frame) {
+                    win.extendedState = Frame.NORMAL
+                    val icons = JormungandrIcons.getIconImages()
+                    if (icons.isNotEmpty()) {
+                        win.iconImages = icons
+                    }
+                    if (win.title != null && win.title.contains("IntelliJ IDEA")) {
+                        win.title = win.title.replace("IntelliJ IDEA", "Jörmungandr")
+                    }
+                }
+                win.toFront()
+                win.requestFocus()
+            } catch (e: Exception) {
+                LOG.warn("Could not brand/activate main IDE window", e)
+            }
+        }
+    }
+
+    /**
+     * Schedules splash screen dismissal ensuring at least MIN_DISPLAY_MS has elapsed since start.
+     */
+    fun scheduleDismissalAfterMinDisplay(onDismissed: (() -> Unit)? = null) {
+        val elapsed = if (startTimeMs > 0L) System.currentTimeMillis() - startTimeMs else 0L
+        val delayRemaining = (MIN_DISPLAY_MS - elapsed).coerceAtLeast(0L)
+        if (delayRemaining > 0L) {
+            coroutineScope.launch {
+                delay(delayRemaining)
+                dismiss(onDismissed)
+            }
+        } else {
+            dismiss(onDismissed)
         }
     }
 

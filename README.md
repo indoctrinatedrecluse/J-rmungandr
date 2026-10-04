@@ -308,22 +308,103 @@ flowchart LR
 ## 🚀 9. Getting Started & Development
 
 ### 📋 Prerequisites
-- **JDK**: Java Development Kit 21 (Temurin or JetBrains Runtime).
+- **JDK**: Java Development Kit 21 LTS (Temurin, Microsoft, Oracle, or JetBrains Runtime).
 - **Python**: Python 3.10+ installed and on `PATH`.
 - **Git**: 2.30+.
+- *(Note: Windows Subsystem for Linux / WSL is **not** required).*
 
-### 🛠️ Building and Launching
-```bash
-# Clone the repository
-git clone https://github.com/indoctrinatedrecluse/J-rmungandr.git
-cd J-rmungandr
+---
 
-# Build all modules
-./gradlew build
+### 🛠️ Execution & Launch Options
 
-# Launch the IDE in development sandbox mode
-./gradlew runIde
+Jörmungandr provides automated, self-healing runner scripts for Windows (`tools/run.ps1`) and Linux/macOS (`tools/run.sh`) that verify prerequisites, configure isolated registry nodes, and orchestrate the IDE sandbox.
+
+#### ⚡ Option A: Direct Native Launcher (Fastest, Bypasses Gradle)
+Once the project has been built, launch the IDE directly without Gradle daemon overhead or terminal locking:
+
+```powershell
+# Windows Batch (Double-click or run from CMD/PowerShell)
+.\tools\launch_ide.bat
+
+# Windows PowerShell
+.\tools\launch_ide.ps1
+
+# Windows PowerShell with attached console output (stdout/stderr)
+.\tools\launch_ide.ps1 -Console
 ```
+*The IDE launches as a native desktop application (`javaw.exe`). The terminal returns immediately.*
+
+---
+
+#### 🔄 Option B: Automated Runner Scripts (`tools/run.ps1` & `tools/run.sh`)
+
+##### 1. Full Build & Run (Default)
+Verifies all prerequisites, heals missing configurations, compiles modules, and launches the IDE:
+```powershell
+# Windows
+.\tools\run.ps1
+
+# Linux / macOS
+./tools/run.sh
+```
+> [!NOTE]  
+> When running through Gradle, the progress bar will display `> 95% EXECUTING [:modules:platform-shell:runIde]` while the IDE window is open. This is normal—Gradle keeps the interactive session alive until you close the IDE.
+
+##### 2. Run Only (No Recompilation)
+Verifies that the target binary/plugin exists in the sandbox and launches immediately without re-running Kotlin/Java compilation tasks:
+```powershell
+# Windows
+.\tools\run.ps1 -RunOnly
+
+# Linux / macOS
+./tools/run.sh -RunOnly
+```
+
+##### 3. Build Only (Compile Plugin Distribution)
+Compiles all modules and packages the plugin distribution without starting the GUI:
+```powershell
+# Windows
+.\tools\run.ps1 -BuildOnly
+
+# Linux / macOS
+./tools/run.sh -BuildOnly
+```
+
+##### 4. Automated Test Suites
+Executes all unit and integration test suites across every module:
+```powershell
+# Windows
+.\tools\run.ps1 -Test
+
+# Linux / macOS
+./tools/run.sh -Test
+```
+
+##### 5. Clean Rebuild
+Purges build artifacts and executes a fresh compile:
+```powershell
+# Windows
+.\tools\run.ps1 -Clean
+
+# Linux / macOS
+./tools/run.sh -Clean
+```
+
+---
+
+### 🧹 Registry Maintenance (`tools/clear_registry.ps1`)
+
+Jörmungandr uses dedicated, isolated Windows registry keys under its own vendor and product namespaces (`HKCU:\SOFTWARE\JavaSoft\Prefs\jormungandr`, `HKCU:\SOFTWARE\JavaSoft\Prefs\indoctrinatedrecluse`, etc.).
+
+To safely reset or inspect Jörmungandr registry entries without affecting other IDEs on your machine:
+```powershell
+# Dry-run inspection (see targeted keys without modifying anything)
+.\tools\clear_registry.ps1 -WhatIf
+
+# Perform isolated registry cleanup
+.\tools\clear_registry.ps1 -Force
+```
+*Enterprise Shields explicitly safeguard JetBrains installations (DataGrip, PyCharm, GoLand, IntelliJ IDEA, Rider, CLion, WebStorm, etc.).*
 
 ---
 

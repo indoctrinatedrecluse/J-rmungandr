@@ -413,6 +413,14 @@ elif [[ $BUILD_ONLY -eq 1 ]]; then
     info "Target task: :modules:platform-shell:buildPlugin (build-only mode)"
     TASKS+=(":modules:platform-shell:buildPlugin")
 elif [[ $RUN_ONLY -eq 1 ]]; then
+    # Verify existing built target binary exists
+    target_plugin=$(find "$PROJECT_ROOT/modules/platform-shell/build/idea-sandbox" -name "platform-shell-*.jar" 2>/dev/null | head -n 1)
+    if [[ -z "$target_plugin" ]]; then
+        fail "No existing built target binary found in modules/platform-shell/build/idea-sandbox/."
+        info "Please run './tools/run.sh' (without -RunOnly) first to build Jörmungandr."
+        exit 1
+    fi
+    ok "Found existing built target: $target_plugin"
     info "Target task: $TASK (run-only mode: skipping compilation and rebuild tasks)"
     TASKS+=("$TASK" "-x" "compileKotlin" "-x" "compileJava" "-x" "instrumentCode" "-x" "jar")
 else
@@ -422,12 +430,19 @@ fi
 
 if [[ $BUILD_ONLY -eq 0 && $RUN_TESTS -eq 0 && "$TASK" == *"runIde"* ]]; then
     TASKS+=(
+        "--no-daemon"
         "-Didea.vendor.name=indoctrinatedrecluse"
         "-Djb.consents.confirmation.enabled=false"
         "-Deua.consents.confirmation.enabled=false"
         "-Didea.initially.ask.config=false"
         "-Dide.show.tips.on.startup=false"
+        "-Dwsl.use.remote.agent.for.nio.filesystem=false"
+        "-Dwsl.enabled=false"
+        "-Dide.ijent.wsldefault=false"
+        "-Didea.wsl.support.enabled=false"
     )
+    info "Starting Jörmungandr IDE..."
+    info "NOTE: While the IDE is open, Gradle runs interactively (showing progress at ~95%). Gradle will finish once you close the IDE."
 fi
 
 info "Executing: ./gradlew ${TASKS[*]} ${EXTRA_ARGS[*]:-}"

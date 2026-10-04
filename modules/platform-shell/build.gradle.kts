@@ -50,7 +50,11 @@ tasks {
                 "-Deua.consents.confirmation.enabled=false",
                 "-Didea.initially.ask.config=false",
                 "-Dide.show.tips.on.startup=false",
-                "-Dide.mac.message.dialogs.as.sheets=false"
+                "-Dide.mac.message.dialogs.as.sheets=false",
+                "-Dwsl.use.remote.agent.for.nio.filesystem=false",
+                "-Dwsl.enabled=false",
+                "-Dide.ijent.wsldefault=false",
+                "-Didea.wsl.support.enabled=false"
             )
         })
 
