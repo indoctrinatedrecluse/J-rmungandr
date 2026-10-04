@@ -289,6 +289,12 @@ flowchart LR
 | **Phase 3** | 📊 Data & Storage | Databases & Visuals | Multi-dialect SQL & NoSQL consoles, DuckDB in-memory queries, Arrow 1M-row virtualized grid. |
 | **Phase 4** | 🔮 Expansion *(TBD)* | R Language & Cloud Lake | R kernel and REPL bridge, ggplot2 device canvas, S3/GCS Parquet browser, remote compute. |
 
+### 📝 Backlog & Priority TODO Items
+- [ ] **Comprehensive Rebranding & White-Labeling (JetBrains / IntelliJ IDEA &rarr; Jörmungandr)**:
+  - Systematically eliminate all remaining upstream IntelliJ IDEA and JetBrains branding, logos, splash text, dialog headers, window titles, menu bar labels, and about screens in favor of custom Jörmungandr identity.
+  - Move application metadata, bundle IDs, paths selectors (`idea.paths.selector`), and vendor attributes to strictly isolated Jörmungandr (`indoctrinatedrecluse`) namespaces.
+  - Implement full custom theme and icon overhaul ensuring zero upstream JetBrains trademarked assets or UI strings leak into the user-facing experience.
+
 ---
 
 ## 💻 8. Technology Stack
