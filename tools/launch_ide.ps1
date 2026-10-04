@@ -151,6 +151,8 @@ $vmArgs = @(
     "-XX:-OmitStackTraceInFastThrow",
     "-XX:CICompilerCount=2",
     "-Didea.vendor.name=indoctrinatedrecluse",
+    "-Didea.product.name=Jörmungandr",
+    "-Didea.application.name=Jörmungandr",
     "-Didea.platform.prefix=Idea",
     "-Didea.paths.selector=IdeaIC2024.3",
     "-Didea.config.path=$configDir",

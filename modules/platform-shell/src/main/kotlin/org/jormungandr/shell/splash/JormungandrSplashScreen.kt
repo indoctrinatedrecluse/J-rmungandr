@@ -165,15 +165,9 @@ object JormungandrSplashScreen {
     fun brandAndActivateWindow(win: Window) {
         SwingUtilities.invokeLater {
             try {
+                org.jormungandr.shell.branding.JormungandrBranding.brandWindow(win)
                 if (win is Frame) {
                     win.extendedState = Frame.NORMAL
-                    val icons = JormungandrIcons.getIconImages()
-                    if (icons.isNotEmpty()) {
-                        win.iconImages = icons
-                    }
-                    if (win.title != null && win.title.contains("IntelliJ IDEA")) {
-                        win.title = win.title.replace("IntelliJ IDEA", "Jörmungandr")
-                    }
                     win.setLocationRelativeTo(null)
                 }
                 win.isAlwaysOnTop = true

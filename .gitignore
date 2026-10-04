@@ -16,16 +16,7 @@ bin/
 
 # --- JetBrains & IntelliJ IDEA ---
 # User-specific configs and caches
-.idea/workspace.xml
-.idea/tasks.xml
-.idea/usage.statistics.xml
-.idea/shelf/
-.idea/sonarlint/
-.idea/httpRequests/
-.idea/caches/
-.idea/compiler.xml
-.idea/jarRepositories.xml
-.idea/modules.xml
+.idea/
 *.iws
 *.iml
 *.ipr

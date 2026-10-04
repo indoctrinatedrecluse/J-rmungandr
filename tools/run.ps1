@@ -507,6 +507,8 @@ if (-not $BuildOnly -and -not $Test -and ($Task -match "runIde")) {
     $tasksToRun += @(
         "--no-daemon",
         "-Didea.vendor.name=indoctrinatedrecluse",
+        "-Didea.product.name=Jörmungandr",
+        "-Didea.application.name=Jörmungandr",
         "-Djb.consents.confirmation.enabled=false",
         "-Deua.consents.confirmation.enabled=false",
         "-Didea.initially.ask.config=false",

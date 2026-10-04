@@ -25,6 +25,7 @@ class JormungandrAppInitializer : ApplicationInitializedListener {
     override suspend fun execute() {
         LOG.info("Jörmungandr application initializing; launching animated splash screen.")
         org.jormungandr.shell.registry.JormungandrRegistry.initialize()
+        org.jormungandr.shell.branding.JormungandrBranding.initialize()
         JormungandrSplashScreen.show()
 
         val extensionManager = ApplicationManager.getApplication().getService(ExtensionManager::class.java)
@@ -59,21 +60,12 @@ class JormungandrStartupActivity : ProjectActivity {
     private fun applyAppIconBranding(project: Project) {
         SwingUtilities.invokeLater {
             try {
-                val iconImages = JormungandrIcons.getIconImages()
-                if (iconImages.isEmpty()) return@invokeLater
-
-                // Apply to project frame
                 val projectFrame = WindowManager.getInstance().getFrame(project)
                 if (projectFrame != null) {
-                    projectFrame.iconImages = iconImages
+                    org.jormungandr.shell.branding.JormungandrBranding.brandWindow(projectFrame)
                 }
-
-                // Apply to all existing AWT frames in the process
-                for (frame in Frame.getFrames()) {
-                    frame.iconImages = iconImages
-                }
-
-                LOG.info("Applied Jörmungandr World Serpent window icon (${iconImages.size} mipmaps).")
+                org.jormungandr.shell.branding.JormungandrBranding.rebrandAllWindows()
+                LOG.info("Applied Jörmungandr World Serpent window icon and branding across all active frames.")
             } catch (e: Exception) {
                 LOG.warn("Could not apply window icon branding", e)
             }

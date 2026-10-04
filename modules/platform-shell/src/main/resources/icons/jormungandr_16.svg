@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="16" height="16">
+  <defs>
+    <linearGradient id="serpentGrad16" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#2AA198"/>
+      <stop offset="50%" stop-color="#268BD2"/>
+      <stop offset="100%" stop-color="#073642"/>
+    </linearGradient>
+    <linearGradient id="circuitGrad16" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#B58900"/>
+      <stop offset="100%" stop-color="#2AA198"/>
+    </linearGradient>
+  </defs>
+  <rect width="40" height="40" rx="8" fill="#FDF6E3"/>
+  <circle cx="20" cy="20" r="14" fill="none" stroke="url(#serpentGrad16)" stroke-width="4.5" stroke-linecap="round"/>
+  <circle cx="20" cy="20" r="14" fill="none" stroke="url(#circuitGrad16)" stroke-width="1.2" stroke-dasharray="3,4"/>
+  <path d="M 23 7 C 28 6 31 9 32 12 C 30 13 28 13 25 11 Z" fill="#073642"/>
+  <circle cx="27" cy="9.5" r="0.8" fill="#FFFFFF"/>
+  <circle cx="8" cy="24" r="1.2" fill="#268BD2"/>
+  <circle cx="32" cy="24" r="1.2" fill="#B58900"/>
+  <circle cx="20" cy="34" r="1.2" fill="#2AA198"/>
+</svg>
