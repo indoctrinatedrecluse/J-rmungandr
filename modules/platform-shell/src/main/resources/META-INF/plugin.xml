@@ -1,0 +1,45 @@
+<idea-plugin>
+    <id>org.jormungandr.ide</id>
+    <name>Jörmungandr</name>
+    <vendor email="abmitra1999@gmail.com" url="https://github.com/indoctrinatedrecluse/J-rmungandr">indoctrinatedrecluse</vendor>
+
+    <description><![CDATA[
+        <h1>🐍 Jörmungandr 🌊</h1>
+        <p>A high-performance, modular Data Science &amp; Analytics IDE built on top of the open-source IntelliJ Platform and Python Community plugins.</p>
+        <ul>
+            <li>🪐 <b>Jupyter &amp; Interactive Notebooks:</b> First-class .ipynb editor and ZeroMQ kernel protocol client.</li>
+            <li>🗄️ <b>Database Analytics Studio:</b> PostgreSQL, DuckDB, SQLite, MySQL, and MongoDB consoles.</li>
+            <li>🏹 <b>Apache Arrow Dataframe Explorer:</b> Virtualized tabular display for 1M+ rows.</li>
+            <li>🧩 <b>Governed Modular Extension Manager:</b> Deterministic lifecycles, memory quotas, and clean disposal.</li>
+        </ul>
+    ]]></description>
+
+    <!-- IntelliJ Platform Module Dependencies -->
+    <depends>com.intellij.modules.platform</depends>
+    <depends>com.intellij.modules.lang</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <!-- Application-level services -->
+        <applicationService
+            serviceInterface="org.jormungandr.core.extension.ExtensionManager"
+            serviceImplementation="org.jormungandr.core.extension.impl.ExtensionManagerImpl"/>
+    </extensions>
+
+    <actions>
+        <group id="Jormungandr.PerspectiveGroup" text="Perspective" popup="true" icon="AllIcons.Actions.GroupBy">
+            <add-to-group group-id="ViewMenu" anchor="first"/>
+            <action id="Jormungandr.Perspective.Analysis"
+                    class="org.jormungandr.shell.perspective.SwitchToAnalysisPerspectiveAction"
+                    text="Analysis Mode (Notebook &amp; Data)"
+                    description="Switch to data exploration perspective"/>
+            <action id="Jormungandr.Perspective.Database"
+                    class="org.jormungandr.shell.perspective.SwitchToDatabasePerspectiveAction"
+                    text="Database Mode (SQL &amp; Storage)"
+                    description="Switch to database and query perspective"/>
+            <action id="Jormungandr.Perspective.Code"
+                    class="org.jormungandr.shell.perspective.SwitchToCodePerspectiveAction"
+                    text="Code Mode (Standard IDE)"
+                    description="Switch to code editor perspective"/>
+        </group>
+    </actions>
+</idea-plugin>

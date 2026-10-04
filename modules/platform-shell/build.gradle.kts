@@ -1,0 +1,37 @@
+plugins {
+    kotlin("jvm")
+    id("org.jetbrains.intellij.platform")
+}
+
+repositories {
+    mavenCentral()
+    intellijPlatform {
+        defaultRepositories()
+    }
+}
+
+dependencies {
+    intellijPlatform {
+        intellijIdeaCommunity(providers.gradleProperty("platformVersion"))
+        bundledPlugin("com.intellij.java")
+    }
+
+    implementation(project(":modules:extension-core"))
+    implementation(project(":modules:jupyter-integration"))
+    implementation(project(":modules:database-suite"))
+    implementation(project(":modules:dataframe-viewer"))
+
+    testImplementation("org.junit.jupiter:junit-jupiter:5.11.3")
+}
+
+intellijPlatform {
+    pluginConfiguration {
+        id.set("org.jormungandr.ide")
+        name.set("Jörmungandr")
+        version.set(providers.gradleProperty("pluginVersion"))
+        description.set("The Modular, Open-Source IDE for Python, Data Science & Analytics.")
+        vendor {
+            name.set("indoctrinatedrecluse")
+        }
+    }
+}

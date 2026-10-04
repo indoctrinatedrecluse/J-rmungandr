@@ -31,6 +31,7 @@ bin/
 *.ipr
 
 # IntelliJ Platform sandbox & plugin test environments
+.intellijPlatform/
 sandbox/
 build/idea-sandbox/
 **/sandbox/
