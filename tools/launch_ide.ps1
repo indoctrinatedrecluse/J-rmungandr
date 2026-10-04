@@ -244,6 +244,161 @@ Write-Host "[INFO] Process will appear in Task Manager under: $binName" -Foregro
 if ($Console) {
     & $javaExe @fullArgs
 } else {
-    $proc = Start-Process -FilePath $javaExe -ArgumentList $fullArgs -PassThru
-    Write-Host "[OK]   Jörmungandr launched successfully! (PID: $($proc.Id))" -ForegroundColor Green
+    # Ensure Win32 helper is loaded to target interactive desktop and activate window
+    if (-not ([System.Management.Automation.PSTypeName]'JormNativeLauncher').Type) {
+        Add-Type @"
+using System;
+using System.Text;
+using System.Runtime.InteropServices;
+using System.Diagnostics;
+
+public class JormNativeLauncher {
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
+    public struct STARTUPINFO {
+        public int cb;
+        public string lpReserved;
+        public string lpDesktop;
+        public string lpTitle;
+        public int dwX;
+        public int dwY;
+        public int dwXSize;
+        public int dwYSize;
+        public int dwXCountChars;
+        public int dwYCountChars;
+        public int dwFillAttribute;
+        public int dwFlags;
+        public short wShowWindow;
+        public short cbReserved2;
+        public IntPtr lpReserved2;
+        public IntPtr hStdInput;
+        public IntPtr hStdOutput;
+        public IntPtr hStdError;
+    }
+
+    [StructLayout(LayoutKind.Sequential)]
+    public struct PROCESS_INFORMATION {
+        public IntPtr hProcess;
+        public IntPtr hThread;
+        public int dwProcessId;
+        public int dwThreadId;
+    }
+
+    public delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
+
+    [DllImport("kernel32.dll", SetLastError = true, CharSet = CharSet.Unicode)]
+    public static extern bool CreateProcess(
+        string lpApplicationName,
+        string lpCommandLine,
+        IntPtr lpProcessAttributes,
+        IntPtr lpThreadAttributes,
+        bool bInheritHandles,
+        uint dwCreationFlags,
+        IntPtr lpEnvironment,
+        string lpCurrentDirectory,
+        ref STARTUPINFO lpStartupInfo,
+        out PROCESS_INFORMATION lpProcessInformation
+    );
+
+    [DllImport("kernel32.dll", SetLastError = true)]
+    public static extern bool CloseHandle(IntPtr hObject);
+
+    [DllImport("user32.dll")]
+    public static extern bool SetForegroundWindow(IntPtr hWnd);
+
+    [DllImport("user32.dll")]
+    public static extern bool ShowWindowAsync(IntPtr hWnd, int nCmdShow);
+
+    [DllImport("user32.dll")]
+    public static extern void SwitchToThisWindow(IntPtr hWnd, bool fAltTab);
+
+    [DllImport("user32.dll")]
+    public static extern bool AllowSetForegroundWindow(int dwProcessId);
+
+    [DllImport("user32.dll")]
+    public static extern bool EnumWindows(EnumWindowsProc enumProc, IntPtr lParam);
+
+    [DllImport("user32.dll")]
+    public static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
+
+    [DllImport("user32.dll")]
+    public static extern bool IsWindowVisible(IntPtr hWnd);
+
+    public const int SW_RESTORE = 9;
+    public const int ASFW_ANY = -1;
+
+    public static int StartOnInteractiveDesktop(string appPath, string cmdLine, string workingDir) {
+        STARTUPINFO si = new STARTUPINFO();
+        si.cb = Marshal.SizeOf(si);
+        si.lpDesktop = @"WinSta0\Default";
+        si.dwFlags = 1; // STARTF_USESHOWWINDOW
+        si.wShowWindow = 1; // SW_SHOWNORMAL
+
+        PROCESS_INFORMATION pi = new PROCESS_INFORMATION();
+        string fullCmd = "\"" + appPath + "\" " + cmdLine;
+        bool success = CreateProcess(null, fullCmd, IntPtr.Zero, IntPtr.Zero, false, 0, IntPtr.Zero, workingDir, ref si, out pi);
+        if (success) {
+            CloseHandle(pi.hProcess);
+            CloseHandle(pi.hThread);
+            return pi.dwProcessId;
+        }
+        return -Marshal.GetLastWin32Error();
+    }
+
+    public static IntPtr FindWindowForProcess(int pid) {
+        IntPtr found = IntPtr.Zero;
+        EnumWindows((hWnd, lParam) => {
+            uint procId;
+            GetWindowThreadProcessId(hWnd, out procId);
+            if (procId == pid && IsWindowVisible(hWnd)) {
+                found = hWnd;
+                return false;
+            }
+            return true;
+        }, IntPtr.Zero);
+        return found;
+    }
+
+    public static void ActivateWindow(IntPtr hWnd) {
+        AllowSetForegroundWindow(ASFW_ANY);
+        ShowWindowAsync(hWnd, SW_RESTORE);
+        SetForegroundWindow(hWnd);
+        SwitchToThisWindow(hWnd, true);
+    }
+}
+"@
+    }
+
+    $quotedArgs = $fullArgs | ForEach-Object {
+        if ($_ -match '\s' -and -not ($_ -match '^".*"$')) { "`"$_`"" } else { $_ }
+    }
+    $argString = $quotedArgs -join ' '
+
+    $launchedPid = [JormNativeLauncher]::StartOnInteractiveDesktop($javaExe, $argString, $ProjectRoot)
+    if ($launchedPid -gt 0) {
+        Write-Host "[OK]   Jörmungandr launched on interactive desktop! (PID: $launchedPid)" -ForegroundColor Green
+    } else {
+        Write-Host "[WARN] Direct desktop assignment returned ($launchedPid); launching via Start-Process..." -ForegroundColor Yellow
+        $proc = Start-Process -FilePath $javaExe -ArgumentList $fullArgs -PassThru
+        $launchedPid = $proc.Id
+        Write-Host "[OK]   Jörmungandr launched successfully! (PID: $launchedPid)" -ForegroundColor Green
+    }
+
+    Write-Host "[INFO] Monitoring IDE startup to ensure foreground focus..." -ForegroundColor Gray
+    $timeout = [DateTime]::UtcNow.AddSeconds(15)
+    $activated = $false
+    while ([DateTime]::UtcNow -lt $timeout) {
+        Start-Sleep -Milliseconds 500
+        $p = Get-Process -Id $launchedPid -ErrorAction SilentlyContinue
+        if (-not $p -or $p.HasExited) { break }
+        $hwnd = $p.MainWindowHandle
+        if ($hwnd -eq [IntPtr]::Zero) {
+            $hwnd = [JormNativeLauncher]::FindWindowForProcess($launchedPid)
+        }
+        if ($hwnd -ne [IntPtr]::Zero) {
+            [JormNativeLauncher]::ActivateWindow($hwnd)
+            $activated = $true
+            Write-Host "[OK]   Jörmungandr window activated and focused on display!" -ForegroundColor Green
+            break
+        }
+    }
 }
