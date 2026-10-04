@@ -52,6 +52,7 @@ header() {
 TASK=":modules:platform-shell:runIde"
 CLEAN=0
 BUILD_ONLY=0
+RUN_ONLY=0
 RUN_TESTS=0
 SKIP_CHECK=0
 EXTRA_ARGS=()
@@ -63,6 +64,7 @@ show_help() {
     echo "Options:"
     echo "  -c, --clean        Cleans build artifacts before running"
     echo "  -b, --build-only   Assembles plugin artifacts without launching the IDE"
+    echo "  -r, --run-only     Runs existing built target binary without rebuilding"
     echo "  -t, --test         Runs all automated test suites"
     echo "      --skip-check   Bypasses environment dependency verification"
     echo "      --task <name>  Custom Gradle task (default: :modules:platform-shell:runIde)"
@@ -78,6 +80,10 @@ while [[ $# -gt 0 ]]; do
             ;;
         -b|--build-only)
             BUILD_ONLY=1
+            shift
+            ;;
+        -r|--run-only|-RunOnly)
+            RUN_ONLY=1
             shift
             ;;
         -t|--test)
@@ -260,6 +266,55 @@ if [[ $SKIP_CHECK -eq 0 ]]; then
 fi
 
 # ---------------------------------------------------------------------------
+# Argument Conflict Validation
+# ---------------------------------------------------------------------------
+if [[ $RUN_ONLY -eq 1 && $BUILD_ONLY -eq 1 ]]; then
+    fail "Conflicting arguments: -RunOnly and -BuildOnly cannot be used together."
+    exit 1
+fi
+
+if [[ $RUN_ONLY -eq 1 && $RUN_TESTS -eq 1 ]]; then
+    fail "Conflicting arguments: -RunOnly and -Test cannot be used together."
+    exit 1
+fi
+
+if [[ $RUN_ONLY -eq 1 && $CLEAN -eq 1 ]]; then
+    warn "-Clean cannot be used with -RunOnly as it would remove the target binary. Ignoring -Clean."
+    CLEAN=0
+fi
+
+# ---------------------------------------------------------------------------
+# Target Binary Verification (RunOnly Mode)
+# ---------------------------------------------------------------------------
+if [[ $RUN_ONLY -eq 1 ]]; then
+    echo -e "\n--- Checking Built Target Binary ---"
+    TARGET_LIBS_DIR="$PROJECT_ROOT/modules/platform-shell/build/libs"
+    TARGET_DIST_DIR="$PROJECT_ROOT/modules/platform-shell/build/distributions"
+    TARGET_BINARY=""
+
+    if compgen -G "$TARGET_LIBS_DIR/platform-shell-*.jar" > /dev/null 2>&1; then
+        for f in "$TARGET_LIBS_DIR"/platform-shell-*.jar; do
+            if [[ "$f" != *"-base.jar" && "$f" != *"-instrumented.jar" && "$f" != *"-searchableOptions.jar" ]]; then
+                TARGET_BINARY="$f"
+                break
+            fi
+        done
+    fi
+
+    if [[ -z "$TARGET_BINARY" ]] && compgen -G "$TARGET_DIST_DIR/platform-shell-*.zip" > /dev/null 2>&1; then
+        TARGET_BINARY="$(ls -1 "$TARGET_DIST_DIR"/platform-shell-*.zip 2>/dev/null | head -n 1)"
+    fi
+
+    if [[ -z "$TARGET_BINARY" ]]; then
+        fail "No existing built target binary found in '$TARGET_LIBS_DIR' or '$TARGET_DIST_DIR'."
+        echo -e "${YELLOW}Please build the project first (e.g., './tools/run.sh -b' or './tools/run.sh') before using -RunOnly.${NC}"
+        exit 1
+    fi
+
+    ok "Found existing built target binary: $TARGET_BINARY"
+fi
+
+# ---------------------------------------------------------------------------
 # Build & Execution
 # ---------------------------------------------------------------------------
 echo -e "\n--- Executing Gradle ---"
@@ -277,6 +332,9 @@ if [[ $RUN_TESTS -eq 1 ]]; then
 elif [[ $BUILD_ONLY -eq 1 ]]; then
     info "Target task: :modules:platform-shell:buildPlugin (build-only mode)"
     TASKS+=(":modules:platform-shell:buildPlugin")
+elif [[ $RUN_ONLY -eq 1 ]]; then
+    info "Target task: $TASK (run-only mode: skipping compilation and rebuild tasks)"
+    TASKS+=("$TASK" "-x" "compileKotlin" "-x" "compileJava" "-x" "instrumentCode" "-x" "jar")
 else
     info "Target task: $TASK"
     TASKS+=("$TASK")

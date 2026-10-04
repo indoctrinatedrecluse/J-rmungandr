@@ -15,6 +15,9 @@
 .PARAMETER BuildOnly
     Builds the IDE plugin package without starting the IDE sandbox.
 
+.PARAMETER RunOnly
+    Runs the existing built target binary without rebuilding.
+
 .PARAMETER Test
     Runs all module unit and integration tests.
 
@@ -25,6 +28,7 @@
     .\tools\run.ps1
     .\tools\run.ps1 -Clean
     .\tools\run.ps1 -BuildOnly
+    .\tools\run.ps1 -RunOnly
     .\tools\run.ps1 -Test
     .\tools\run.ps1 -Task ":modules:dataframe-viewer:test"
 #>
@@ -34,6 +38,7 @@ param(
     [string]$Task = ":modules:platform-shell:runIde",
     [switch]$Clean,
     [switch]$BuildOnly,
+    [switch]$RunOnly,
     [switch]$Test,
     [switch]$SkipCheck,
     [switch]$Help,
@@ -83,6 +88,7 @@ if ($Help) {
     Write-Host "Options:"
     Write-Host "  -Clean        Cleans build artifacts before running"
     Write-Host "  -BuildOnly    Assembles plugin artifacts without launching the IDE"
+    Write-Host "  -RunOnly      Runs existing built target binary without rebuilding"
     Write-Host "  -Test         Runs all automated test suites"
     Write-Host "  -SkipCheck    Bypasses environment dependency verification"
     Write-Host "  -Task <name>  Custom Gradle task (default: :modules:platform-shell:runIde)"
@@ -271,6 +277,48 @@ if (-not $SkipCheck) {
 }
 
 # ---------------------------------------------------------------------------
+# Argument Conflict Validation
+# ---------------------------------------------------------------------------
+if ($RunOnly -and $BuildOnly) {
+    Write-Fail "Conflicting arguments: -RunOnly and -BuildOnly cannot be used together."
+    exit 1
+}
+if ($RunOnly -and $Test) {
+    Write-Fail "Conflicting arguments: -RunOnly and -Test cannot be used together."
+    exit 1
+}
+if ($RunOnly -and $Clean) {
+    Write-Warn "-Clean cannot be used with -RunOnly as it would remove the target binary. Ignoring -Clean."
+    $Clean = $false
+}
+
+# ---------------------------------------------------------------------------
+# Target Binary Verification (RunOnly Mode)
+# ---------------------------------------------------------------------------
+if ($RunOnly) {
+    Write-Host "`n--- Checking Built Target Binary ---" -ForegroundColor White
+    $targetLibsDir = Join-Path $ProjectRoot "modules\platform-shell\build\libs"
+    $targetDistDir = Join-Path $ProjectRoot "modules\platform-shell\build\distributions"
+
+    $targetJar = Get-ChildItem -Path $targetLibsDir -Filter "platform-shell-*.jar" -ErrorAction SilentlyContinue |
+        Where-Object { $_.Name -notmatch "-(base|instrumented|searchableOptions)\.jar$" } |
+        Select-Object -First 1
+
+    if (-not $targetJar) {
+        $targetJar = Get-ChildItem -Path $targetDistDir -Filter "platform-shell-*.zip" -ErrorAction SilentlyContinue |
+            Select-Object -First 1
+    }
+
+    if (-not $targetJar) {
+        Write-Fail "No existing built target binary found in '$targetLibsDir' or '$targetDistDir'."
+        Write-Host "Please build the project first (e.g., '.\tools\run.ps1 -BuildOnly' or '.\tools\run.ps1') before using -RunOnly." -ForegroundColor Yellow
+        exit 1
+    }
+
+    Write-Ok "Found existing built target binary: $($targetJar.FullName) ($([math]::Round($targetJar.Length / 1MB, 2)) MB)"
+}
+
+# ---------------------------------------------------------------------------
 # Build & Execution
 # ---------------------------------------------------------------------------
 Write-Host "`n--- Executing Gradle ---" -ForegroundColor White
@@ -289,6 +337,15 @@ if ($Test) {
 } elseif ($BuildOnly) {
     Write-Info "Target task: :modules:platform-shell:buildPlugin (build-only mode)"
     $tasksToRun += ":modules:platform-shell:buildPlugin"
+} elseif ($RunOnly) {
+    Write-Info "Target task: $Task (run-only mode: skipping compilation and rebuild tasks)"
+    $tasksToRun += $Task
+    $tasksToRun += @(
+        "-x", "compileKotlin",
+        "-x", "compileJava",
+        "-x", "instrumentCode",
+        "-x", "jar"
+    )
 } else {
     Write-Info "Target task: $Task"
     $tasksToRun += $Task
