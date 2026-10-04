@@ -139,6 +139,30 @@ tasks {
 </application>"""
                 )
             }
+
+            val lafXml = File(optionsDir, "laf.xml")
+            if (!lafXml.exists() || !lafXml.readText().contains("org.jormungandr.theme")) {
+                lafXml.writeText(
+                    """<application>
+  <component name="LafManager" autodetect="false">
+    <laf themeId="org.jormungandr.theme.solarized.light" />
+    <preferred-light-laf themeId="org.jormungandr.theme.solarized.light" />
+    <preferred-dark-laf themeId="org.jormungandr.theme.bubblegum.barbie" />
+  </component>
+</application>"""
+                )
+            }
+
+            val colorsSchemeXml = File(optionsDir, "colors.scheme.xml")
+            if (!colorsSchemeXml.exists() || colorsSchemeXml.readText().contains("name=\"Dark\"")) {
+                colorsSchemeXml.writeText(
+                    """<application>
+  <component name="EditorColorsManagerImpl">
+    <global_color_scheme name="Solarized Light" />
+  </component>
+</application>"""
+                )
+            }
         }
     }
 }

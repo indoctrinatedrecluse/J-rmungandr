@@ -134,6 +134,32 @@ if (-not (Test-Path $generalLocalXml)) {
     Set-Content -Path $generalLocalXml -Value $genContent -Encoding UTF8
 }
 
+$lafXml = Join-Path $optionsDir "laf.xml"
+if (-not (Test-Path $lafXml) -or (-not (Get-Content $lafXml -Raw).Contains("org.jormungandr.theme"))) {
+    $lafContent = @"
+<application>
+  <component name="LafManager" autodetect="false">
+    <laf themeId="org.jormungandr.theme.solarized.light" />
+    <preferred-light-laf themeId="org.jormungandr.theme.solarized.light" />
+    <preferred-dark-laf themeId="org.jormungandr.theme.bubblegum.barbie" />
+  </component>
+</application>
+"@
+    Set-Content -Path $lafXml -Value $lafContent -Encoding UTF8
+}
+
+$colorsSchemeXml = Join-Path $optionsDir "colors.scheme.xml"
+if (-not (Test-Path $colorsSchemeXml) -or (Get-Content $colorsSchemeXml -Raw).Contains('name="Dark"')) {
+    $colorsContent = @"
+<application>
+  <component name="EditorColorsManagerImpl">
+    <global_color_scheme name="Solarized Light" />
+  </component>
+</application>
+"@
+    Set-Content -Path $colorsSchemeXml -Value $colorsContent -Encoding UTF8
+}
+
 # 4. Build Complete Classpath and VM Arguments
 $ideaHomePath = $ideaHome.FullName -replace '\\', '/'
 $jnaPath = "$ideaHomePath/lib/jna/amd64"

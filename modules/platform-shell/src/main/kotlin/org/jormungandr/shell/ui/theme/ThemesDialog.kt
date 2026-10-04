@@ -156,6 +156,10 @@ class ThemesDialog(project: Project? = null) : DialogWrapper(project, true) {
             addActionListener {
                 themeManager?.applyTheme(theme.id)
                 refreshThemeCards()
+                peer.window?.let { win ->
+                    SwingUtilities.updateComponentTreeUI(win)
+                    win.repaint()
+                }
             }
         }
         buttonPanel.add(applyBtn)

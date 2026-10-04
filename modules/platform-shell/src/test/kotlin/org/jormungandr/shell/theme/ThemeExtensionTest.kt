@@ -86,4 +86,24 @@ class ThemeExtensionTest {
         assertTrue(css.contains("--jg-grid-header-bg: #F8BBD0;"))
         assertTrue(css.contains("--jg-syntax-keyword: #D81B60;"))
     }
+
+    @Test
+    fun `test applying theme with qualified plugin id and short id`() {
+        val themeExtension = ThemeExtension()
+
+        val res1 = themeExtension.applyTheme("org.jormungandr.theme.bubblegum.barbie")
+        assertTrue(res1.isSuccess)
+        assertEquals("bubblegum.barbie", themeExtension.currentTheme.value.id)
+
+        val res2 = themeExtension.applyTheme("solarized.light")
+        assertTrue(res2.isSuccess)
+        assertEquals("solarized.light", themeExtension.currentTheme.value.id)
+
+        val res3 = themeExtension.applyTheme("org.jormungandr.theme.solarized.light")
+        assertTrue(res3.isSuccess)
+        assertEquals("solarized.light", themeExtension.currentTheme.value.id)
+
+        val resUnknown = themeExtension.applyTheme("non.existent.theme")
+        assertTrue(resUnknown.isFailure)
+    }
 }

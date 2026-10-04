@@ -12,6 +12,7 @@ import org.jormungandr.core.extension.ExtensionManager
 import org.jormungandr.database.DatabaseSuiteExtension
 import org.jormungandr.dataframe.DataFrameViewerExtension
 import org.jormungandr.jupyter.JupyterExtension
+import org.jormungandr.core.theme.ThemeManager
 import org.jormungandr.shell.theme.ThemeExtension
 
 /**
@@ -47,7 +48,8 @@ object CoreExtensionsRegistry {
         scope: CoroutineScope = CoroutineScope(Dispatchers.Default)
     ) {
         val themeService = runCatching {
-            ApplicationManager.getApplication()?.getService(ThemeExtension::class.java)
+            (ApplicationManager.getApplication()?.getService(ThemeManager::class.java) as? ThemeExtension)
+                ?: ApplicationManager.getApplication()?.getService(ThemeExtension::class.java)
         }.getOrNull() ?: ThemeExtension()
 
         val coreExtensions = listOfNotNull(

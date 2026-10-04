@@ -11,6 +11,7 @@ import javax.swing.SwingUtilities
 
 import com.intellij.openapi.application.ApplicationManager
 import org.jormungandr.core.extension.ExtensionManager
+import org.jormungandr.core.theme.ThemeManager
 import org.jormungandr.shell.extension.CoreExtensionsRegistry
 
 /**
@@ -32,6 +33,11 @@ class JormungandrAppInitializer : ApplicationInitializedListener {
         if (extensionManager != null) {
             CoreExtensionsRegistry.ensureCoreExtensionsRegistered(extensionManager)
         }
+
+        val themeManager = ApplicationManager.getApplication().getService(ThemeManager::class.java)
+        if (themeManager != null) {
+            themeManager.applyTheme(themeManager.currentTheme.value.id)
+        }
     }
 }
 
@@ -47,6 +53,12 @@ class JormungandrStartupActivity : ProjectActivity {
 
     override suspend fun execute(project: Project) {
         LOG.info("Jörmungandr main UI loaded for project: ${project.name}. Applying window branding.")
+
+        // Ensure active theme styling is applied to all newly opened project windows
+        val themeManager = ApplicationManager.getApplication().getService(ThemeManager::class.java)
+        if (themeManager != null) {
+            themeManager.applyTheme(themeManager.currentTheme.value.id)
+        }
 
         // Apply World Serpent branding to all active window title bars and OS taskbar frames
         applyAppIconBranding(project)
