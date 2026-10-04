@@ -1,0 +1,20 @@
+Jörmungandr
+Copyright 2025-2026 indoctrinatedrecluse
+
+This product is an open-source Data Science & Analytics IDE built on top of the
+open-source IntelliJ Platform and includes software developed by JetBrains s.r.o.
+(https://www.jetbrains.com/) and contributors.
+
+Upstream Components & Attribution:
+- IntelliJ Platform Community Edition
+  Copyright © 2000-2026 JetBrains s.r.o. and contributors.
+  Licensed under the Apache License, Version 2.0.
+  https://github.com/JetBrains/intellij-community
+
+- IntelliJ Python Community Plugin / Extensions
+  Copyright © 2000-2026 JetBrains s.r.o. and contributors.
+  Licensed under the Apache License, Version 2.0.
+  https://github.com/JetBrains/intellij-community/tree/master/python
+
+Both upstream frameworks fall under the Apache License 2.0 and are thus under fair use
+for modification and redistribution for both personal and commercial use.

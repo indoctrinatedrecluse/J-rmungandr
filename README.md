@@ -329,7 +329,12 @@ cd J-rmungandr
 
 ## 📄 10. License & Open Source Attribution
 
-Jörmungandr is distributed under the **Apache License 2.0**.
-- Built upon the **IntelliJ Platform Community Edition** ([Apache 2.0](https://www.jetbrains.com/legal/licenses/open-source-licenses/)).
-- Integrates the **IntelliJ Python Community Plugin** ([Apache 2.0](https://github.com/JetBrains/intellij-community/tree/master/python)).
-- Implements the open-source **Jupyter Messaging Protocol** ([BSD 3-Clause](https://github.com/jupyter/jupyter_core/blob/main/COPYING.md)).
+Jörmungandr is free, open-source software licensed under the [Apache License 2.0](LICENSE).  
+Copyright © 2025–2026 **indoctrinatedrecluse**.
+
+### Upstream Frameworks & Fair Use Acknowledgements
+- **IntelliJ Platform Community Edition**: Copyright © 2000–2026 JetBrains s.r.o. ([Apache 2.0 License](https://github.com/JetBrains/intellij-community)).
+- **IntelliJ Python Community Plugin & Extensions**: Copyright © 2000–2026 JetBrains s.r.o. ([Apache 2.0 License](https://github.com/JetBrains/intellij-community/tree/master/python)).
+- **Jupyter Messaging Protocol**: Open source specification ([BSD 3-Clause](https://github.com/jupyter/jupyter_core/blob/main/COPYING.md)).
+
+Both the IntelliJ Platform and the Python Community extensions fall under the Apache License 2.0 and are thus under fair use for modification, extension, derivative works, and redistribution for both personal and commercial use in accordance with the terms of the Apache 2.0 license. See [NOTICE](NOTICE) for complete project attributions.
