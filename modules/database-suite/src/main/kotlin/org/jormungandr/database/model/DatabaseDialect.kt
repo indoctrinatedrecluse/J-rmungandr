@@ -8,11 +8,12 @@ enum class DialectCategory(val displayName: String) {
     DOCUMENT_STORE("Document Store NoSQL"),
     KEY_VALUE("In-Memory Key-Value"),
     WIDE_COLUMN("Wide-Column Store"),
-    EVENT_STREAMING("Distributed Event Streaming")
+    EVENT_STREAMING("Distributed Event Streaming"),
+    DATA_LAKE("Remote Data Lakes & Object Storage")
 }
 
 /**
- * Supported SQL, NoSQL, and streaming engine dialects in Jörmungandr.
+ * Supported SQL, NoSQL, streaming, and object storage data lake engine dialects in Jörmungandr.
  */
 enum class DatabaseDialect(
     val displayName: String,
@@ -30,7 +31,10 @@ enum class DatabaseDialect(
     CASSANDRA("Apache Cassandra (CQL)", false, 9042, "", DialectCategory.WIDE_COLUMN),
     MONGODB("MongoDB", false, 27017, "", DialectCategory.DOCUMENT_STORE),
     REDIS("Redis", false, 6379, "", DialectCategory.KEY_VALUE),
-    KAFKA("Apache Kafka", false, 9092, "", DialectCategory.EVENT_STREAMING)
+    KAFKA("Apache Kafka", false, 9092, "", DialectCategory.EVENT_STREAMING),
+    S3_DATA_LAKE("Amazon S3 & MinIO Data Lake", false, 443, "", DialectCategory.DATA_LAKE),
+    GCS_DATA_LAKE("Google Cloud Storage (GCS)", false, 443, "", DialectCategory.DATA_LAKE),
+    HTTP_DATA_LAKE("Remote HTTP/Parquet Endpoint", false, 443, "", DialectCategory.DATA_LAKE)
 }
 
 data class ConnectionConfig(
@@ -66,6 +70,9 @@ data class ConnectionConfig(
                 DatabaseDialect.MONGODB -> "mongodb://$host:$port/$databaseName"
                 DatabaseDialect.REDIS -> "redis://$host:$port"
                 DatabaseDialect.KAFKA -> "kafka://$host:$port"
+                DatabaseDialect.S3_DATA_LAKE -> "s3://$host/$databaseName"
+                DatabaseDialect.GCS_DATA_LAKE -> "gs://$host/$databaseName"
+                DatabaseDialect.HTTP_DATA_LAKE -> "https://$host/$databaseName"
             }
         }
 }

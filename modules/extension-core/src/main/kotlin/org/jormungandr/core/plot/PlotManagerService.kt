@@ -19,6 +19,12 @@ class PlotManagerService {
     private val _activePlot = MutableStateFlow<PlotItem?>(null)
     val activePlot: StateFlow<PlotItem?> = _activePlot.asStateFlow()
 
+    private val _webPlots = MutableStateFlow<List<WebPlotItem>>(emptyList())
+    val webPlots: StateFlow<List<WebPlotItem>> = _webPlots.asStateFlow()
+
+    private val _activeWebPlot = MutableStateFlow<WebPlotItem?>(null)
+    val activeWebPlot: StateFlow<WebPlotItem?> = _activeWebPlot.asStateFlow()
+
     fun addPlot(plot: PlotItem) {
         val current = _plots.value.toMutableList()
         current.add(plot)
@@ -39,9 +45,36 @@ class PlotManagerService {
         }
     }
 
+    fun addWebPlot(plot: WebPlotItem) {
+        val current = _webPlots.value.toMutableList()
+        current.add(plot)
+        _webPlots.value = current
+        _activeWebPlot.value = plot
+    }
+
+    fun selectWebPlot(plot: WebPlotItem) {
+        _activeWebPlot.value = plot
+    }
+
+    fun removeWebPlot(id: String) {
+        val current = _webPlots.value.toMutableList()
+        current.removeAll { it.id == id }
+        _webPlots.value = current
+        if (_activeWebPlot.value?.id == id) {
+            _activeWebPlot.value = current.lastOrNull()
+        }
+    }
+
+    fun clearAllWebPlots() {
+        _webPlots.value = emptyList()
+        _activeWebPlot.value = null
+    }
+
     fun clearAll() {
         _plots.value = emptyList()
         _activePlot.value = null
+        _webPlots.value = emptyList()
+        _activeWebPlot.value = null
     }
 
     companion object {

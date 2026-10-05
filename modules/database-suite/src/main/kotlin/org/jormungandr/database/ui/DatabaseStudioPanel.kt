@@ -19,6 +19,8 @@ import org.jormungandr.database.nosql.mongo.MongoEngine
 import org.jormungandr.database.nosql.mongo.MongoStudioPanel
 import org.jormungandr.database.nosql.redis.RedisEngine
 import org.jormungandr.database.nosql.redis.RedisStudioPanel
+import org.jormungandr.database.datalake.DataLakeEngine
+import org.jormungandr.database.datalake.RemoteDataLakeStudioPanel
 import java.awt.BorderLayout
 import java.awt.FlowLayout
 import java.awt.Font
@@ -38,10 +40,18 @@ class DatabaseStudioPanel(private val project: Project? = null) : JPanel(BorderL
 
     // Specialized Studio Panels
     private val consolePanel = QueryConsolePanel(project)
+    private val visualBuilderPanel = VisualQueryBuilderPanel(project) { sql ->
+        consolePanel.setQueryText(sql)
+        tabbedPane.selectedIndex = 0
+    }
     private val mongoStudioPanel = MongoStudioPanel(project)
     private val redisStudioPanel = RedisStudioPanel(project)
     private val cassandraStudioPanel = CassandraStudioPanel(project)
     private val kafkaStudioPanel = KafkaStudioPanel(project)
+    private val dataLakeStudioPanel = RemoteDataLakeStudioPanel(project) { sql ->
+        consolePanel.setQueryText(sql)
+        tabbedPane.selectedIndex = 0
+    }
     private val tabbedPane = JBTabbedPane()
 
     private val schemaDiagramPanel = SchemaDiagramPanel(null) { table ->
@@ -98,12 +108,22 @@ class DatabaseStudioPanel(private val project: Project? = null) : JPanel(BorderL
             }
         }
 
+        val addVisualSqlBtn = JButton("+ 🧩 Visual Builder").apply {
+            isFocusable = false
+            font = font.deriveFont(Font.PLAIN, 11f)
+            toolTipText = "Open Visual No-Code / Low-Code SQL & Join Builder"
+            addActionListener {
+                tabbedPane.selectedIndex = 1
+                visualBuilderPanel.refreshConnections()
+            }
+        }
+
         val addMongoBtn = JButton("+ 🍃 Mongo").apply {
             isFocusable = false
             font = font.deriveFont(Font.PLAIN, 11f)
             toolTipText = "Open MongoDB Document Studio"
             addActionListener {
-                tabbedPane.selectedIndex = 1
+                tabbedPane.selectedIndex = 2
                 mongoStudioPanel.refreshMetadata()
             }
         }
@@ -113,7 +133,7 @@ class DatabaseStudioPanel(private val project: Project? = null) : JPanel(BorderL
             font = font.deriveFont(Font.PLAIN, 11f)
             toolTipText = "Open Redis Keyspace & Command Studio"
             addActionListener {
-                tabbedPane.selectedIndex = 2
+                tabbedPane.selectedIndex = 3
                 redisStudioPanel.refreshKeys()
             }
         }
@@ -123,7 +143,7 @@ class DatabaseStudioPanel(private val project: Project? = null) : JPanel(BorderL
             font = font.deriveFont(Font.PLAIN, 11f)
             toolTipText = "Open Apache Cassandra CQL Studio"
             addActionListener {
-                tabbedPane.selectedIndex = 3
+                tabbedPane.selectedIndex = 4
                 cassandraStudioPanel.refreshKeyspaces()
             }
         }
@@ -133,8 +153,18 @@ class DatabaseStudioPanel(private val project: Project? = null) : JPanel(BorderL
             font = font.deriveFont(Font.PLAIN, 11f)
             toolTipText = "Open Apache Kafka Stream Studio"
             addActionListener {
-                tabbedPane.selectedIndex = 4
+                tabbedPane.selectedIndex = 5
                 kafkaStudioPanel.refreshTopics()
+            }
+        }
+
+        val addDataLakeBtn = JButton("+ 🌊 Data Lake").apply {
+            isFocusable = false
+            font = font.deriveFont(Font.PLAIN, 11f)
+            toolTipText = "Open Remote S3 / GCS Data Lake Explorer"
+            addActionListener {
+                tabbedPane.selectedIndex = 6
+                dataLakeStudioPanel.refreshConnections()
             }
         }
 
@@ -144,30 +174,36 @@ class DatabaseStudioPanel(private val project: Project? = null) : JPanel(BorderL
             addActionListener {
                 refreshSchemaTree()
                 consolePanel.refreshConnections()
+                visualBuilderPanel.refreshConnections()
                 mongoStudioPanel.refreshMetadata()
                 redisStudioPanel.refreshKeys()
                 cassandraStudioPanel.refreshKeyspaces()
                 kafkaStudioPanel.refreshTopics()
+                dataLakeStudioPanel.refreshConnections()
             }
         }
 
         explorerToolbar.add(addConnBtn)
         explorerToolbar.add(addDuckBtn)
+        explorerToolbar.add(addVisualSqlBtn)
         explorerToolbar.add(addMongoBtn)
         explorerToolbar.add(addRedisBtn)
         explorerToolbar.add(addCassandraBtn)
         explorerToolbar.add(addKafkaBtn)
+        explorerToolbar.add(addDataLakeBtn)
         explorerToolbar.add(refreshBtn)
 
         explorerPanel.add(explorerToolbar, BorderLayout.NORTH)
         explorerPanel.add(JBScrollPane(tree), BorderLayout.CENTER)
 
-        // Right Tabs: SQL & PL/SQL, MongoDB, Redis, Cassandra, Kafka, Schema Diagram
+        // Right Tabs: SQL & PL/SQL, Visual SQL Builder, MongoDB, Redis, Cassandra, Kafka, Remote Data Lakes, Schema Diagram
         tabbedPane.addTab("💻 SQL & PL/SQL Console", consolePanel)
+        tabbedPane.addTab("🧩 Visual SQL Builder", visualBuilderPanel)
         tabbedPane.addTab("🍃 MongoDB Studio", mongoStudioPanel)
         tabbedPane.addTab("⚡ Redis Studio", redisStudioPanel)
         tabbedPane.addTab("🪐 Cassandra CQL", cassandraStudioPanel)
         tabbedPane.addTab("📨 Kafka Streams", kafkaStudioPanel)
+        tabbedPane.addTab("🌊 Remote Data Lakes", dataLakeStudioPanel)
         tabbedPane.addTab("🗺️ Schema Diagram", schemaDiagramPanel)
 
         // Main Horizontal Split
@@ -263,6 +299,24 @@ class DatabaseStudioPanel(private val project: Project? = null) : JPanel(BorderL
             databaseName = ""
         )
         DatabaseConnectionManager.registerConfig(kafkaConfig)
+
+        // 8. Amazon S3 Data Lake Sample
+        val s3Config = ConnectionConfig(
+            id = UUID.randomUUID().toString(),
+            name = "Amazon S3 (Lakehouse Analytics)",
+            dialect = DatabaseDialect.S3_DATA_LAKE,
+            databaseName = "analytics-data-lake"
+        )
+        DatabaseConnectionManager.registerConfig(s3Config)
+
+        // 9. Google Cloud Storage Sample
+        val gcsConfig = ConnectionConfig(
+            id = UUID.randomUUID().toString(),
+            name = "GCS (Genomics & Public Data)",
+            dialect = DatabaseDialect.GCS_DATA_LAKE,
+            databaseName = "genomics-public-data"
+        )
+        DatabaseConnectionManager.registerConfig(gcsConfig)
     }
 
     private fun setupTreeInteractions() {
@@ -289,6 +343,12 @@ class DatabaseStudioPanel(private val project: Project? = null) : JPanel(BorderL
                             consolePanel.executeCurrentQuery()
                         }
                     })
+                    menu.add(JMenuItem("🧩 Open in Visual SQL Builder").apply {
+                        addActionListener {
+                            visualBuilderPanel.loadTable(userObj.name)
+                            tabbedPane.selectedIndex = 1
+                        }
+                    })
                     menu.addSeparator()
                     menu.add(JMenuItem("Generate CREATE TABLE DDL").apply {
                         addActionListener {
@@ -312,16 +372,20 @@ class DatabaseStudioPanel(private val project: Project? = null) : JPanel(BorderL
                 val str = userObj?.toString() ?: ""
                 when {
                     str.contains("MongoDB") || str.startsWith("🍃") -> {
-                        tabbedPane.selectedIndex = 1
-                    }
-                    str.contains("Redis") || str.startsWith("⚡") -> {
                         tabbedPane.selectedIndex = 2
                     }
-                    str.contains("Cassandra") || str.startsWith("🪐") -> {
+                    str.contains("Redis") || str.startsWith("⚡") -> {
                         tabbedPane.selectedIndex = 3
                     }
-                    str.contains("Kafka") || str.startsWith("📨") -> {
+                    str.contains("Cassandra") || str.startsWith("🪐") -> {
                         tabbedPane.selectedIndex = 4
+                    }
+                    str.contains("Kafka") || str.startsWith("📨") -> {
+                        tabbedPane.selectedIndex = 5
+                    }
+                    str.contains("Data Lake") || str.startsWith("🌊") -> {
+                        tabbedPane.selectedIndex = 6
+                        dataLakeStudioPanel.refreshConnections()
                     }
                     userObj is TableMetadata -> {
                         if (e.clickCount == 2) {
@@ -344,6 +408,7 @@ class DatabaseStudioPanel(private val project: Project? = null) : JPanel(BorderL
         val redisCategoryNode = DefaultMutableTreeNode("⚡ In-Memory Key-Value (Redis)")
         val cassandraCategoryNode = DefaultMutableTreeNode("🪐 Wide-Column Stores (Cassandra)")
         val kafkaCategoryNode = DefaultMutableTreeNode("📨 Event Streaming Brokers (Kafka)")
+        val dataLakeCategoryNode = DefaultMutableTreeNode("🌊 Remote Data Lakes (S3 / GCS / HTTP)")
 
         var primaryCatalog: org.jormungandr.database.model.CatalogMetadata? = null
 
@@ -438,6 +503,15 @@ class DatabaseStudioPanel(private val project: Project? = null) : JPanel(BorderL
                     }
                     kafkaCategoryNode.add(connNode)
                 }
+
+                DialectCategory.DATA_LAKE -> {
+                    val connNode = DefaultMutableTreeNode("🌊 ${cfg.name}")
+                    val objects = DataLakeEngine.listObjects(cfg, "")
+                    for (obj in objects) {
+                        connNode.add(DefaultMutableTreeNode("${if (obj.isPrefix) "📁" else "📄"} ${obj.name} (${obj.sizeFormatted})"))
+                    }
+                    dataLakeCategoryNode.add(connNode)
+                }
             }
         }
 
@@ -446,6 +520,7 @@ class DatabaseStudioPanel(private val project: Project? = null) : JPanel(BorderL
         if (redisCategoryNode.childCount > 0) rootNode.add(redisCategoryNode)
         if (cassandraCategoryNode.childCount > 0) rootNode.add(cassandraCategoryNode)
         if (kafkaCategoryNode.childCount > 0) rootNode.add(kafkaCategoryNode)
+        if (dataLakeCategoryNode.childCount > 0) rootNode.add(dataLakeCategoryNode)
 
         primaryCatalog?.let { schemaDiagramPanel.setCatalog(it) }
 

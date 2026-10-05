@@ -1,5 +1,7 @@
 package org.jormungandr.jupyter.ui
 
+import com.google.gson.Gson
+import com.intellij.ide.browsers.BrowserLauncher
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.EditorFactory
@@ -9,13 +11,17 @@ import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileTypes.FileTypeManager
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.vfs.LocalFileSystem
+import com.intellij.openapi.wm.ToolWindowManager
 import com.intellij.ui.JBColor
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.components.JBTextArea
 import com.intellij.util.ui.JBUI
+import org.jormungandr.core.plot.WebPlotItem
+import org.jormungandr.core.plot.WebPlotType
 import org.jormungandr.core.theme.ThemeManager
 import org.jormungandr.jupyter.model.*
+import org.jormungandr.jupyter.ui.plot.WebPlotViewComponent
 import java.awt.*
 import java.awt.datatransfer.StringSelection
 import java.awt.event.KeyAdapter
@@ -459,7 +465,27 @@ class CellComponent(
             }
         }
 
-        // 2. Check for HTML
+        // 2. Check for Plotly JSON MIME
+        val plotlyJson = data["application/vnd.plotly.v1+json"]
+        if (plotlyJson != null) {
+            val jsonString = if (plotlyJson is String) plotlyJson else Gson().toJson(plotlyJson)
+            val html = buildPlotlyHtmlFromJson(jsonString)
+            renderInteractiveWebCard(html, WebPlotType.PLOTLY, execCount)
+            return
+        }
+
+        // 3. Check for Vega-Lite MIME
+        val vegaJson = data["application/vnd.vegalite.v5+json"]
+            ?: data["application/vnd.vegalite.v4+json"]
+            ?: data["application/vnd.vega.v5+json"]
+        if (vegaJson != null) {
+            val jsonString = if (vegaJson is String) vegaJson else Gson().toJson(vegaJson)
+            val html = buildVegaHtmlFromJson(jsonString)
+            renderInteractiveWebCard(html, WebPlotType.VEGA_LITE, execCount)
+            return
+        }
+
+        // 4. Check for HTML
         val htmlContent = data["text/html"]?.toString()
         if (htmlContent != null) {
             val parsedTable = HtmlTableParser.parse(htmlContent)
@@ -529,6 +555,10 @@ class CellComponent(
 
                 outputPanel.add(tableCard)
                 return
+            } else if (isInteractiveWebVisual(htmlContent)) {
+                val detectedType = WebPlotItem.detectType(htmlContent)
+                renderInteractiveWebCard(htmlContent, detectedType, execCount)
+                return
             } else {
                 // General HTML
                 val editorPane = JEditorPane("text/html", htmlContent).apply {
@@ -560,6 +590,133 @@ class CellComponent(
         }
         resultRow.add(textComp, BorderLayout.CENTER)
         outputPanel.add(resultRow)
+    }
+
+    private fun isInteractiveWebVisual(html: String): Boolean {
+        val lower = html.lowercase()
+        return lower.contains("plotly") ||
+               lower.contains("plot.ly") ||
+               lower.contains("leaflet") ||
+               lower.contains("folium") ||
+               lower.contains("vega-lite") ||
+               lower.contains("vegaembed") ||
+               lower.contains("echarts") ||
+               (lower.contains("<script") && (lower.contains("canvas") || lower.contains("chart") || lower.contains("plot") || lower.contains("webgl")))
+    }
+
+    private fun buildPlotlyHtmlFromJson(jsonString: String): String {
+        return """
+            <div id="plotly-div" style="width:100%;height:100%;min-height:360px;"></div>
+            <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+            <script>
+            (function() {
+                var fig = $jsonString;
+                Plotly.newPlot('plotly-div', fig.data || [], fig.layout || {}, fig.config || {responsive: true});
+            })();
+            </script>
+        """.trimIndent()
+    }
+
+    private fun buildVegaHtmlFromJson(jsonString: String): String {
+        return """
+            <div id="vis" style="width:100%;height:100%;min-height:360px;"></div>
+            <script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
+            <script src="https://cdn.jsdelivr.net/npm/vega-lite@5"></script>
+            <script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
+            <script>
+            (function() {
+                var spec = $jsonString;
+                vegaEmbed('#vis', spec, {mode: "vega-lite"}).catch(console.warn);
+            })();
+            </script>
+        """.trimIndent()
+    }
+
+    private fun renderInteractiveWebCard(html: String, type: WebPlotType, execCount: Int?) {
+        val plotItem = WebPlotItem(
+            title = "Notebook Output [${type.displayName}]",
+            plotType = type,
+            htmlContent = html,
+            source = "Jupyter Cell"
+        )
+        runCatching {
+            org.jormungandr.core.plot.PlotManagerService.getInstance().addWebPlot(plotItem)
+        }
+
+        val card = JPanel(BorderLayout()).apply {
+            isOpaque = true
+            background = Color(255, 255, 255)
+            border = CompoundBorder(
+                LineBorder(Color(203, 213, 225), 1, true),
+                EmptyBorder(4, 6, 6, 6)
+            )
+        }
+
+        val header = JPanel(BorderLayout()).apply {
+            isOpaque = false
+            border = EmptyBorder(4, 4, 6, 4)
+        }
+
+        val left = JPanel(FlowLayout(FlowLayout.LEFT, 6, 0)).apply { isOpaque = false }
+        if (execCount != null) {
+            val outLabel = JLabel("Out [$execCount]: ").apply {
+                font = Font("Monospaced", Font.BOLD, 11)
+                foreground = Color(203, 75, 22)
+            }
+            left.add(outLabel)
+        }
+        val badge = JLabel("${type.badgeIcon} ${type.displayName}").apply {
+            font = font.deriveFont(Font.BOLD, 11f)
+            foreground = Color(30, 64, 175)
+        }
+        left.add(badge)
+        header.add(left, BorderLayout.WEST)
+
+        val right = JPanel(FlowLayout(FlowLayout.RIGHT, 4, 0)).apply { isOpaque = false }
+        val openBrowserBtn = JButton("🌐 Open in Browser").apply {
+            font = font.deriveFont(Font.PLAIN, 10f)
+            isFocusable = false
+            toolTipText = "Open interactive figure in your default web browser"
+            addActionListener {
+                runCatching {
+                    val f = plotItem.exportHtmlFile()
+                    BrowserLauncher.instance.browse(f.toURI())
+                }
+            }
+        }
+        val openPlotsBtn = JButton("🖼️ Open in Scientific Plots").apply {
+            font = font.deriveFont(Font.PLAIN, 10f)
+            isFocusable = false
+            toolTipText = "Inspect in the Scientific Plots tool window"
+            addActionListener {
+                runCatching {
+                    val tw = ToolWindowManager.getInstance(project).getToolWindow("Scientific Plots")
+                    tw?.show()
+                }
+            }
+        }
+        val copyHtmlBtn = JButton("📋 Copy HTML").apply {
+            font = font.deriveFont(Font.PLAIN, 10f)
+            isFocusable = false
+            addActionListener {
+                val fullHtml = WebPlotItem.ensureCompleteHtml(html, plotItem.title)
+                val sel = StringSelection(fullHtml)
+                Toolkit.getDefaultToolkit().systemClipboard.setContents(sel, sel)
+            }
+        }
+        right.add(openBrowserBtn)
+        right.add(openPlotsBtn)
+        right.add(copyHtmlBtn)
+        header.add(right, BorderLayout.EAST)
+
+        card.add(header, BorderLayout.NORTH)
+
+        val webView = WebPlotViewComponent(webPlot = plotItem, parentDisposable = null, compactMode = true).apply {
+            preferredSize = Dimension(preferredSize.width, 380)
+        }
+        card.add(webView, BorderLayout.CENTER)
+
+        outputPanel.add(card)
     }
 
     private fun formatTableHtml(tableHtml: String): String {

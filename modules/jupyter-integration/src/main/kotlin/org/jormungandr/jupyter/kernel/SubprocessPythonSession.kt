@@ -60,6 +60,15 @@ class SubprocessPythonSession(
                 "    plt.show = __jg_show\n" +
                 "except Exception:\n" +
                 "    pass\n" +
+                "try:\n" +
+                "    import plotly.io as pio\n" +
+                "    pio.renderers.default = 'notebook_connected'\n" +
+                "    def __jg_plotly_show(fig, *args, **kwargs):\n" +
+                "        html = fig.to_html(include_plotlyjs='cdn', full_html=True)\n" +
+                "        print('__JG_MIME_HTML__' + base64.b64encode(html.encode('utf-8')).decode('ascii') + '__JG_MIME_HTML_END__', flush=True)\n" +
+                "    pio.show = __jg_plotly_show\n" +
+                "except Exception:\n" +
+                "    pass\n" +
                 "print('__JG_KERNEL_READY__', flush=True)\n" +
                 "while True:\n" +
                 "    line = sys.stdin.readline()\n" +
@@ -83,10 +92,32 @@ class SubprocessPythonSession(
                 "                res = eval(compile(expr_ast, '<cell>', 'eval'), cell_globals)\n" +
                 "                if res is not None:\n" +
                 "                    handled = False\n" +
-                "                    if hasattr(res, '_repr_html_'):\n" +
+                "                    if hasattr(res, '_repr_mimebundle_'):\n" +
+                "                        try:\n" +
+                "                            mb = res._repr_mimebundle_()\n" +
+                "                            if isinstance(mb, tuple): mb = mb[0]\n" +
+                "                            if isinstance(mb, dict):\n" +
+                "                                if 'text/html' in mb:\n" +
+                "                                    h = mb['text/html']\n" +
+                "                                    print('__JG_MIME_HTML__' + base64.b64encode(h.encode('utf-8')).decode('ascii') + '__JG_MIME_HTML_END__', flush=True)\n" +
+                "                                    handled = True\n" +
+                "                                elif 'image/png' in mb:\n" +
+                "                                    p = mb['image/png']\n" +
+                "                                    b64 = p if isinstance(p, str) else base64.b64encode(p).decode('ascii')\n" +
+                "                                    print('__JG_MIME_PNG__' + b64 + '__JG_MIME_PNG_END__', flush=True)\n" +
+                "                                    handled = True\n" +
+                "                        except Exception: pass\n" +
+                "                    if not handled and hasattr(res, '_repr_html_'):\n" +
                 "                        try:\n" +
                 "                            h = res._repr_html_()\n" +
                 "                            if h:\n" +
+                "                                print('__JG_MIME_HTML__' + base64.b64encode(h.encode('utf-8')).decode('ascii') + '__JG_MIME_HTML_END__', flush=True)\n" +
+                "                                handled = True\n" +
+                "                        except Exception: pass\n" +
+                "                    if not handled and hasattr(res, 'to_html'):\n" +
+                "                        try:\n" +
+                "                            h = res.to_html()\n" +
+                "                            if h and isinstance(h, str):\n" +
                 "                                print('__JG_MIME_HTML__' + base64.b64encode(h.encode('utf-8')).decode('ascii') + '__JG_MIME_HTML_END__', flush=True)\n" +
                 "                                handled = True\n" +
                 "                        except Exception: pass\n" +

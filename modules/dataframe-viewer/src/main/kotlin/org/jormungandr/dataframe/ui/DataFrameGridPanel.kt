@@ -10,6 +10,7 @@ import com.intellij.ui.table.JBTable
 import org.jormungandr.core.theme.DataGridThemeTokens
 import org.jormungandr.core.theme.JormungandrTheme
 import org.jormungandr.dataframe.chart.DataFrameChartView
+import org.jormungandr.dataframe.chart.DataFrameInteractivePlotStudio
 import org.jormungandr.dataframe.codegen.DataFrameCodeGenerator
 import org.jormungandr.dataframe.filter.CompoundFilter
 import org.jormungandr.dataframe.io.DataFrameExporter
@@ -61,9 +62,22 @@ class DataFrameGridPanel(
 
     // Advanced features
     private val chartView = DataFrameChartView(initialDataFrame)
+    private val interactivePlotStudio = DataFrameInteractivePlotStudio(initialDataFrame)
     private val profilerView = ColumnProfilerPanel(initialDataFrame)
     private val pivotView = PivotTablePanel(initialDataFrame, gridTheme)
     private val sqlView = DataFrameSqlPanel(initialDataFrame, gridTheme)
+    private val prepStudioView = DataPrepStudioPanel(initialDataFrame, gridTheme) { transformedDf ->
+        dataFrame = transformedDf
+    }
+    private val copilotView = DataScienceCopilotPanel(
+        initialDataFrame,
+        onExecuteSql = { sql ->
+            val result = org.jormungandr.dataframe.sql.DataFrameSqlEngine.execute(dataFrame, sql)
+            if (result is org.jormungandr.dataframe.sql.SqlExecutionResult.Success) {
+                dataFrame = result.dataFrame
+            }
+        }
+    )
     private val filterBuilder = FilterBuilderPanel(initialDataFrame) { compoundFilter ->
         applyCompoundFilter(compoundFilter)
     }
@@ -93,17 +107,23 @@ class DataFrameGridPanel(
         gridTab.add(statusBar, BorderLayout.SOUTH)
 
         tabbedPane.addTab("Grid View", gridTab)
+        tabbedPane.addTab("Data Prep Studio", prepStudioView)
+        tabbedPane.addTab("✨ Data Copilot", copilotView)
         tabbedPane.addTab("Chart View", chartView)
+        tabbedPane.addTab("3D & Web Charts", interactivePlotStudio)
         tabbedPane.addTab("Column Profiler", profilerView)
         tabbedPane.addTab("Pivot Studio", pivotView)
         tabbedPane.addTab("In-Memory SQL", sqlView)
 
         tabbedPane.addChangeListener {
             when (tabbedPane.selectedIndex) {
-                1 -> chartView.setDataFrame(dataFrame)
-                2 -> profilerView.setDataFrame(dataFrame)
-                3 -> pivotView.setDataFrame(dataFrame)
-                4 -> sqlView.setDataFrame(dataFrame)
+                1 -> prepStudioView.setDataFrame(dataFrame)
+                2 -> copilotView.updateDataFrame(dataFrame)
+                3 -> chartView.setDataFrame(dataFrame)
+                4 -> interactivePlotStudio.setDataFrame(dataFrame)
+                5 -> profilerView.setDataFrame(dataFrame)
+                6 -> pivotView.setDataFrame(dataFrame)
+                7 -> sqlView.setDataFrame(dataFrame)
             }
         }
 
@@ -118,7 +138,10 @@ class DataFrameGridPanel(
             tableModel.dataFrame = value
             currentSortColumn = -1
             headerRenderer.sortColumn = -1
+            prepStudioView.setDataFrame(value)
+            copilotView.updateDataFrame(value)
             chartView.setDataFrame(value)
+            interactivePlotStudio.setDataFrame(value)
             profilerView.setDataFrame(value)
             pivotView.setDataFrame(value)
             sqlView.setDataFrame(value)

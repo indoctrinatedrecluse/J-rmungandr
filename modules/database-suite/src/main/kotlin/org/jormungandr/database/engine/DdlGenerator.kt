@@ -91,6 +91,9 @@ object DdlGenerator {
             DatabaseDialect.MONGODB -> "db.${table.name}.find().limit($limit)"
             DatabaseDialect.REDIS -> "KEYS *"
             DatabaseDialect.KAFKA -> "CONSUME ${table.name} LIMIT $limit"
+            DatabaseDialect.S3_DATA_LAKE,
+            DatabaseDialect.GCS_DATA_LAKE,
+            DatabaseDialect.HTTP_DATA_LAKE -> "SELECT $colList FROM read_parquet('$qualifiedName') LIMIT $limit;"
         }
     }
 

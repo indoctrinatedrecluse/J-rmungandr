@@ -104,17 +104,24 @@ Modern data practitioners are caught between two disparate worlds:
   - ZeroMQ client communicating directly with local/remote Jupyter kernels.
   - Variable inspector showing type, shape, and memory consumption.
 - **Database & Data Source Suite**:
-  - SQL engine support: PostgreSQL, MySQL, SQLite, DuckDB, Snowflake.
-  - NoSQL engine support: MongoDB, Redis.
-  - Schema tree explorer, query console, and streaming tabular data grid.
+  - SQL engine support: PostgreSQL, MySQL, SQLite, DuckDB, Snowflake, Oracle PL/SQL.
+  - NoSQL & Streaming engine support: MongoDB, Redis, Apache Cassandra (CQL), Apache Kafka.
+  - Remote Data Lake & Object Storage explorer: Amazon S3, Google Cloud Storage, HTTP/REST.
+  - Visual No-Code / Low-Code SQL & Join Builder with multi-dialect and DataFrame export.
+  - Schema tree explorer, visual ER diagram, query console, and streaming tabular data grid.
+- **Interactive Visualizations & Machine Learning Studio**:
+  - Interactive Web & 3D Visualizations: Plotly, Altair, Vega-Lite, Folium, ECharts via embedded Chromium.
+  - In-IDE Machine Learning Experiment Tracker & Metric Studio (MLflow-style leaderboards and step-series convergence curves).
+  - In-IDE Data Science Copilot powered by Google Gemini AI & offline heuristic intelligence.
+  - Low-code Data Prep Studio transformation pipeline wizard with Pandas, Polars, and SQL generation.
 - **Modular Extension Manager**:
   - Strict lifecycle states (`UNLOADED` &rarr; `ACTIVE` &rarr; `DISPOSING` &rarr; `TERMINATED`).
   - Memory bounds and IntelliJ `Disposable` hierarchy integration.
 
-### 3.3 🔮 Follow-Up Scope (Phase 2 & Beyond)
+### 3.3 🔮 Follow-Up Scope (Future Horizons)
 - **R Language Integration (TBD)**: R kernel integration, R REPL, package viewer, and graphics device window.
 - **Hardware-Accelerated Visualization**: WebGL/Skiko canvas for 10M+ datapoint scatterplots.
-- **Cloud & Remote Execution**: S3/GCS data lake browser (Parquet inspection), SSH/Docker kernel runners.
+- **Remote Compute**: Remote Docker & SSH Jupyter kernel runners.
 
 ---
 
@@ -269,25 +276,31 @@ flowchart LR
     end
     class P2,M2 phase;
 
-    subgraph P3["🗄️ Phase 3: Data & Analytics"]
-        M3["SQL Suite: DuckDB / Postgres<br/>NoSQL: Mongo / Redis<br/>Apache Arrow Memory Grid<br/>JCEF / Skiko Chart Canvas"]
+    subgraph P3["🗄️ Phase 3: Data & Storage"]
+        M3["SQL Suite: DuckDB / Postgres / Oracle<br/>NoSQL: Mongo / Redis / Cassandra / Kafka<br/>Visual SQL Builder & Join Designer<br/>Remote Data Lake (S3/GCS/HTTP)"]
     end
     class P3,M3 phase;
 
-    subgraph P4["🔮 Phase 4: Advanced (TBD)"]
-        M4["R Language Kernel & REPL<br/>ggplot2 Graphics Device<br/>S3/GCS Parquet Data Lake<br/>Remote Docker / SSH Kernels"]
+    subgraph P4["🧪 Phase 4: AI & Visual Studio"]
+        M4["Interactive Web & 3D Charts (Plotly/Vega)<br/>Data Prep Pipeline Wizard<br/>Gemini Data Science Copilot<br/>MLflow Experiment & Metric Studio"]
     end
-    class P4,M4 future;
+    class P4,M4 phase;
 
-    P1 --> P2 --> P3 --> P4
+    subgraph P5["🔮 Phase 5: Advanced Horizons"]
+        M5["R Language Kernel & REPL<br/>ggplot2 Graphics Device<br/>Remote Docker / SSH Kernels"]
+    end
+    class P5,M5 future;
+
+    P1 --> P2 --> P3 --> P4 --> P5
 ```
 
 | Phase | Milestone | Focus Areas | Deliverables |
 | :--- | :--- | :--- | :--- |
 | **Phase 1** | 🏛️ Platform Core | Shell, Branding, Extension Manager | IntelliJ CE base, module build system, `ExtensionManager` state machine, `Disposable` tree. |
 | **Phase 2** | 🐍 Python & Notebooks | Runtime & Interactive REPL | `python-community` integration, environment switcher, ZeroMQ v5 client, `.ipynb` editor. |
-| **Phase 3** | 📊 Data & Storage | Databases & Visuals | Multi-dialect SQL & NoSQL consoles, DuckDB in-memory queries, Arrow 1M-row virtualized grid. |
-| **Phase 4** | 🔮 Expansion *(TBD)* | R Language & Cloud Lake | R kernel and REPL bridge, ggplot2 device canvas, S3/GCS Parquet browser, remote compute. |
+| **Phase 3** | 📊 Data & Storage | Databases & Data Lakes | Multi-dialect SQL & NoSQL consoles, DuckDB OLAP, Cassandra CQL, Kafka streams, Visual SQL Builder, S3/GCS Data Lake. |
+| **Phase 4** | 🧪 AI & Visual Studio | Copilot, Web Viz & ML | Plotly/Vega 3D & Web Studio, Data Prep Studio pipeline wizard, Gemini AI Copilot, ML Experiment Studio. |
+| **Phase 5** | 🔮 Horizons *(TBD)* | R Language & Remote Compute | R kernel and REPL bridge, ggplot2 device canvas, remote SSH/Docker compute runners. |
 
 ### 📝 Backlog & Priority TODO Items
 - [ ] **Comprehensive Rebranding & White-Labeling (JetBrains / IntelliJ IDEA &rarr; Jörmungandr)**:
@@ -315,6 +328,21 @@ The flagship DataFrame Studio provides exploratory data analysis, visual vector 
 - **Features Inside the Studio**:
   - 📋 **Grid View Tab**: High-speed virtualized data table with sortable columns, instant full-text search, **🎨 Heatmap** numeric cell gradient formatting, **Σ Describe** summary dataset generator, **Group By ▾** aggregations, **Columns ▾** visibility selector, **🔍 Filter Builder** (compound multi-condition filtering with `>`, `<`, `=`, `!=`, `contains`, `regex`), **⚡ Code ▾** exporter (generate Pandas, Polars, and SQL DDL / Inserts), and **💾 Export ▾** (copy as CSV, TSV, Markdown, JSON, JSON Lines `.jsonl`, or Excel XML `.xml`).
   - 📊 **Right Statistical Inspector**: Detailed per-column summary metrics (null counts & percentages, distinct values, min, max, mean, median, 25%/75% quantiles, IQR, standard deviation, skewness) and inline distribution bar histograms.
+  - 🧙 **Data Prep Studio Tab**: Low-code data cleaning and transformation pipeline wizard. Interactively assemble sequential transformation steps:
+    - **Drop Missing Values**: Drop rows with nulls across all or selected columns.
+    - **Impute / Fill Missing**: Fill NaNs with Column Mean, Median, Mode, Constant value, or Forward-fill.
+    - **Type Casting**: Safe conversion between Integer, Float, String, and Boolean.
+    - **String Cleaning**: Strip whitespace, lowercase, uppercase, and regex search/replace.
+    - **Numerical Scaling**: Standard Scaler ($Z = \frac{x - \mu}{\sigma}$), Min-Max Scaler ($[0, 1]$), and Robust IQR Scaler.
+    - **Outlier Clipping**: Winsorization by standard deviation ($k \cdot \sigma$) or quantile bounds ($[p_1, p_2]$).
+    - **Deduplication & One-Hot Encoding**: Drop duplicate rows and expand categorical values into binary indicator columns.
+    - **Rename & Drop Columns**: Clean up schema headers and eliminate unneeded features.
+    - **Live Preview & Code Generation**: Live transformed preview grid, reorderable step cards, copyable scripts for **Pandas**, **Polars**, and **SQL**, plus **"⚡ Apply Pipeline to Grid"** to update the active table.
+  - ✨ **Data Copilot Tab**: In-IDE conversational AI assistant for data exploration, powered by Google Gemini (`gemini-2.5-flash` / `gemini-2.5-pro`) and an offline heuristic fallback engine:
+    - Injects active dataset schema, column types, and statistical metrics into the conversational prompt context.
+    - Quick-prompt chips: **💬 NL ➔ SQL**, **🐍 NL ➔ Pandas**, **📊 Suggest Visualizations**, and **🧹 Cleaning Strategy**.
+    - Markdown extraction with instant syntax-highlighted code cards.
+    - Direct **"▶ Run SQL"** button to execute generated queries immediately against the dataset in-memory.
   - 📈 **Chart View Tab**: Comprehensive 2D vector chart studio supporting **8 distinct visualization types**:
     - **Line Charts**: Multi-series trends with auto-scaling axes.
     - **Bar Charts**: Categorical comparison with distinct series shading.
@@ -325,6 +353,12 @@ The flagship DataFrame Studio provides exploratory data analysis, visual vector 
     - **Donut / Pie Charts**: Proportional categorical slice visualization with percentage breakdown.
     - **Correlation Matrix Heatmap**: Pearson correlation grid ($r \in [-1.0, 1.0]$) with dynamic red-to-blue gradient color mapping.
     - Features **"📋 Copy Chart"** (copies rendered bitmap directly to system clipboard) and **"🖼️ Send to Plots"** (transfers live chart directly into the dedicated Scientific Plots tool window).
+  - 🌐 **3D & Web Charts Tab**: Multi-dimensional interactive web visualization generator:
+    - **3D Scatter Plot**: Orbit, pan, and zoom across $X, Y, Z$ feature coordinates with color dimension mapping.
+    - **3D Surface Mesh**: 3D terrain and grid surface rendering with continuous height gradients.
+    - **Interactive Heatmap**: High-resolution zoomable heatmaps with coordinate value tooltips.
+    - **Geographic Scatter Map**: Latitude and longitude spatial scatter plots with customizable markers.
+    - Features camera perspective presets (Isometric, Top-Down, Front, Side), color palette dropdowns (Viridis, Plasma, Inferno, Turbo, Coolwarm, Jet), one-click export to standalone HTML files, and copyable Python code (`plotly.express`).
   - 🩺 **Column Profiler Tab**: Holistic dataset health audit showing data type category distributions, null percentage gauges, and distinct value cardinality across every column.
   - 🧊 **Pivot Studio Tab**: Interactive 2D cross-tabulation matrix studio. Configure Row dimension, Column dimension, Value metric, and Aggregation function (`Sum`, `Average (Mean)`, `Count`, `Min`, `Max`, `Median`, `Std Dev`) with toggleable Grand Totals, and one-click export to clipboard as CSV, Markdown, or Excel XML.
   - 🗄️ **In-Memory SQL Tab**: Embedded ANSI SQL console running directly in-memory against the loaded dataset table (`df`). Write and run `SELECT`, `WHERE`, `GROUP BY`, `HAVING`, `ORDER BY`, `LIMIT` queries with `Ctrl + Enter`, built-in query templates dropdown, tabular results view, error banner, and one-click export.
@@ -345,6 +379,7 @@ Full-featured notebook editing and kernel interaction powered by asynchronous Ze
   - **Variable Inspector Tab**: Live interactive variable workspace inspector. Tracks in-scope Python variables, types, dimensions/shapes, formatted byte sizes (`B`, `KB`, `MB`, `GB`), and value previews. Features instant text search filtering, clipboard copy, a direct **"📊 Open in DataFrame Studio"** button, and an **"📈 Plot Variable"** button that plots 1D/2D arrays and Series directly into the Scientific Plots gallery!
 - **Multimodal Rich Output Rendering**:
   - 🖼️ **Image & Matplotlib Rendering**: Seamlessly captures figures generated via `matplotlib.pyplot` and `seaborn` (utilizing automated headless `Agg` backend hooks and cell figure inspection). Decodes inline Base64 `image/png` / `image/jpeg` with **"🖼️ Open in Plots"** and **"📋 Copy Image"** buttons.
+  - 🌐 **Interactive Web & 3D Figures**: Intercepts rich HTML outputs produced by Plotly, Altair / Vega-Lite, and Folium maps. Renders styled preview cards with detected format badges, a **"📋 Copy HTML"** action, and a direct **"🌐 Open in Web Plots"** button sending the live figure to the Scientific Plots Chromium studio.
   - 📊 **Rich HTML Table Cards**: Intercepts HTML table outputs (e.g. Pandas and Polars DataFrames) and renders them in styled cards with row & column counts, a **"📋 Copy CSV"** action, and a direct **"📊 Open in DataFrame Studio"** button.
   - ⚡ **Interactive Cell Actions Menu (`⋮`)**: Per-cell actions dropdown offering **Run Cell**, **Run All Above**, **Run All Below**, **Clear Output**, **Copy Code**, and **Delete Cell**.
 - **Executing Cells**:
@@ -377,6 +412,22 @@ Unified analytical console for SQL, analytical engines, and NoSQL databases:
   - Switch to the **"🗺️ Schema Diagram"** tab in Database Studio.
   - Interactive table entity cards displaying columns, data types, primary key badges (`🔑 [PK]`), foreign key badges (`🔗 [FK]`), and mapped relationships (e.g. `orders.customer_id ➔ customers.id`).
   - Real-time schema table search filter, one-click **"📋 Export All DDL"** for the complete schema, and **Query** shortcut button on every card.
+- **🧩 Visual No-Code / Low-Code SQL & Join Builder**:
+  - Switch to the **"🧩 Visual SQL Builder"** tab (or click **"+ 🧩 Visual Builder"** in the toolbar).
+  - Drag-and-click relational query designer. Select schema tables, choose output columns, and visually construct joins (`INNER`, `LEFT`, `RIGHT`, `FULL OUTER`, `CROSS`) with auto-foreign-key relationship inference.
+  - Projection column manager: Configure column aliases, enable/disable output fields, and assign aggregate functions (`COUNT`, `SUM`, `AVG`, `MIN`, `MAX`, `COUNT_DISTINCT`). Automatically produces ANSI SQL `GROUP BY` expressions for non-aggregated columns.
+  - Filter criteria builder: Add compound `WHERE` and `HAVING` filters with operators (`=`, `!=`, `>`, `<`, `>=`, `<=`, `LIKE`, `IN`, `IS NULL`, `IS NOT NULL`).
+  - Order & Pagination: Multi-column `ORDER BY` with ASC/DESC, `LIMIT`, and `OFFSET`.
+  - Multi-dialect code generation: Real-time code generator produces dialect-compliant SQL (DuckDB, SQLite, PostgreSQL, MySQL, Oracle/PL-SQL with modern `OFFSET ... FETCH FIRST`, Cassandra CQL) plus Python DataFrame queries (Pandas merge/filter and DuckDB Python).
+  - Instant query runner (`▶ Run Query`) with virtualized results grid and direct **"📊 Open in DataFrame Studio"** export.
+- **🌊 Remote Data Lake & Object Storage Explorer**:
+  - Switch to the **"🌊 Remote Data Lakes"** tab (or click **"+ 🌊 Data Lake"** in the toolbar).
+  - Multi-cloud object storage explorer supporting **Amazon S3** (`s3://`), **Google Cloud Storage** (`gs://`), and **HTTP/REST** endpoints (`https://`).
+  - Browse remote buckets, folders, and partition directories (e.g. `s3://company-datalake/events/year=2026/`).
+  - Inspect storage file formats: Apache Parquet, CSV, JSON Lines (`.jsonl`), and Delta Lake.
+  - Streaming data preview: Inspect schema and sample data records directly in-memory without downloading multi-gigabyte partitions.
+  - Zero-copy DuckDB SQL queries over remote data lake objects via DuckDB `httpfs` (`SELECT * FROM read_parquet('s3://...') WHERE ...`).
+  - Copyable Polars lazy scanning Python snippets (`pl.scan_parquet(...)`).
 - **Oracle PL/SQL Procedural Runner & Templates**:
   - Full execution support for anonymous procedural blocks (`DECLARE ... BEGIN ... EXCEPTION ... END;`), stored procedures, functions, packages, and triggers.
   - Automatic **`DBMS_OUTPUT` Server Output Capture**: Captures lines emitted via `DBMS_OUTPUT.PUT_LINE` and displays them in execution summaries.
@@ -406,7 +457,7 @@ Unified analytical console for SQL, analytical engines, and NoSQL databases:
   - **🚀 Produce Event**: Send live test events to any topic/partition with custom keys and JSON payload templates.
   - **👥 Consumer Groups & Lag Monitor**: Track consumer group offsets and visual color-coded lag indicators (`Healthy`, `Moderate`, `High Lag`).
 - **Multi-Dialect Connection Manager**:
-  - Support for SQLite, DuckDB, PostgreSQL, MySQL, Oracle (PL/SQL), Snowflake, Apache Cassandra (CQL), MongoDB, Redis, and Apache Kafka.
+  - Support for SQLite, DuckDB, PostgreSQL, MySQL, Oracle (PL/SQL), Snowflake, Apache Cassandra (CQL), MongoDB, Redis, Apache Kafka, and Remote Data Lakes (Amazon S3, Google Cloud Storage, HTTP/REST).
   - File browser button for effortlessly attaching local `.duckdb`, `.db`, `.sqlite`, `.parquet`, or `.csv` files.
 
 ---
@@ -470,12 +521,25 @@ A centralized, high-fidelity gallery and canvas for all figures, charts, and vis
 - **Opening the Tool Window**:
   - Main menu: `View` &rarr; `Tool Windows` &rarr; `Scientific Plots`.
   - Or click the **Scientific Plots** icon on the right tool window stripe.
-- **Capabilities & Features**:
-  - 🖼️ **Interactive Zoom & Pan Canvas**: Smooth vector/bitmap canvas with zoom controls (`+`, `-`, `1:1`, `Fit to Window`), drag-to-pan navigation, and high-DPI scaling.
-  - 🎞️ **Visual Thumbnail Filmstrip**: Horizontal gallery strip displaying all captured figures in chronological order with active figure indicator and metadata (dimensions, timestamp, origin source).
-  - 📋 **One-Click Clipboard Export**: Copy high-resolution plot images (`BufferedImage`) directly to the system clipboard for immediate pasting into presentations, reports, or documentation.
-  - 💾 **Save to Disk**: Export plots as crisp `.png` image files with customizable destinations.
-  - 🔄 **Unified Interop**: Plots can be received seamlessly from Matplotlib/Seaborn executions, DataFrame Chart Studio (**"🖼️ Send to Plots"**), and Variable Inspector (**"📈 Plot Variable"**).
+- **Studio Tabs & Capabilities**:
+  - 🖼️ **Tab 1: Static Figures Gallery**:
+    - Centralized canvas for raster figures (`matplotlib`, `seaborn`, PIL, DataFrame 2D charts).
+    - Smooth vector/bitmap canvas with zoom controls (`+`, `-`, `1:1`, `Fit to Viewport`), drag-to-pan navigation, and high-DPI scaling.
+    - Horizontal thumbnail filmstrip displaying all captured figures in chronological order with active figure indicator and metadata (dimensions, timestamp, origin source).
+    - One-click clipboard export (`BufferedImage`) and crisp `.png` file saving.
+    - Seamless interop: receives figures from Matplotlib/Seaborn executions, DataFrame Chart Studio (**"🖼️ Send to Plots"**), and Variable Inspector (**"📈 Plot Variable"**).
+  - 🌐 **Tab 2: Interactive 3D & Web Figures Studio**:
+    - Embedded Chromium runtime ([`JBCefBrowser`](https://plugins.jetbrains.com/docs/intellij/jcef.html)) for rich WebGL and HTML visualizations with graceful HTML card fallback.
+    - Full support for **Plotly 3D** (scatter, surfaces, meshes), **Altair / Vega-Lite** declarative specs, **Folium** interactive Leaflet maps, and **Apache ECharts**.
+    - Web thumbnail filmstrip with format detection badges (`[PLOTLY]`, `[VEGA_LITE]`, `[FOLIUM]`, `[ECHART]`, `[HTML]`).
+    - Dedicated studio action bar: **🔄 Reload**, **🌐 External Browser**, **📋 Copy Raw HTML**, and **💾 Save HTML File**.
+  - 🧪 **Tab 3: Machine Learning Experiment Tracker & Metric Studio**:
+    - Built-in, lightweight MLflow-style experiment tracker for training runs and model evaluation.
+    - Multi-run experiment leaderboard with status badges (`🟢 FINISHED`, `🟡 RUNNING`, `🔴 FAILED`), run duration, and hyperparameter tables.
+    - Interactive 2D Metric Curve Canvas (`MetricCurveCanvas`): Plots multi-run step-series convergence curves for Training Loss, Validation Loss, Accuracy, F1-Score, and custom metrics with smooth scaling, coordinate axes, and color-coded run legends.
+    - Run Comparison: Multi-select runs via leaderboard checkboxes to overlay convergence curves side-by-side.
+    - Hyperparameter & Metadata Inspector: Deep inspection of learning rates, batch sizes, optimizers, model architectures, and Git commits.
+    - Code Snippet Generator: Copyable Python logging client code (`MlExperimentTrackerClient`) for immediate integration into PyTorch, Scikit-learn, XGBoost, and LightGBM training loops.
 
 ---
 
