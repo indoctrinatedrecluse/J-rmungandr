@@ -50,6 +50,29 @@
                     canCloseContent="true"
                     icon="/icons/jormungandr_16.png"
                     factoryClass="org.jormungandr.jupyter.ui.toolwindow.JupyterToolWindowFactory"/>
+
+        <!-- Arrow DataFrame Viewer Subsystem -->
+        <applicationService serviceImplementation="org.jormungandr.dataframe.service.DataFrameService"/>
+
+        <fileType name="CSV Dataset"
+                  implementationClass="org.jormungandr.dataframe.filetype.CsvFileType"
+                  fieldName="INSTANCE"
+                  extensions="csv;tsv;tab"/>
+
+        <fileEditorProvider implementation="org.jormungandr.dataframe.ui.editor.DataFrameEditorProvider"/>
+
+        <toolWindow id="DataFrame Viewer"
+                    anchor="bottom"
+                    canCloseContent="true"
+                    icon="/icons/jormungandr_16.png"
+                    factoryClass="org.jormungandr.dataframe.ui.toolwindow.DataFrameToolWindowFactory"/>
+
+        <!-- Database & Query Studio Subsystem -->
+        <toolWindow id="Database Studio"
+                    anchor="right"
+                    canCloseContent="true"
+                    icon="/icons/jormungandr_16.png"
+                    factoryClass="org.jormungandr.database.ui.toolwindow.DatabaseToolWindowFactory"/>
     </extensions>
 
     <actions>

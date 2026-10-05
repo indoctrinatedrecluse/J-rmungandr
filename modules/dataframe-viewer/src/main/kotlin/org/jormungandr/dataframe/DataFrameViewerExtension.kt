@@ -69,12 +69,21 @@ class DataFrameViewerExtension : JormungandrExtension {
 
     override suspend fun trimMemory(level: MemoryPressureLevel) {
         LOG.warn("DataFrameViewerExtension releasing cached Arrow buffers under $level pressure.")
-        // Evict non-visible off-heap Arrow memory chunks
+        if (level == MemoryPressureLevel.CRITICAL) {
+            val service = runCatching {
+                com.intellij.openapi.application.ApplicationManager.getApplication()?.getService(org.jormungandr.dataframe.service.DataFrameService::class.java)
+            }.getOrNull()
+            service?.clear()
+        }
     }
 
     override suspend fun deactivate() {
         _state = ExtensionState.DISPOSING
         LOG.info("DataFrameViewerExtension deactivating: unmapping all Arrow off-heap buffers...")
+        val service = runCatching {
+            com.intellij.openapi.application.ApplicationManager.getApplication()?.getService(org.jormungandr.dataframe.service.DataFrameService::class.java)
+        }.getOrNull()
+        service?.clear()
         _state = ExtensionState.TERMINATED
     }
 

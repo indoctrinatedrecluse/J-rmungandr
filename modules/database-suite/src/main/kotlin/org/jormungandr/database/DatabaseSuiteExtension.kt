@@ -61,12 +61,16 @@ class DatabaseSuiteExtension : JormungandrExtension {
 
     override suspend fun trimMemory(level: MemoryPressureLevel) {
         LOG.warn("DatabaseSuiteExtension trimming cached schema metadata and query buffers under $level pressure.")
-        // Clear cached schemas and close idle connection pool handles
+        if (level == MemoryPressureLevel.CRITICAL) {
+            org.jormungandr.database.engine.DatabaseConnectionManager.closeAll()
+            activeConnections.clear()
+        }
     }
 
     override suspend fun deactivate() {
         _state = ExtensionState.DISPOSING
         LOG.info("DatabaseSuiteExtension deactivating: closing all active database connections...")
+        org.jormungandr.database.engine.DatabaseConnectionManager.closeAll()
         activeConnections.clear()
         _state = ExtensionState.TERMINATED
     }
