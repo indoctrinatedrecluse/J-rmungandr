@@ -1,0 +1,42 @@
+<idea-plugin>
+    <id>org.jormungandr.dataframe</id>
+    <name>DataFrame Viewer &amp; Charting Studio</name>
+    <version>0.1.0</version>
+    <vendor email="abmitra1999@gmail.com" url="https://github.com/indoctrinatedrecluse/Jormungandr">indoctrinatedrecluse</vendor>
+
+    <description><![CDATA[
+        <h1>📊 DataFrame Viewer &amp; 2D Charting Studio</h1>
+        <p>Flagship high-performance tabular dataset viewer and 2D vector charting engine for Jörmungandr.</p>
+        <ul>
+            <li><b>Multi-Tab Studio:</b> Grid View, interactive 2D Vector Chart View, and Column Profiler</li>
+            <li><b>2D Vector Charts:</b> Bar, Line, Scatter, and Histogram charts with live hover inspection and PNG export</li>
+            <li><b>Statistical Profiling:</b> Quartiles (Q25, Q50, Q75), IQR, variance, skewness, distribution histograms</li>
+            <li><b>Dynamic Filter Builder:</b> Compound AND/OR conditions across 13 comparison operators</li>
+            <li><b>Data Transformations:</b> SQL-style groupBy aggregations and Pandas-like describe()</li>
+            <li><b>Code Generator:</b> Instant export to Pandas, Polars, and SQL DDL + Inserts scripts</li>
+            <li><b>Heatmap Rendering:</b> Percentile gradient background highlighting for numeric cells</li>
+        </ul>
+    ]]></description>
+
+    <category>Data Science</category>
+
+    <depends>com.intellij.modules.platform</depends>
+    <depends>org.jormungandr.ide</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <applicationService serviceImplementation="org.jormungandr.dataframe.service.DataFrameService"/>
+
+        <fileType name="CSV Dataset"
+                  implementationClass="org.jormungandr.dataframe.filetype.CsvFileType"
+                  fieldName="INSTANCE"
+                  extensions="csv;tsv;tab"/>
+
+        <fileEditorProvider implementation="org.jormungandr.dataframe.ui.editor.DataFrameEditorProvider"/>
+
+        <toolWindow id="DataFrame Viewer"
+                    anchor="bottom"
+                    canCloseContent="true"
+                    icon="/icons/jormungandr_16.png"
+                    factoryClass="org.jormungandr.dataframe.ui.toolwindow.DataFrameToolWindowFactory"/>
+    </extensions>
+</idea-plugin>

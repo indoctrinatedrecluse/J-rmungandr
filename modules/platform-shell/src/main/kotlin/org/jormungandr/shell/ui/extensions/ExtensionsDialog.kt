@@ -16,11 +16,17 @@ import javax.swing.*
 import javax.swing.border.EmptyBorder
 import javax.swing.border.LineBorder
 
+import com.intellij.openapi.options.ShowSettingsUtil
+import org.jormungandr.core.extension.MemoryPressureLevel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+
 /**
- * Extensions Modal Dialog displaying loaded and active modular extensions,
- * their metadata, supported languages, associated technology stacks, and resource quotas.
+ * Subsystems Modal Dialog displaying loaded and active data science engines,
+ * memory quotas, thread pools, and runtime cache governance.
  */
-class ExtensionsDialog(project: Project? = null) : DialogWrapper(project, true) {
+class ExtensionsDialog(private val currentProject: Project? = null) : DialogWrapper(currentProject, true) {
 
     private val extensionManager: ExtensionManager? = runCatching {
         ApplicationManager.getApplication()?.getService(ExtensionManager::class.java)
@@ -31,7 +37,7 @@ class ExtensionsDialog(project: Project? = null) : DialogWrapper(project, true) 
     private val detailPanel = JPanel()
 
     init {
-        title = "Jörmungandr Modular Extensions"
+        title = "Data Science Subsystems & Resource Monitor"
         isResizable = true
 
         // Ensure default core extensions are registered if not yet bootstrapped
@@ -64,7 +70,7 @@ class ExtensionsDialog(project: Project? = null) : DialogWrapper(project, true) 
 
     override fun createCenterPanel(): JComponent {
         val root = JPanel(BorderLayout(16, 12)).apply {
-            preferredSize = Dimension(740, 460)
+            preferredSize = Dimension(780, 480)
             border = EmptyBorder(12, 16, 12, 16)
         }
 
@@ -77,8 +83,8 @@ class ExtensionsDialog(project: Project? = null) : DialogWrapper(project, true) 
         val titleText = JPanel().apply {
             layout = BoxLayout(this, BoxLayout.Y_AXIS)
             isOpaque = false
-            val hLabel = JBLabel("Modular Extension Architecture").apply { font = font.deriveFont(Font.BOLD, 16f) }
-            val subLabel = JBLabel("Governed extension lifecycles, memory quotas, and language runtimes.").apply {
+            val hLabel = JBLabel("Data Science Subsystems & Resource Governor").apply { font = font.deriveFont(Font.BOLD, 16f) }
+            val subLabel = JBLabel("Active engine runtimes, off-heap buffers, worker thread pools, and cache trimming.").apply {
                 font = font.deriveFont(Font.PLAIN, 11f)
                 foreground = Color(110, 110, 110)
             }
@@ -112,6 +118,48 @@ class ExtensionsDialog(project: Project? = null) : DialogWrapper(project, true) 
             border = null
         }
         root.add(splitPane, BorderLayout.CENTER)
+
+        // Footer Banner (Live Memory + Plugin Manager shortcut)
+        val footer = JPanel(BorderLayout(8, 0)).apply {
+            border = EmptyBorder(8, 0, 0, 0)
+            isOpaque = false
+        }
+        val rt = Runtime.getRuntime()
+        val usedMb = (rt.totalMemory() - rt.freeMemory()) / (1024 * 1024)
+        val maxMb = rt.maxMemory() / (1024 * 1024)
+        val memLabel = JBLabel("💾 JVM Heap: ${usedMb} MB / ${maxMb} MB  |  Off-Heap Governor: Active")
+        memLabel.font = memLabel.font.deriveFont(Font.PLAIN, 11f)
+
+        val footerButtons = JPanel(FlowLayout(FlowLayout.RIGHT, 6, 0)).apply {
+            isOpaque = false
+            val openPluginsBtn = JButton("⚙️ Open Plugin Manager...").apply {
+                isFocusable = false
+                toolTipText = "Configure native IntelliJ plugins (Settings → Plugins)"
+                addActionListener {
+                    ShowSettingsUtil.getInstance().showSettingsDialog(currentProject, "Plugins")
+                }
+            }
+            val trimAllBtn = JButton("🧹 Trim All").apply {
+                isFocusable = false
+                toolTipText = "Evict cached memory across all active data science subsystems"
+                addActionListener {
+                    val mgr = extensionManager ?: return@addActionListener
+                    GlobalScope.launch(Dispatchers.IO) {
+                        for (e in mgr.loadedExtensions.value.values) {
+                            runCatching { e.trimMemory(MemoryPressureLevel.CRITICAL) }
+                        }
+                        System.gc()
+                    }
+                    JOptionPane.showMessageDialog(rootPane, "Evicted caches across all subsystems and triggered GC.", "Trim Memory", JOptionPane.INFORMATION_MESSAGE)
+                }
+            }
+            add(trimAllBtn)
+            add(openPluginsBtn)
+        }
+
+        footer.add(memLabel, BorderLayout.WEST)
+        footer.add(footerButtons, BorderLayout.EAST)
+        root.add(footer, BorderLayout.SOUTH)
 
         return root
     }
@@ -240,6 +288,39 @@ class ExtensionsDialog(project: Project? = null) : DialogWrapper(project, true) 
             })
         }
         content.add(quotaPanel)
+
+        // Runtime Governance Controls
+        val controlPanel = JPanel(FlowLayout(FlowLayout.LEFT, 8, 0)).apply {
+            alignmentX = Component.LEFT_ALIGNMENT
+            isOpaque = false
+        }
+        val trimBtn = JButton("🧹 Trim Subsystem Cache").apply {
+            isFocusable = false
+            toolTipText = "Evict cached buffers and memory for this subsystem"
+            addActionListener {
+                GlobalScope.launch(Dispatchers.IO) {
+                    ext.trimMemory(MemoryPressureLevel.CRITICAL)
+                    System.gc()
+                }
+                JOptionPane.showMessageDialog(rootPane, "Dispatched memory cache trim to ${m.displayName}", "Trim Cache", JOptionPane.INFORMATION_MESSAGE)
+            }
+        }
+        val pauseResumeBtn = JButton(if (ext.state == ExtensionState.PAUSED) "▶ Resume Subsystem" else "⏸ Pause Subsystem").apply {
+            isFocusable = false
+            addActionListener {
+                GlobalScope.launch(Dispatchers.IO) {
+                    if (ext.state == ExtensionState.PAUSED) ext.resume() else ext.pause()
+                    SwingUtilities.invokeLater {
+                        updateDetailPanel(ext)
+                        extensionList.repaint()
+                    }
+                }
+            }
+        }
+        controlPanel.add(trimBtn)
+        controlPanel.add(pauseResumeBtn)
+        content.add(Box.createVerticalStrut(14))
+        content.add(controlPanel)
 
         val scroll = JBScrollPane(content).apply {
             border = null

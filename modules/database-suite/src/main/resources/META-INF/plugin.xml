@@ -1,0 +1,32 @@
+<idea-plugin>
+    <id>org.jormungandr.database</id>
+    <name>Database Analytics Studio</name>
+    <version>0.1.0</version>
+    <vendor email="abmitra1999@gmail.com" url="https://github.com/indoctrinatedrecluse/Jormungandr">indoctrinatedrecluse</vendor>
+
+    <description><![CDATA[
+        <h1>🗄️ Database Analytics Studio &amp; Query Console</h1>
+        <p>Interactive multi-dialect SQL studio, schema explorer, and query execution engine for Jörmungandr.</p>
+        <ul>
+            <li><b>Multi-Dialect Support:</b> PostgreSQL, MySQL, SQLite, DuckDB, and Snowflake</li>
+            <li><b>Schema Introspection:</b> Catalogs, schemas, tables, columns, primary keys, and data types</li>
+            <li><b>Query History:</b> Full execution logging with recall to editor, duration tracking, and status</li>
+            <li><b>DDL Generator:</b> Dialect-aware CREATE TABLE, DROP TABLE, SELECT, and parameterized INSERT templates</li>
+            <li><b>Instant Export:</b> Copy query results as CSV, JSON, Markdown, or SQL DDL + Inserts</li>
+        </ul>
+    ]]></description>
+
+    <category>Database</category>
+
+    <depends>com.intellij.modules.platform</depends>
+    <depends>org.jormungandr.ide</depends>
+    <depends>org.jormungandr.dataframe</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <toolWindow id="Database Studio"
+                    anchor="right"
+                    canCloseContent="true"
+                    icon="/icons/jormungandr_16.png"
+                    factoryClass="org.jormungandr.database.ui.toolwindow.DatabaseToolWindowFactory"/>
+    </extensions>
+</idea-plugin>

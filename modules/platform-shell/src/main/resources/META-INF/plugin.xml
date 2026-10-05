@@ -34,57 +34,9 @@
         <!-- Animated Splash Screen & Branding Lifecycle -->
         <applicationInitializedListener implementation="org.jormungandr.shell.splash.JormungandrAppInitializer"/>
         <postStartupActivity implementation="org.jormungandr.shell.splash.JormungandrStartupActivity"/>
-
-        <!-- Jupyter Notebook Integration Subsystem -->
-        <applicationService serviceImplementation="org.jormungandr.jupyter.kernel.JupyterKernelService"/>
-
-        <fileType name="Jupyter Notebook"
-                  implementationClass="org.jormungandr.jupyter.filetype.JupyterNotebookFileType"
-                  fieldName="INSTANCE"
-                  extensions="ipynb"/>
-
-        <fileEditorProvider implementation="org.jormungandr.jupyter.ui.editor.JupyterNotebookEditorProvider"/>
-
-        <toolWindow id="Jupyter Kernels"
-                    anchor="bottom"
-                    canCloseContent="true"
-                    icon="/icons/jormungandr_16.png"
-                    factoryClass="org.jormungandr.jupyter.ui.toolwindow.JupyterToolWindowFactory"/>
-
-        <!-- Arrow DataFrame Viewer Subsystem -->
-        <applicationService serviceImplementation="org.jormungandr.dataframe.service.DataFrameService"/>
-
-        <fileType name="CSV Dataset"
-                  implementationClass="org.jormungandr.dataframe.filetype.CsvFileType"
-                  fieldName="INSTANCE"
-                  extensions="csv;tsv;tab"/>
-
-        <fileEditorProvider implementation="org.jormungandr.dataframe.ui.editor.DataFrameEditorProvider"/>
-
-        <toolWindow id="DataFrame Viewer"
-                    anchor="bottom"
-                    canCloseContent="true"
-                    icon="/icons/jormungandr_16.png"
-                    factoryClass="org.jormungandr.dataframe.ui.toolwindow.DataFrameToolWindowFactory"/>
-
-        <!-- Database & Query Studio Subsystem -->
-        <toolWindow id="Database Studio"
-                    anchor="right"
-                    canCloseContent="true"
-                    icon="/icons/jormungandr_16.png"
-                    factoryClass="org.jormungandr.database.ui.toolwindow.DatabaseToolWindowFactory"/>
     </extensions>
 
     <actions>
-        <!-- New File Group -->
-        <action id="Jormungandr.NewJupyterNotebook"
-                class="org.jormungandr.jupyter.actions.NewNotebookAction"
-                text="Jupyter Notebook (.ipynb)"
-                description="Create a new interactive Jupyter Notebook"
-                icon="/icons/jormungandr_16.png">
-            <add-to-group group-id="NewGroup" anchor="first"/>
-        </action>
-
         <group id="Jormungandr.PerspectiveGroup" text="Perspective" popup="true" icon="/icons/jormungandr_16.png">
             <add-to-group group-id="ViewMenu" anchor="first"/>
             <action id="Jormungandr.Perspective.Analysis"
@@ -104,8 +56,8 @@
         <!-- View Menu Actions -->
         <action id="Jormungandr.View.Extensions"
                 class="org.jormungandr.shell.ui.extensions.ExtensionsAction"
-                text="Extensions..."
-                description="View active modular extensions, language stacks, and memory quotas"
+                text="Data Science Subsystems &amp; Resource Monitor..."
+                description="Monitor active data science engines, worker thread pools, memory quotas, and cache trimming"
                 icon="/icons/jormungandr_16.png">
             <add-to-group group-id="ViewMenu" anchor="after" relative-to-action="Jormungandr.PerspectiveGroup"/>
         </action>

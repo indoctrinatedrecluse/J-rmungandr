@@ -165,4 +165,39 @@ tasks {
             }
         }
     }
+
+    prepareSandbox {
+        doLast {
+            val pluginsDir = defaultDestinationDirectory.get().asFile
+            val platformLib = File(pluginsDir, "platform-shell/lib")
+            if (platformLib.exists()) {
+                // 1. Move jupyter-integration plugin
+                val jupyterLib = File(pluginsDir, "jupyter-integration/lib").apply { mkdirs() }
+                listOf("jupyter-integration", "jeromq", "jnacl").forEach { prefix ->
+                    platformLib.listFiles()?.filter { it.name.startsWith(prefix) }?.forEach { f ->
+                        f.copyTo(File(jupyterLib, f.name), overwrite = true)
+                        f.delete()
+                    }
+                }
+
+                // 2. Move dataframe-viewer plugin
+                val dfLib = File(pluginsDir, "dataframe-viewer/lib").apply { mkdirs() }
+                listOf("dataframe-viewer").forEach { prefix ->
+                    platformLib.listFiles()?.filter { it.name.startsWith(prefix) }?.forEach { f ->
+                        f.copyTo(File(dfLib, f.name), overwrite = true)
+                        f.delete()
+                    }
+                }
+
+                // 3. Move database-suite plugin
+                val dbLib = File(pluginsDir, "database-suite/lib").apply { mkdirs() }
+                listOf("database-suite", "sqlite-jdbc").forEach { prefix ->
+                    platformLib.listFiles()?.filter { it.name.startsWith(prefix) }?.forEach { f ->
+                        f.copyTo(File(dbLib, f.name), overwrite = true)
+                        f.delete()
+                    }
+                }
+            }
+        }
+    }
 }

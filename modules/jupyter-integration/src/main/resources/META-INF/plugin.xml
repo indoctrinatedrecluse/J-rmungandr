@@ -1,0 +1,49 @@
+<idea-plugin>
+    <id>org.jormungandr.jupyter</id>
+    <name>Jupyter Notebooks</name>
+    <version>0.1.0</version>
+    <vendor email="abmitra1999@gmail.com" url="https://github.com/indoctrinatedrecluse/Jormungandr">indoctrinatedrecluse</vendor>
+
+    <description><![CDATA[
+        <h1>🪐 Jupyter Notebooks &amp; Interactive Kernel Subsystem</h1>
+        <p>First-class interactive Jupyter notebook (.ipynb) editing, live cell execution, ZeroMQ kernel protocol client, and rich inline display outputs for Jörmungandr.</p>
+        <ul>
+            <li>Executable Python code and Markdown cells</li>
+            <li>ZeroMQ v5.x asynchronous kernel communication</li>
+            <li>Kernel lifecycle management (start, interrupt, restart, shutdown)</li>
+            <li>Rich media outputs including ANSI text, HTML, and images</li>
+        </ul>
+    ]]></description>
+
+    <category>Data Science</category>
+
+    <depends>com.intellij.modules.platform</depends>
+    <depends>org.jormungandr.ide</depends>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <applicationService serviceImplementation="org.jormungandr.jupyter.kernel.JupyterKernelService"/>
+
+        <fileType name="Jupyter Notebook"
+                  implementationClass="org.jormungandr.jupyter.filetype.JupyterNotebookFileType"
+                  fieldName="INSTANCE"
+                  extensions="ipynb"/>
+
+        <fileEditorProvider implementation="org.jormungandr.jupyter.ui.editor.JupyterNotebookEditorProvider"/>
+
+        <toolWindow id="Jupyter Kernels"
+                    anchor="bottom"
+                    canCloseContent="true"
+                    icon="/icons/jormungandr_16.png"
+                    factoryClass="org.jormungandr.jupyter.ui.toolwindow.JupyterToolWindowFactory"/>
+    </extensions>
+
+    <actions>
+        <action id="Jormungandr.NewJupyterNotebook"
+                class="org.jormungandr.jupyter.actions.NewNotebookAction"
+                text="Jupyter Notebook (.ipynb)"
+                description="Create a new interactive Jupyter Notebook"
+                icon="/icons/jormungandr_16.png">
+            <add-to-group group-id="NewGroup" anchor="first"/>
+        </action>
+    </actions>
+</idea-plugin>
