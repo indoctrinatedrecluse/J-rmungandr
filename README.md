@@ -112,11 +112,13 @@ Modern data practitioners are caught between two disparate worlds:
 - **Interactive Visualizations & Machine Learning Studio**:
   - Interactive Web & 3D Visualizations: Plotly, Altair, Vega-Lite, Folium, ECharts via embedded Chromium.
   - In-IDE Machine Learning Experiment Tracker & Metric Studio (MLflow-style leaderboards and step-series convergence curves).
-  - In-IDE Data Science Copilot powered by Google Gemini AI & offline heuristic intelligence.
+  - In-IDE AI/ML Training Studio (Interactive Ridge/OLS regression, Logistic classification with ROC/AUC and confusion matrices, K-Means clustering, PCA scree plots, preliminary feature categorization/health profiling without training, and Scikit-Learn/PyTorch/XGBoost templates).
+  - In-IDE Data Science Copilot powered by Google Gemini AI & offline heuristic intelligence with resilient lifecycle initialization.
   - Low-code Data Prep Studio transformation pipeline wizard with Pandas, Polars, and SQL generation.
-- **Modular Extension Manager**:
+- **Modular Extension Manager & Bespoke Visual Identity**:
   - Strict lifecycle states (`UNLOADED` &rarr; `ACTIVE` &rarr; `DISPOSING` &rarr; `TERMINATED`).
   - Memory bounds and IntelliJ `Disposable` hierarchy integration.
+  - Bespoke extension iconography across tool window stripes, left UI list panes, and native Plugin Manager (`pluginIcon.svg` & Retina rasters).
 
 ### 3.3 🔮 Follow-Up Scope (Future Horizons)
 - **R Language Integration (TBD)**: R kernel integration, R REPL, package viewer, and graphics device window.
@@ -282,7 +284,7 @@ flowchart LR
     class P3,M3 phase;
 
     subgraph P4["🧪 Phase 4: AI & Visual Studio"]
-        M4["Interactive Web & 3D Charts (Plotly/Vega)<br/>Data Prep Pipeline Wizard<br/>Gemini Data Science Copilot<br/>MLflow Experiment & Metric Studio"]
+        M4["Interactive Web & 3D Charts (Plotly/Vega)<br/>Data Prep Pipeline Wizard<br/>Gemini Data Science Copilot<br/>AI/ML Training Studio & Experiments"]
     end
     class P4,M4 phase;
 
@@ -299,7 +301,7 @@ flowchart LR
 | **Phase 1** | 🏛️ Platform Core | Shell, Branding, Extension Manager | IntelliJ CE base, module build system, `ExtensionManager` state machine, `Disposable` tree. |
 | **Phase 2** | 🐍 Python & Notebooks | Runtime & Interactive REPL | `python-community` integration, environment switcher, ZeroMQ v5 client, `.ipynb` editor. |
 | **Phase 3** | 📊 Data & Storage | Databases & Data Lakes | Multi-dialect SQL & NoSQL consoles, DuckDB OLAP, Cassandra CQL, Kafka streams, Visual SQL Builder, S3/GCS Data Lake. |
-| **Phase 4** | 🧪 AI & Visual Studio | Copilot, Web Viz & ML | Plotly/Vega 3D & Web Studio, Data Prep Studio pipeline wizard, Gemini AI Copilot, ML Experiment Studio. |
+| **Phase 4** | 🧪 AI & Visual Studio | Copilot, Web Viz & ML | Plotly/Vega 3D & Web Studio, Data Prep Studio pipeline wizard, Gemini AI Copilot, AI/ML Training Studio & ML Experiment Studio. |
 | **Phase 5** | 🔮 Horizons *(TBD)* | R Language & Remote Compute | R kernel and REPL bridge, ggplot2 device canvas, remote SSH/Docker compute runners. |
 
 ### 📝 Backlog & Priority TODO Items
@@ -343,6 +345,7 @@ The flagship DataFrame Studio provides exploratory data analysis, visual vector 
     - Quick-prompt chips: **💬 NL ➔ SQL**, **🐍 NL ➔ Pandas**, **📊 Suggest Visualizations**, and **🧹 Cleaning Strategy**.
     - Markdown extraction with instant syntax-highlighted code cards.
     - Direct **"▶ Run SQL"** button to execute generated queries immediately against the dataset in-memory.
+    - **Resilient Lifecycle Architecture**: Hardened component initialization with deferred status updates and defensive offline fallback heuristics, guaranteeing zero-crash startup even when offline or unconfigured.
   - 🤖 **AI/ML Training Studio Tab**: Comprehensive in-IDE machine learning training, visual evaluation, and data profiling studio:
     - **Interactive Multi-Task Training**:
       - **Regression**: Ridge Regularization (L2), Ordinary Least Squares (OLS), and Polynomial Regression (Degree 2) with closed-form matrix math $(X^T X + \lambda I)^{-1} X^T y$.
@@ -489,10 +492,22 @@ Real-time resource manager and memory guardian:
 - **Opening the Monitor**:
   - Main menu: `View` &rarr; `Data Science Subsystems & Resource Monitor...`.
   - Or click the memory indicator gauge on the right side of the bottom status bar.
-- **Capabilities**:
-  - Real-time heap and off-heap memory consumption meters for each loaded subsystem (Jupyter, DataFrame Viewer, Database Suite, Apache Arrow buffers).
-  - Background thread pool status and worker task monitoring.
-  - One-click memory trimming (`Trim Caches`), buffer flushing, and garbage collection.
+- **Left UI Navigation Pane**:
+  - Master list of all installed & active subsystems (`org.jormungandr.jupyter`, `org.jormungandr.dataframe`, `org.jormungandr.database`, `org.jormungandr.shell`).
+  - **Bespoke 24x24 Subsystem Badges**: Distinct visual identities rendered dynamically via `JormungandrIcons.getExtensionIcon(id, 24)`:
+    - 🪐 **Jupyter**: Planetary rings emblem.
+    - 📊 **DataFrame**: Analytical grid matrix & bar chart badge.
+    - 🗄️ **Database**: Multi-tier storage disk with golden SQL flash.
+    - 🐍 **Platform Shell**: World Serpent Ouroboros emblem.
+  - Real-time status indicators (`🟢 ACTIVE`, `🟡 PAUSED`, `⚪ UNLOADED`).
+- **Right Detail & Health Inspector**:
+  - Subsystem identity, version, vendor attribution, and full descriptive metadata.
+  - **Memory Meters**: Granular breakdown of JVM Heap usage and native Off-Heap buffer allocations (e.g. Apache Arrow in-memory tables, DuckDB caches).
+  - **Thread Pool & Background Workers**: Active execution threads, queue depth, and thread state tracking.
+  - **Resource Actions**:
+    - **🧹 Trim Caches**: Immediate buffer compaction and soft-cache eviction without restarting the subsystem.
+    - **⏸️ Pause / Resume**: Freeze background listeners and release non-essential handles on demand.
+  - **Global Memory Governor**: JVM quota visualization, total off-heap tally, and one-click **"🧹 Run Garbage Collection"**.
 
 ---
 
@@ -524,15 +539,24 @@ Switch workspace tool window layouts instantly depending on the current task:
 ---
 
 ### 🧩 7. Built-in Plugin Manager Integration
-All core Jörmungandr modules are first-class plugins registered with custom serpent iconography:
+All core Jörmungandr modules are first-class plugins registered with dedicated visual branding and bespoke iconography:
 
 - **Opening the Plugin Manager**:
   - Main menu: `File` &rarr; `Settings` &rarr; `Plugins` (or `Preferences` &rarr; `Plugins` on macOS).
-  - Under the **Installed** tab, find:
-    - 🐍 **Jörmungandr Platform Shell** (`org.jormungandr.shell`)
-    - 🪐 **Jupyter Notebook Integration** (`org.jormungandr.jupyter`)
-    - 📊 **DataFrame Viewer & Studio** (`org.jormungandr.dataframe`)
-    - 🗄️ **Database Analytics Suite** (`org.jormungandr.database`)
+  - Switch to the **Installed** tab to inspect, configure, enable, or disable any subsystem independently.
+- **Bespoke Visual Identities & Extension Icons**:
+  - Rather than reusing a single generic icon across all plugins, each extension carries its own bespoke iconography across tool window stripes, the left UI pane in the Subsystems Monitor, and the native Plugin Manager:
+    - 🪐 **Jupyter Notebook Integration** (`org.jormungandr.jupyter`): Planetary core with tilted Saturnian ring & orbital moons (`jupyter_16.png`, `jupyter_24.png`, `pluginIcon.svg`, `pluginIcon@2x.png`).
+    - 📊 **DataFrame Viewer & Studio** (`org.jormungandr.dataframe`): Tabular matrix grid with analytical histogram bars and upward trendline (`dataframe_16.png`, `dataframe_24.png`, `pluginIcon.svg`, `pluginIcon@2x.png`).
+    - 🗄️ **Database Analytics Suite** (`org.jormungandr.database`): Multi-tier cylindrical database disks with golden SQL query bolt (`database_16.png`, `database_24.png`, `pluginIcon.svg`, `pluginIcon@2x.png`).
+    - 🐍 **Jörmungandr Platform Shell** (`org.jormungandr.shell`): The World Serpent Ouroboros emblem (`jormungandr_16.png`, `jormungandr_24.png`, `pluginIcon.svg`, `pluginIcon@2x.png`).
+- **Native Plugin Manager Spec Compliance**:
+  - Each module bundles native plugin icons conforming to JetBrains Marketplace & Plugin Manager standards:
+    - Vector SVG: `pluginIcon.svg` (40x40 viewport).
+    - HiDPI / Retina Rasters: `pluginIcon.png` (40x40), `pluginIcon@2x.png` (80x80), `pluginIcon_dark.png` (40x40), and `pluginIcon_dark@2x.png` (80x80).
+  - Automated sandbox packaging (`prepareSandbox` Gradle task) places the icon assets directly into the sandbox plugin root for seamless presentation in the IntelliJ settings dialog.
+- **Tool Window Stripe & Header Integration**:
+  - Right and bottom tool window stripes feature bespoke 16x16 vector/raster icons, providing instant visual recognition for Notebooks, DataFrames, Databases, and Scientific Plots.
 
 ---
 
@@ -685,6 +709,7 @@ To safely reset or inspect Jörmungandr registry entries without affecting other
 
 Jörmungandr features a comprehensive runtime white-labeling and branding overhaul engine ([`JormungandrBranding`](file:///D:/Projects/J%C3%B6rmungandr/modules/platform-shell/src/main/kotlin/org/jormungandr/shell/branding/JormungandrBranding.kt)):
 - **Universal Window & Title Bar Branding**: Automatically applies the Jörmungandr World Serpent emblem (`jormungandr.ico`, multi-resolution rasters 16px–512px, and vector SVGs) beside the application name on native OS title bars, custom frame headers (`CustomHeader`), and taskbars.
+- **Bespoke Subsystem & Extension Branding**: Employs distinct visual emblems for each extension (Jupyter planetary rings, DataFrame analytical grid, Database multi-tier disks with SQL bolt, Platform Shell Ouroboros) across tool window stripes, left UI list panels in the Subsystems Monitor, and the native Plugin Manager.
 - **Identity & Attribution Mutation**: Reflectively mutates `ApplicationNamesInfo` and `ApplicationInfoImpl` to report Jörmungandr product identity, Indoctrinated Recluse vendor attribution, version metadata, and custom issue/support URLs.
 - **Dynamic UI Text & Menu Rebranding**: Recursively intercepts and transforms upstream IntelliJ/JetBrains strings across all frames, dialogs, menus, status bars, and `ActionManager` action presentations into Jörmungandr equivalents.
 - **Resilient GDPR & Telemetry Guard**: Shields `ConsentOptions` using a dynamic `IOBackend` proxy and bundled consent definitions, guaranteeing seamless startup and zero telemetry leaks.
