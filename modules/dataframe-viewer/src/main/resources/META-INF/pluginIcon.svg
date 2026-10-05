@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="40" height="40">
+  <defs>
+    <linearGradient id="dfBarGrad" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" stop-color="#268BD2"/>
+      <stop offset="100%" stop-color="#2AA198"/>
+    </linearGradient>
+    <linearGradient id="dfLineGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#B58900"/>
+      <stop offset="100%" stop-color="#859900"/>
+    </linearGradient>
+  </defs>
+  <!-- Background Card (Solarized Light Base3) -->
+  <rect width="40" height="40" rx="8" fill="#FDF6E3"/>
+  <!-- Table Matrix Grid Frame -->
+  <rect x="7" y="8" width="26" height="24" rx="2" fill="none" stroke="#93A1A1" stroke-width="1.2"/>
+  <!-- Header Divider Line -->
+  <line x1="7" y1="14" x2="33" y2="14" stroke="#93A1A1" stroke-width="1.2"/>
+  <!-- Column Grid Lines -->
+  <line x1="15" y1="8" x2="15" y2="32" stroke="#EEE8D5" stroke-width="1"/>
+  <line x1="23" y1="8" x2="23" y2="32" stroke="#EEE8D5" stroke-width="1"/>
+  <!-- Analytical Histogram Bars -->
+  <rect x="10" y="24" width="3.5" height="6" rx="0.8" fill="url(#dfBarGrad)" opacity="0.85"/>
+  <rect x="17.5" y="19" width="3.5" height="11" rx="0.8" fill="url(#dfBarGrad)" opacity="0.9"/>
+  <rect x="25" y="15" width="3.5" height="15" rx="0.8" fill="url(#dfBarGrad)"/>
+  <!-- Dynamic Trendline Sparkline Overlay -->
+  <path d="M 9 25 L 18 18 L 26 12 L 32 9" fill="none" stroke="url(#dfLineGrad)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <!-- Peak Data Point -->
+  <circle cx="32" cy="9" r="1.6" fill="#B58900"/>
+</svg>

@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" width="40" height="40">
+  <defs>
+    <linearGradient id="dbDiskGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#268BD2"/>
+      <stop offset="50%" stop-color="#2AA198"/>
+      <stop offset="100%" stop-color="#073642"/>
+    </linearGradient>
+    <linearGradient id="dbQueryGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#B58900"/>
+      <stop offset="100%" stop-color="#CB4B16"/>
+    </linearGradient>
+  </defs>
+  <!-- Background Card (Solarized Light Base3) -->
+  <rect width="40" height="40" rx="8" fill="#FDF6E3"/>
+  <!-- Bottom Cylinder Layer -->
+  <path d="M 10 26 C 10 29, 30 29, 30 26 L 30 30 C 30 33, 10 33, 10 30 Z" fill="url(#dbDiskGrad)" opacity="0.8"/>
+  <ellipse cx="20" cy="26" rx="10" ry="3.5" fill="#2AA198"/>
+  <!-- Middle Cylinder Layer -->
+  <path d="M 10 19 C 10 22, 30 22, 30 19 L 30 23 C 30 26, 10 26, 10 23 Z" fill="url(#dbDiskGrad)" opacity="0.9"/>
+  <ellipse cx="20" cy="19" rx="10" ry="3.5" fill="#268BD2"/>
+  <!-- Top Cylinder Layer -->
+  <path d="M 10 12 C 10 15, 30 15, 30 12 L 30 16 C 30 19, 10 19, 10 16 Z" fill="url(#dbDiskGrad)"/>
+  <ellipse cx="20" cy="12" rx="10" ry="3.5" fill="#93A1A1"/>
+  <!-- Relational SQL Query Lightning Flash Indicator -->
+  <polygon points="27,6 20,16 24,16 19,25 29,13 24,13" fill="url(#dbQueryGrad)"/>
+</svg>
