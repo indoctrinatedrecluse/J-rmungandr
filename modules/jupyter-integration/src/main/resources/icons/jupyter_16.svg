@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16">
+  <!-- Back Orbital Ring Arc -->
+  <path d="M 2 7.5 C 3 4, 13 4, 14 7.5" fill="none" stroke="#CB4B16" stroke-width="1.2" stroke-linecap="round"/>
+  <!-- Planet Core -->
+  <circle cx="8" cy="8" r="3.2" fill="#D33682" stroke="#6C71C4" stroke-width="0.6"/>
+  <circle cx="7" cy="7" r="1" fill="#FFFFFF" opacity="0.6"/>
+  <!-- Front Orbital Ring Arc -->
+  <path d="M 14 8.5 C 13 12, 3 12, 2 8.5" fill="none" stroke="#CB4B16" stroke-width="1.2" stroke-linecap="round"/>
+  <!-- Moons -->
+  <circle cx="4" cy="5.5" r="0.8" fill="#CB4B16"/>
+  <circle cx="12" cy="10.5" r="0.8" fill="#2AA198"/>
+  <circle cx="8" cy="12.5" r="0.6" fill="#B58900"/>
+</svg>

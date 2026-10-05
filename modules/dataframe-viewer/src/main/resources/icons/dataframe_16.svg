@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16">
+  <!-- Grid Matrix Frame -->
+  <rect x="2" y="2" width="12" height="12" rx="1.5" fill="none" stroke="#657B83" stroke-width="1"/>
+  <!-- Header Line -->
+  <line x1="2" y1="5.5" x2="14" y2="5.5" stroke="#657B83" stroke-width="1"/>
+  <!-- Columns -->
+  <line x1="6" y1="2" x2="6" y2="14" stroke="#93A1A1" stroke-width="0.8"/>
+  <line x1="10" y1="2" x2="10" y2="14" stroke="#93A1A1" stroke-width="0.8"/>
+  <!-- Histogram Bars -->
+  <rect x="3.2" y="10" width="1.6" height="3" rx="0.4" fill="#2AA198"/>
+  <rect x="7.2" y="8" width="1.6" height="5" rx="0.4" fill="#268BD2"/>
+  <rect x="11.2" y="6" width="1.6" height="7" rx="0.4" fill="#859900"/>
+</svg>

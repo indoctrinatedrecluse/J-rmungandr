@@ -8,8 +8,14 @@ import javax.swing.Icon
  */
 object JupyterIcons {
     @JvmField
-    val NOTEBOOK_16: Icon = IconLoader.getIcon("/icons/jormungandr_16.png", JupyterIcons::class.java)
+    val JUPYTER_16: Icon = IconLoader.getIcon("/icons/jupyter_16.png", JupyterIcons::class.java)
 
     @JvmField
-    val RUN_16: Icon = IconLoader.getIcon("/icons/jormungandr_16.png", JupyterIcons::class.java)
+    val PLOTS_16: Icon = IconLoader.getIcon("/icons/plots_16.png", JupyterIcons::class.java)
+
+    @JvmField
+    val NOTEBOOK_16: Icon = IconLoader.getIcon("/icons/jupyter_16.png", JupyterIcons::class.java)
+
+    @JvmField
+    val RUN_16: Icon = IconLoader.getIcon("/icons/jupyter_16.png", JupyterIcons::class.java)
 }

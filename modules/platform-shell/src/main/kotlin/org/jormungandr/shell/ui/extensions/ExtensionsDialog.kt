@@ -180,20 +180,30 @@ class ExtensionsDialog(private val currentProject: Project? = null) : DialogWrap
             isOpaque = false
         }
 
-        // Title & Version
-        val nameLabel = JBLabel(m.displayName).apply {
-            font = font.deriveFont(Font.BOLD, 17f)
-            foreground = Color(7, 54, 66)
+        // Title & Version with bespoke extension icon
+        val titleRow = JPanel(BorderLayout(12, 0)).apply {
+            isOpaque = false
             alignmentX = Component.LEFT_ALIGNMENT
         }
-        val idLabel = JBLabel("${ext.id.value} · v${m.version}").apply {
-            font = font.deriveFont(Font.PLAIN, 11f)
-            foreground = Color(101, 123, 131)
-            alignmentX = Component.LEFT_ALIGNMENT
+        val detailIcon = JLabel(JormungandrIcons.getExtensionIcon(ext.id.value, 24))
+        val titleTextCol = JPanel().apply {
+            layout = BoxLayout(this, BoxLayout.Y_AXIS)
+            isOpaque = false
+            val nameLabel = JBLabel(m.displayName).apply {
+                font = font.deriveFont(Font.BOLD, 17f)
+                foreground = Color(7, 54, 66)
+            }
+            val idLabel = JBLabel("${ext.id.value} · v${m.version}").apply {
+                font = font.deriveFont(Font.PLAIN, 11f)
+                foreground = Color(101, 123, 131)
+            }
+            add(nameLabel)
+            add(Box.createVerticalStrut(2))
+            add(idLabel)
         }
-        content.add(nameLabel)
-        content.add(Box.createVerticalStrut(2))
-        content.add(idLabel)
+        titleRow.add(detailIcon, BorderLayout.WEST)
+        titleRow.add(titleTextCol, BorderLayout.CENTER)
+        content.add(titleRow)
         content.add(Box.createVerticalStrut(10))
 
         // State Badge
@@ -351,9 +361,10 @@ class ExtensionsDialog(private val currentProject: Project? = null) : DialogWrap
 
     /** Custom list cell renderer for extension overview */
     private inner class ExtensionListCellRenderer : ListCellRenderer<JormungandrExtension> {
-        private val panel = JPanel(BorderLayout(8, 0)).apply {
+        private val panel = JPanel(BorderLayout(10, 0)).apply {
             border = EmptyBorder(6, 10, 6, 10)
         }
+        private val iconLabel = JLabel()
         private val titleLabel = JLabel().apply { font = font.deriveFont(Font.BOLD, 12f) }
         private val idLabel = JLabel().apply {
             font = font.deriveFont(Font.PLAIN, 10f)
@@ -371,6 +382,7 @@ class ExtensionsDialog(private val currentProject: Project? = null) : DialogWrap
                 add(Box.createVerticalStrut(2))
                 add(idLabel)
             }
+            panel.add(iconLabel, BorderLayout.WEST)
             panel.add(center, BorderLayout.CENTER)
             panel.add(stateLabel, BorderLayout.EAST)
         }
@@ -383,6 +395,7 @@ class ExtensionsDialog(private val currentProject: Project? = null) : DialogWrap
             cellHasFocus: Boolean
         ): Component {
             if (value != null) {
+                iconLabel.icon = JormungandrIcons.getExtensionIcon(value.id.value, 24)
                 titleLabel.text = value.metadata.displayName
                 idLabel.text = value.id.value
                 val isActive = value.state == ExtensionState.ACTIVE

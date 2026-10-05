@@ -39,13 +39,13 @@
         <toolWindow id="Jupyter Kernels"
                     anchor="bottom"
                     canCloseContent="true"
-                    icon="/icons/jormungandr_16.png"
+                    icon="/icons/jupyter_16.png"
                     factoryClass="org.jormungandr.jupyter.ui.toolwindow.JupyterToolWindowFactory"/>
 
         <toolWindow id="Scientific Plots"
                     anchor="right"
                     canCloseContent="true"
-                    icon="/icons/jormungandr_16.png"
+                    icon="/icons/plots_16.png"
                     factoryClass="org.jormungandr.jupyter.ui.plot.ScientificPlotsToolWindowFactory"/>
     </extensions>
 
@@ -54,7 +54,7 @@
                 class="org.jormungandr.jupyter.actions.NewNotebookAction"
                 text="Jupyter Notebook (.ipynb)"
                 description="Create a new interactive Jupyter Notebook"
-                icon="/icons/jormungandr_16.png">
+                icon="/icons/jupyter_16.png">
             <add-to-group group-id="NewGroup" anchor="first"/>
         </action>
     </actions>

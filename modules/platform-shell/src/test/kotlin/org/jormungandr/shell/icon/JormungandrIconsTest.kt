@@ -50,5 +50,58 @@ class JormungandrIconsTest {
 
         val svgDarkStream = JormungandrIcons::class.java.getResourceAsStream("/META-INF/pluginIcon_dark.svg")
         assertNotNull(svgDarkStream, "pluginIcon_dark.svg must exist for dark mode UI")
+
+        val pngStream = JormungandrIcons::class.java.getResourceAsStream("/META-INF/pluginIcon.png")
+        assertNotNull(pngStream, "pluginIcon.png must exist for fallback raster display")
+
+        val png2xStream = JormungandrIcons::class.java.getResourceAsStream("/META-INF/pluginIcon@2x.png")
+        assertNotNull(png2xStream, "pluginIcon@2x.png must exist for HiDPI raster display")
+    }
+
+    @Test
+    fun `test bespoke extension icons exist and are decodable`() {
+        val extensionIconPaths = listOf(
+            "/icons/jupyter_16.png" to 16,
+            "/icons/jupyter_24.png" to 24,
+            "/icons/jupyter_32.png" to 32,
+            "/icons/plots_16.png" to 16,
+            "/icons/dataframe_16.png" to 16,
+            "/icons/dataframe_24.png" to 24,
+            "/icons/dataframe_32.png" to 32,
+            "/icons/database_16.png" to 16,
+            "/icons/database_24.png" to 24,
+            "/icons/database_32.png" to 32
+        )
+
+        for ((path, expectedSize) in extensionIconPaths) {
+            val stream = JormungandrIcons::class.java.getResourceAsStream(path)
+            assertNotNull(stream, "Resource $path should exist on classpath")
+
+            val img: BufferedImage? = ImageIO.read(stream)
+            assertNotNull(img, "Image at $path should be decodable")
+            assertEquals(expectedSize, img!!.width, "Width for $path should match $expectedSize")
+            assertEquals(expectedSize, img.height, "Height for $path should match $expectedSize")
+        }
+    }
+
+    @Test
+    fun `test getExtensionIcon returns non-null distinct icons`() {
+        val jupyter16 = JormungandrIcons.getExtensionIcon("org.jormungandr.jupyter", 16)
+        val dataframe16 = JormungandrIcons.getExtensionIcon("org.jormungandr.dataframe", 16)
+        val database16 = JormungandrIcons.getExtensionIcon("org.jormungandr.database", 16)
+        val default16 = JormungandrIcons.getExtensionIcon("org.jormungandr.other", 16)
+
+        assertNotNull(jupyter16, "Jupyter icon must not be null")
+        assertNotNull(dataframe16, "DataFrame icon must not be null")
+        assertNotNull(database16, "Database icon must not be null")
+        assertNotNull(default16, "Default icon must not be null")
+
+        val jupyter24 = JormungandrIcons.getExtensionIcon("org.jormungandr.jupyter", 24)
+        val dataframe24 = JormungandrIcons.getExtensionIcon("org.jormungandr.dataframe", 24)
+        val database24 = JormungandrIcons.getExtensionIcon("org.jormungandr.database", 24)
+
+        assertNotNull(jupyter24, "Jupyter 24 icon must not be null")
+        assertNotNull(dataframe24, "DataFrame 24 icon must not be null")
+        assertNotNull(database24, "Database 24 icon must not be null")
     }
 }

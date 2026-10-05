@@ -172,30 +172,55 @@ tasks {
             val platformLib = File(pluginsDir, "platform-shell/lib")
             if (platformLib.exists()) {
                 // 1. Move jupyter-integration plugin
-                val jupyterLib = File(pluginsDir, "jupyter-integration/lib").apply { mkdirs() }
+                val jupyterDir = File(pluginsDir, "jupyter-integration")
+                val jupyterLib = File(jupyterDir, "lib").apply { mkdirs() }
                 listOf("jupyter-integration", "jeromq", "jnacl").forEach { prefix ->
                     platformLib.listFiles()?.filter { it.name.startsWith(prefix) }?.forEach { f ->
                         f.copyTo(File(jupyterLib, f.name), overwrite = true)
                         f.delete()
                     }
                 }
+                val jupyterMeta = File(jupyterDir, "META-INF").apply { mkdirs() }
+                val jupyterSrcMeta = File(project(":modules:jupyter-integration").projectDir, "src/main/resources/META-INF")
+                jupyterSrcMeta.listFiles()?.filter { it.name.startsWith("pluginIcon") }?.forEach { f ->
+                    f.copyTo(File(jupyterMeta, f.name), overwrite = true)
+                }
 
                 // 2. Move dataframe-viewer plugin
-                val dfLib = File(pluginsDir, "dataframe-viewer/lib").apply { mkdirs() }
+                val dfDir = File(pluginsDir, "dataframe-viewer")
+                val dfLib = File(dfDir, "lib").apply { mkdirs() }
                 listOf("dataframe-viewer").forEach { prefix ->
                     platformLib.listFiles()?.filter { it.name.startsWith(prefix) }?.forEach { f ->
                         f.copyTo(File(dfLib, f.name), overwrite = true)
                         f.delete()
                     }
                 }
+                val dfMeta = File(dfDir, "META-INF").apply { mkdirs() }
+                val dfSrcMeta = File(project(":modules:dataframe-viewer").projectDir, "src/main/resources/META-INF")
+                dfSrcMeta.listFiles()?.filter { it.name.startsWith("pluginIcon") }?.forEach { f ->
+                    f.copyTo(File(dfMeta, f.name), overwrite = true)
+                }
 
                 // 3. Move database-suite plugin
-                val dbLib = File(pluginsDir, "database-suite/lib").apply { mkdirs() }
+                val dbDir = File(pluginsDir, "database-suite")
+                val dbLib = File(dbDir, "lib").apply { mkdirs() }
                 listOf("database-suite", "sqlite-jdbc").forEach { prefix ->
                     platformLib.listFiles()?.filter { it.name.startsWith(prefix) }?.forEach { f ->
                         f.copyTo(File(dbLib, f.name), overwrite = true)
                         f.delete()
                     }
+                }
+                val dbMeta = File(dbDir, "META-INF").apply { mkdirs() }
+                val dbSrcMeta = File(project(":modules:database-suite").projectDir, "src/main/resources/META-INF")
+                dbSrcMeta.listFiles()?.filter { it.name.startsWith("pluginIcon") }?.forEach { f ->
+                    f.copyTo(File(dbMeta, f.name), overwrite = true)
+                }
+
+                // 4. Copy platform-shell plugin icons
+                val shellMeta = File(File(pluginsDir, "platform-shell"), "META-INF").apply { mkdirs() }
+                val shellSrcMeta = File(projectDir, "src/main/resources/META-INF")
+                shellSrcMeta.listFiles()?.filter { it.name.startsWith("pluginIcon") }?.forEach { f ->
+                    f.copyTo(File(shellMeta, f.name), overwrite = true)
                 }
             }
         }

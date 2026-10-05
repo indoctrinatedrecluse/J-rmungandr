@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" width="16" height="16">
+  <!-- Bottom Disk -->
+  <path d="M 3 10 C 3 11.5, 11 11.5, 11 10 L 11 12 C 11 13.5, 3 13.5, 3 12 Z" fill="#073642" stroke="#268BD2" stroke-width="0.8"/>
+  <ellipse cx="7" cy="10" rx="4" ry="1.4" fill="#268BD2"/>
+  <!-- Top Disk -->
+  <path d="M 3 5 C 3 6.5, 11 6.5, 11 5 L 11 7 C 11 8.5, 3 8.5, 3 7 Z" fill="#268BD2" stroke="#2AA198" stroke-width="0.8"/>
+  <ellipse cx="7" cy="5" rx="4" ry="1.4" fill="#2AA198"/>
+  <!-- Golden Lightning Query Bolt -->
+  <polygon points="13,2 9.5,7 11.5,7 9,12 14,6 12,6" fill="#B58900" stroke="#CB4B16" stroke-width="0.4"/>
+</svg>

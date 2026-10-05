@@ -41,6 +41,41 @@ object JormungandrIcons {
     @JvmField
     val LOGO_128: Icon = IconLoader.getIcon("$ICONS_PATH/jormungandr_128.png", JormungandrIcons::class.java)
 
+    /** Extension & Subsystem icons */
+    @JvmField
+    val JUPYTER_16: Icon = IconLoader.getIcon("$ICONS_PATH/jupyter_16.png", JormungandrIcons::class.java)
+
+    @JvmField
+    val JUPYTER_24: Icon = IconLoader.getIcon("$ICONS_PATH/jupyter_24.png", JormungandrIcons::class.java)
+
+    @JvmField
+    val PLOTS_16: Icon = IconLoader.getIcon("$ICONS_PATH/plots_16.png", JormungandrIcons::class.java)
+
+    @JvmField
+    val DATAFRAME_16: Icon = IconLoader.getIcon("$ICONS_PATH/dataframe_16.png", JormungandrIcons::class.java)
+
+    @JvmField
+    val DATAFRAME_24: Icon = IconLoader.getIcon("$ICONS_PATH/dataframe_24.png", JormungandrIcons::class.java)
+
+    @JvmField
+    val DATABASE_16: Icon = IconLoader.getIcon("$ICONS_PATH/database_16.png", JormungandrIcons::class.java)
+
+    @JvmField
+    val DATABASE_24: Icon = IconLoader.getIcon("$ICONS_PATH/database_24.png", JormungandrIcons::class.java)
+
+    /**
+     * Resolves the distinct icon for an extension ID (e.g. org.jormungandr.jupyter)
+     * at standard 16x16 or prominent 24x24 resolution.
+     */
+    fun getExtensionIcon(extensionId: String, size: Int = 16): Icon {
+        return when {
+            extensionId.contains("jupyter") -> if (size >= 24) JUPYTER_24 else JUPYTER_16
+            extensionId.contains("dataframe") -> if (size >= 24) DATAFRAME_24 else DATAFRAME_16
+            extensionId.contains("database") -> if (size >= 24) DATABASE_24 else DATABASE_16
+            else -> if (size >= 24) LOGO_24 else APP_ICON
+        }
+    }
+
     /** Available pixel dimensions bundled in platform-shell resources */
     val AVAILABLE_RESOLUTIONS = listOf(16, 24, 32, 48, 64, 128, 256, 512)
 

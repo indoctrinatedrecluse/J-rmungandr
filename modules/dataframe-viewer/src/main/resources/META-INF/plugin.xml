@@ -46,7 +46,7 @@
         <toolWindow id="DataFrame Viewer"
                     anchor="bottom"
                     canCloseContent="true"
-                    icon="/icons/jormungandr_16.png"
+                    icon="/icons/dataframe_16.png"
                     factoryClass="org.jormungandr.dataframe.ui.toolwindow.DataFrameToolWindowFactory"/>
     </extensions>
 </idea-plugin>

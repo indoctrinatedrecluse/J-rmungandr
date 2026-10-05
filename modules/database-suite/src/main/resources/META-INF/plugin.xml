@@ -30,7 +30,7 @@
         <toolWindow id="Database Studio"
                     anchor="right"
                     canCloseContent="true"
-                    icon="/icons/jormungandr_16.png"
+                    icon="/icons/database_16.png"
                     factoryClass="org.jormungandr.database.ui.toolwindow.DatabaseToolWindowFactory"/>
     </extensions>
 </idea-plugin>
