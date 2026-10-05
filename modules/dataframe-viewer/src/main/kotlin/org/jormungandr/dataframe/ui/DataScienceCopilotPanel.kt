@@ -58,7 +58,6 @@ class DataScienceCopilotPanel(
     }
     private val apiKeyStatusLabel = JBLabel("").apply {
         font = font.deriveFont(Font.PLAIN, 11f)
-        updateApiKeyStatus()
     }
 
     // Chat Message Container
@@ -91,6 +90,8 @@ class DataScienceCopilotPanel(
     }
 
     init {
+        updateApiKeyStatus()
+
         val topPanel = JPanel(BorderLayout()).apply {
             border = EmptyBorder(6, 8, 6, 8)
         }
