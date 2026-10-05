@@ -125,5 +125,56 @@ class VariableInspectorService(private val project: Project) {
         return if (res.isNotEmpty()) res else null
     }
 
+    suspend fun plotVariable(session: KernelSession, varName: String): java.awt.image.BufferedImage? {
+        val code = """
+            import io, base64
+            try:
+                import matplotlib
+                matplotlib.use('Agg')
+                import matplotlib.pyplot as plt
+                plt.figure(figsize=(6, 4))
+                __v = globals().get('$varName')
+                if hasattr(__v, 'plot'):
+                    __v.plot()
+                elif hasattr(__v, '__len__') and not isinstance(__v, (str, dict)):
+                    plt.plot(__v)
+                else:
+                    plt.plot([__v])
+                plt.title('Variable: $varName')
+                plt.grid(True, linestyle='--', alpha=0.5)
+                __buf = io.BytesIO()
+                plt.savefig(__buf, format='png', bbox_inches='tight', dpi=100)
+                plt.close('all')
+                print('__JG_PLOT_START__\n' + base64.b64encode(__buf.getvalue()).decode('ascii') + '\n__JG_PLOT_END__')
+            except Exception as e:
+                print('__JG_PLOT_ERR__' + str(e))
+        """.trimIndent()
+
+        val captured = StringBuilder()
+        var insidePlot = false
+        session.execute(code) { output ->
+            if (output is CellOutput.StreamOutput) {
+                for (line in output.text.lines()) {
+                    if (line.contains("__JG_PLOT_START__")) {
+                        insidePlot = true
+                    } else if (line.contains("__JG_PLOT_END__")) {
+                        insidePlot = false
+                    } else if (insidePlot) {
+                        captured.append(line.trim())
+                    }
+                }
+            }
+        }
+
+        val b64 = captured.toString().trim()
+        if (b64.isNotEmpty()) {
+            return runCatching {
+                val bytes = java.util.Base64.getDecoder().decode(b64)
+                javax.imageio.ImageIO.read(java.io.ByteArrayInputStream(bytes))
+            }.getOrNull()
+        }
+        return null
+    }
+
     fun getActiveSession(): KernelSession? = activeSession
 }

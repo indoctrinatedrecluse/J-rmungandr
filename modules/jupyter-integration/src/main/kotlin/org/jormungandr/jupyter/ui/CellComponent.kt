@@ -419,7 +419,26 @@ class CellComponent(
                         )
                     }
 
+                    runCatching {
+                        val plotItem = org.jormungandr.core.plot.PlotItem(
+                            title = "Cell Output [${img.width}×${img.height}]",
+                            source = "Matplotlib / Jupyter",
+                            image = img
+                        )
+                        org.jormungandr.core.plot.PlotManagerService.getInstance().addPlot(plotItem)
+                    }
+
                     val toolbar = JPanel(FlowLayout(FlowLayout.RIGHT, 4, 0)).apply { isOpaque = false }
+                    val sendToPlotsBtn = JButton("🖼️ Open in Plots").apply {
+                        font = font.deriveFont(Font.PLAIN, 10f)
+                        toolTipText = "Inspect this figure in the Scientific Plots tool window"
+                        addActionListener {
+                            runCatching {
+                                val tw = com.intellij.openapi.wm.ToolWindowManager.getInstance(project).getToolWindow("Scientific Plots")
+                                tw?.show()
+                            }
+                        }
+                    }
                     val copyImgBtn = JButton("📋 Copy Image").apply {
                         font = font.deriveFont(Font.PLAIN, 10f)
                         addActionListener {
@@ -429,6 +448,7 @@ class CellComponent(
                             )
                         }
                     }
+                    toolbar.add(sendToPlotsBtn)
                     toolbar.add(copyImgBtn)
 
                     imgContainer.add(toolbar, BorderLayout.NORTH)

@@ -26,6 +26,7 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <applicationService serviceImplementation="org.jormungandr.jupyter.kernel.JupyterKernelService"/>
+        <applicationService serviceImplementation="org.jormungandr.core.plot.PlotManagerService"/>
         <projectService serviceImplementation="org.jormungandr.jupyter.variable.VariableInspectorService"/>
 
         <fileType name="Jupyter Notebook"
@@ -40,6 +41,12 @@
                     canCloseContent="true"
                     icon="/icons/jormungandr_16.png"
                     factoryClass="org.jormungandr.jupyter.ui.toolwindow.JupyterToolWindowFactory"/>
+
+        <toolWindow id="Scientific Plots"
+                    anchor="right"
+                    canCloseContent="true"
+                    icon="/icons/jormungandr_16.png"
+                    factoryClass="org.jormungandr.jupyter.ui.plot.ScientificPlotsToolWindowFactory"/>
     </extensions>
 
     <actions>

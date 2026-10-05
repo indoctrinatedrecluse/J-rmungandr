@@ -81,8 +81,16 @@ class VariableInspectorPanel(
             addActionListener { copySelectedValue() }
         }
 
+        val plotVarBtn = JButton("📈 Plot Variable").apply {
+            font = font.deriveFont(Font.BOLD, 11f)
+            foreground = Color(5, 150, 105)
+            toolTipText = "Generate quick Matplotlib plot for selected NumPy array, Series, or variable"
+            addActionListener { plotSelectedVariable() }
+        }
+
         right.add(refreshBtn)
         right.add(openDfBtn)
+        right.add(plotVarBtn)
         right.add(copyBtn)
 
         topPanel.add(left, BorderLayout.WEST)
@@ -195,5 +203,41 @@ class VariableInspectorPanel(
         if (row < 0 || row >= tableModel.rowCount) return
         val preview = tableModel.getValueAt(row, 4)?.toString() ?: return
         Toolkit.getDefaultToolkit().systemClipboard.setContents(StringSelection(preview), null)
+    }
+
+    private fun plotSelectedVariable() {
+        val row = table.selectedRow
+        if (row < 0 || row >= tableModel.rowCount) return
+        val varName = tableModel.getValueAt(row, 0)?.toString() ?: return
+
+        val session = service.getActiveSession()
+        if (session == null) {
+            JOptionPane.showMessageDialog(this, "No active kernel session connected.", "Plot Variable", JOptionPane.WARNING_MESSAGE)
+            return
+        }
+
+        statusLabel.text = "Generating plot for '$varName'..."
+        scope.launch(Dispatchers.IO) {
+            val img = service.plotVariable(session, varName)
+            if (img != null) {
+                val plotItem = org.jormungandr.core.plot.PlotItem(
+                    title = "Plot: $varName",
+                    source = "Variable Inspector",
+                    image = img
+                )
+                org.jormungandr.core.plot.PlotManagerService.getInstance().addPlot(plotItem)
+                ApplicationManager.getApplication().invokeLater {
+                    statusLabel.text = "✓ Plot generated for '$varName' and added to Scientific Plots"
+                    runCatching {
+                        val tw = com.intellij.openapi.wm.ToolWindowManager.getInstance(project).getToolWindow("Scientific Plots")
+                        tw?.show()
+                    }
+                }
+            } else {
+                ApplicationManager.getApplication().invokeLater {
+                    statusLabel.text = "⚠️ Could not plot variable '$varName'"
+                }
+            }
+        }
     }
 }

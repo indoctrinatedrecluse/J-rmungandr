@@ -44,8 +44,22 @@ class SubprocessPythonSession(
         if (_status.value.isRunning && process?.isAlive == true) return@withContext true
         _status.value = KernelStatus.STARTING
         try {
-            val runnerScript = "import sys, base64, traceback, ast\n" +
+            val runnerScript = "import sys, base64, traceback, ast, io\n" +
                 "cell_globals = {'__name__': '__main__', '__doc__': None}\n" +
+                "try:\n" +
+                "    import matplotlib\n" +
+                "    matplotlib.use('Agg')\n" +
+                "    import matplotlib.pyplot as plt\n" +
+                "    def __jg_show(*args, **kwargs):\n" +
+                "        for __num in plt.get_fignums():\n" +
+                "            __f = plt.figure(__num)\n" +
+                "            __buf = io.BytesIO()\n" +
+                "            __f.savefig(__buf, format='png', bbox_inches='tight', dpi=100)\n" +
+                "            print('__JG_MIME_PNG__' + base64.b64encode(__buf.getvalue()).decode('ascii') + '__JG_MIME_PNG_END__', flush=True)\n" +
+                "        plt.close('all')\n" +
+                "    plt.show = __jg_show\n" +
+                "except Exception:\n" +
+                "    pass\n" +
                 "print('__JG_KERNEL_READY__', flush=True)\n" +
                 "while True:\n" +
                 "    line = sys.stdin.readline()\n" +
@@ -91,6 +105,18 @@ class SubprocessPythonSession(
                 "        except Exception:\n" +
                 "            traceback.print_exc()\n" +
                 "        finally:\n" +
+                "            try:\n" +
+                "                if 'matplotlib.pyplot' in sys.modules:\n" +
+                "                    import matplotlib.pyplot as plt\n" +
+                "                    if plt.get_fignums():\n" +
+                "                        for __num in plt.get_fignums():\n" +
+                "                            __f = plt.figure(__num)\n" +
+                "                            __buf = io.BytesIO()\n" +
+                "                            __f.savefig(__buf, format='png', bbox_inches='tight', dpi=100)\n" +
+                "                            print('__JG_MIME_PNG__' + base64.b64encode(__buf.getvalue()).decode('ascii') + '__JG_MIME_PNG_END__', flush=True)\n" +
+                "                        plt.close('all')\n" +
+                "            except Exception:\n" +
+                "                pass\n" +
                 "            sys.stdout.flush()\n" +
                 "            sys.stderr.flush()\n" +
                 "            print('__JG_EXEC_DONE__', flush=True)\n"

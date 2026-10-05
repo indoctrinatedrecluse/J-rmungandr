@@ -315,7 +315,16 @@ The flagship DataFrame Studio provides exploratory data analysis, visual vector 
 - **Features Inside the Studio**:
   - 📋 **Grid View Tab**: High-speed virtualized data table with sortable columns, instant full-text search, **🎨 Heatmap** numeric cell gradient formatting, **Σ Describe** summary dataset generator, **Group By ▾** aggregations, **Columns ▾** visibility selector, **🔍 Filter Builder** (compound multi-condition filtering with `>`, `<`, `=`, `!=`, `contains`, `regex`), **⚡ Code ▾** exporter (generate Pandas, Polars, and SQL DDL / Inserts), and **💾 Export ▾** (copy as CSV, TSV, Markdown, JSON, JSON Lines `.jsonl`, or Excel XML `.xml`).
   - 📊 **Right Statistical Inspector**: Detailed per-column summary metrics (null counts & percentages, distinct values, min, max, mean, median, 25%/75% quantiles, IQR, standard deviation, skewness) and inline distribution bar histograms.
-  - 📈 **Chart View Tab**: 2D vector chart studio supporting Line charts, Bar charts, Scatter plots, and Area graphs with configurable X/Y axis bindings, grid lines, and responsive viewport sizing.
+  - 📈 **Chart View Tab**: Comprehensive 2D vector chart studio supporting **8 distinct visualization types**:
+    - **Line Charts**: Multi-series trends with auto-scaling axes.
+    - **Bar Charts**: Categorical comparison with distinct series shading.
+    - **Area Charts**: Cumulative distribution and continuous area fills.
+    - **Scatter Plots**: Cross-feature correlation dots with coordinate tooltips.
+    - **Histograms**: Automatic binning and frequency distributions for numeric data.
+    - **Box & Whisker Plots**: Five-number statistical summary ($Min, Q_1, Median, Q_3, Max$) with outlier visualizers.
+    - **Donut / Pie Charts**: Proportional categorical slice visualization with percentage breakdown.
+    - **Correlation Matrix Heatmap**: Pearson correlation grid ($r \in [-1.0, 1.0]$) with dynamic red-to-blue gradient color mapping.
+    - Features **"📋 Copy Chart"** (copies rendered bitmap directly to system clipboard) and **"🖼️ Send to Plots"** (transfers live chart directly into the dedicated Scientific Plots tool window).
   - 🩺 **Column Profiler Tab**: Holistic dataset health audit showing data type category distributions, null percentage gauges, and distinct value cardinality across every column.
   - 🧊 **Pivot Studio Tab**: Interactive 2D cross-tabulation matrix studio. Configure Row dimension, Column dimension, Value metric, and Aggregation function (`Sum`, `Average (Mean)`, `Count`, `Min`, `Max`, `Median`, `Std Dev`) with toggleable Grand Totals, and one-click export to clipboard as CSV, Markdown, or Excel XML.
   - 🗄️ **In-Memory SQL Tab**: Embedded ANSI SQL console running directly in-memory against the loaded dataset table (`df`). Write and run `SELECT`, `WHERE`, `GROUP BY`, `HAVING`, `ORDER BY`, `LIMIT` queries with `Ctrl + Enter`, built-in query templates dropdown, tabular results view, error banner, and one-click export.
@@ -333,9 +342,9 @@ Full-featured notebook editing and kernel interaction powered by asynchronous Ze
 - **Jupyter Kernels Tool Window**:
   - Main menu: `View` &rarr; `Tool Windows` &rarr; `Jupyter Kernels`.
   - **Active Kernels Tab**: View running local/remote kernel instances, connection status, transport (ZeroMQ TCP / Subprocess), and runtime process ID.
-  - **Variable Inspector Tab**: Live interactive variable workspace inspector. Tracks in-scope Python variables, types, dimensions/shapes, formatted byte sizes (`B`, `KB`, `MB`, `GB`), and value previews. Features instant text search filtering, clipboard copy, and a direct **"📊 Open in DataFrame Studio"** button to export any DataFrame/Series variable directly into the flagship DataFrame Studio!
+  - **Variable Inspector Tab**: Live interactive variable workspace inspector. Tracks in-scope Python variables, types, dimensions/shapes, formatted byte sizes (`B`, `KB`, `MB`, `GB`), and value previews. Features instant text search filtering, clipboard copy, a direct **"📊 Open in DataFrame Studio"** button, and an **"📈 Plot Variable"** button that plots 1D/2D arrays and Series directly into the Scientific Plots gallery!
 - **Multimodal Rich Output Rendering**:
-  - 🖼️ **Image Rendering**: Decodes Base64 `image/png` and `image/jpeg` outputs inline with a one-click **"📋 Copy Image"** button.
+  - 🖼️ **Image & Matplotlib Rendering**: Seamlessly captures figures generated via `matplotlib.pyplot` and `seaborn` (utilizing automated headless `Agg` backend hooks and cell figure inspection). Decodes inline Base64 `image/png` / `image/jpeg` with **"🖼️ Open in Plots"** and **"📋 Copy Image"** buttons.
   - 📊 **Rich HTML Table Cards**: Intercepts HTML table outputs (e.g. Pandas and Polars DataFrames) and renders them in styled cards with row & column counts, a **"📋 Copy CSV"** action, and a direct **"📊 Open in DataFrame Studio"** button.
   - ⚡ **Interactive Cell Actions Menu (`⋮`)**: Per-cell actions dropdown offering **Run Cell**, **Run All Above**, **Run All Below**, **Clear Output**, **Copy Code**, and **Delete Cell**.
 - **Executing Cells**:
@@ -424,6 +433,21 @@ All core Jörmungandr modules are first-class plugins registered with custom ser
     - 🪐 **Jupyter Notebook Integration** (`org.jormungandr.jupyter`)
     - 📊 **DataFrame Viewer & Studio** (`org.jormungandr.dataframe`)
     - 🗄️ **Database Analytics Suite** (`org.jormungandr.database`)
+
+---
+
+### 🖼️ 8. Dedicated Scientific Plots Tool Window & Graphical Studio
+A centralized, high-fidelity gallery and canvas for all figures, charts, and visualizations generated across notebooks, variables, and dataframes:
+
+- **Opening the Tool Window**:
+  - Main menu: `View` &rarr; `Tool Windows` &rarr; `Scientific Plots`.
+  - Or click the **Scientific Plots** icon on the right tool window stripe.
+- **Capabilities & Features**:
+  - 🖼️ **Interactive Zoom & Pan Canvas**: Smooth vector/bitmap canvas with zoom controls (`+`, `-`, `1:1`, `Fit to Window`), drag-to-pan navigation, and high-DPI scaling.
+  - 🎞️ **Visual Thumbnail Filmstrip**: Horizontal gallery strip displaying all captured figures in chronological order with active figure indicator and metadata (dimensions, timestamp, origin source).
+  - 📋 **One-Click Clipboard Export**: Copy high-resolution plot images (`BufferedImage`) directly to the system clipboard for immediate pasting into presentations, reports, or documentation.
+  - 💾 **Save to Disk**: Export plots as crisp `.png` image files with customizable destinations.
+  - 🔄 **Unified Interop**: Plots can be received seamlessly from Matplotlib/Seaborn executions, DataFrame Chart Studio (**"🖼️ Send to Plots"**), and Variable Inspector (**"📈 Plot Variable"**).
 
 ---
 
