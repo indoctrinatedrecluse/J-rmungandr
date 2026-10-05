@@ -377,8 +377,36 @@ Unified analytical console for SQL, analytical engines, and NoSQL databases:
   - Switch to the **"🗺️ Schema Diagram"** tab in Database Studio.
   - Interactive table entity cards displaying columns, data types, primary key badges (`🔑 [PK]`), foreign key badges (`🔗 [FK]`), and mapped relationships (e.g. `orders.customer_id ➔ customers.id`).
   - Real-time schema table search filter, one-click **"📋 Export All DDL"** for the complete schema, and **Query** shortcut button on every card.
+- **Oracle PL/SQL Procedural Runner & Templates**:
+  - Full execution support for anonymous procedural blocks (`DECLARE ... BEGIN ... EXCEPTION ... END;`), stored procedures, functions, packages, and triggers.
+  - Automatic **`DBMS_OUTPUT` Server Output Capture**: Captures lines emitted via `DBMS_OUTPUT.PUT_LINE` and displays them in execution summaries.
+  - Built-in PL/SQL templates under **📝 Templates ▾** (Anonymous blocks, Cursor `FOR` loops, Stored Procedures with `OUT` parameters, Package Spec/Body, and Audit triggers).
+- **🍃 MongoDB Document Studio**:
+  - Switch to the **"🍃 MongoDB Studio"** tab (or click **"+ 🍃 Mongo"**).
+  - Explore databases (`ecom_store`, `analytics_db`) and collections (`customers`, `orders`, `products`).
+  - Run JSON queries with filter operators (`$gt`, `$gte`, `$lt`, `$lte`, `$ne`, `$regex`), field projections (`{ "name": 1, "tier": 1 }`), and limit sizing.
+  - Execute multi-stage Aggregation Pipelines (`$match`, `$project`, `$group`, `$sort`, `$limit`).
+  - Dual view: **📋 Tabular Grid** (flattened document columns in virtualized grid) and **📄 JSON Documents View** (indented syntax-highlighted cards).
+  - One-click document insertion dialog and **"📊 Open in DataFrame Studio"** export.
+- **⚡ Redis Keyspace & Command Studio**:
+  - Switch to the **"⚡ Redis Studio"** tab (or click **"+ ⚡ Redis"**).
+  - Real-time keyspace browser with pattern matching (`*`, `user:*`, `session:*`) and type filters.
+  - Visual type badges: `[STR]` (String), `[HASH]` (Hash), `[LIST]` (List), `[SET]` (Set), `[ZSET]` (Sorted Set), and TTL countdowns.
+  - Interactive **Value Inspector**: Dedicated inspectors for hashes (field-value table), lists (indexed items), sets (members), sorted sets (scores), and strings (text/JSON).
+  - **Interactive Redis CLI Console**: Built-in interactive command terminal (`redis> `) supporting `GET`, `SET`, `HGETALL`, `LRANGE`, `SMEMBERS`, `ZRANGE`, `INFO`, `DBSIZE`, `KEYS *`, `PING`.
+- **🪐 Apache Cassandra CQL Studio**:
+  - Switch to the **"🪐 Cassandra CQL"** tab (or click **"+ 🪐 Cassandra"**).
+  - Wide-column keyspaces explorer (`ecommerce_ks`, `telemetry_ks`) with table schemas.
+  - Explicit badges for Partition Keys (`🔑 [PK]`) and Clustering Columns (`📐 [CK]`).
+  - Interactive CQL query runner (`SELECT * FROM keyspace.table WHERE ... ALLOW FILTERING`) with syntax templates and direct DataFrame export.
+- **📨 Apache Kafka Event Streaming Studio**:
+  - Switch to the **"📨 Kafka Streams"** tab (or click **"+ 📨 Kafka"**).
+  - Topic Explorer: View topics, partition counts (`[3P]`), and total ingested message counts.
+  - **📡 Event Stream Inspector**: Real-time record tail showing partition, offset, timestamp, key, and formatted JSON payload viewer with one-click copy.
+  - **🚀 Produce Event**: Send live test events to any topic/partition with custom keys and JSON payload templates.
+  - **👥 Consumer Groups & Lag Monitor**: Track consumer group offsets and visual color-coded lag indicators (`Healthy`, `Moderate`, `High Lag`).
 - **Multi-Dialect Connection Manager**:
-  - Support for PostgreSQL, MySQL, SQLite (Embedded), DuckDB (Embedded), Snowflake, MongoDB, and Redis.
+  - Support for SQLite, DuckDB, PostgreSQL, MySQL, Oracle (PL/SQL), Snowflake, Apache Cassandra (CQL), MongoDB, Redis, and Apache Kafka.
   - File browser button for effortlessly attaching local `.duckdb`, `.db`, `.sqlite`, `.parquet`, or `.csv` files.
 
 ---

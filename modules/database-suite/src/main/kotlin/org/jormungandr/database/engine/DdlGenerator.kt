@@ -85,9 +85,12 @@ object DdlGenerator {
             DatabaseDialect.DUCKDB,
             DatabaseDialect.POSTGRESQL,
             DatabaseDialect.MYSQL -> "SELECT $colList FROM $qualifiedName LIMIT $limit;"
+            DatabaseDialect.ORACLE_PLSQL -> "SELECT $colList FROM $qualifiedName FETCH FIRST $limit ROWS ONLY;"
             DatabaseDialect.SNOWFLAKE -> "SELECT $colList FROM $qualifiedName LIMIT $limit;"
+            DatabaseDialect.CASSANDRA -> "SELECT $colList FROM $qualifiedName LIMIT $limit;"
             DatabaseDialect.MONGODB -> "db.${table.name}.find().limit($limit)"
             DatabaseDialect.REDIS -> "KEYS *"
+            DatabaseDialect.KAFKA -> "CONSUME ${table.name} LIMIT $limit"
         }
     }
 

@@ -172,14 +172,45 @@ class QueryConsolePanel(private val project: com.intellij.openapi.project.Projec
         val conn = DatabaseConnectionManager.getConnection(config.id)
             ?: runCatching { DatabaseConnectionManager.connect(config) }.getOrNull()
 
+        val sql = queryEditor.text.trim()
+        val limit = limitCombo.selectedItem as? Int ?: 1000
+
+        // Handle PL/SQL procedural execution
+        if (config.dialect == org.jormungandr.database.model.DatabaseDialect.ORACLE_PLSQL ||
+            org.jormungandr.database.dialect.plsql.PlSqlEngine.isProceduralBlock(sql)
+        ) {
+            timerLabel.text = "⏱ Running PL/SQL..."
+            val plResult = org.jormungandr.database.dialect.plsql.PlSqlEngine.execute(conn, sql, limit)
+            timerLabel.text = "⏱ ${plResult.executionTimeMs} ms"
+
+            if (plResult.isSuccess) {
+                val df = plResult.dataFrame ?: DataFrame.empty("plsql_output")
+                gridPanel.dataFrame = df
+                val outSummary = if (plResult.serverOutput.isNotEmpty()) " | Output: ${plResult.serverOutput.first()}" else ""
+                statusLabel.text = "✓ PL/SQL executed (${plResult.serverOutput.size} output lines$outSummary)"
+                statusLabel.foreground = Color(40, 160, 60)
+            } else {
+                statusLabel.text = "✗ ${plResult.errorMessage}"
+                statusLabel.foreground = Color(200, 50, 50)
+            }
+
+            QueryHistoryManager.recordExecution(
+                connectionId = config.id,
+                connectionName = config.name,
+                query = sql,
+                durationMs = plResult.executionTimeMs,
+                rowCount = plResult.serverOutput.size,
+                isSuccess = plResult.isSuccess,
+                errorMessage = plResult.errorMessage
+            )
+            return
+        }
+
         if (conn == null) {
             statusLabel.text = "Failed to connect to ${config.name}"
             statusLabel.foreground = Color(200, 50, 50)
             return
         }
-
-        val sql = queryEditor.text.trim()
-        val limit = limitCombo.selectedItem as? Int ?: 1000
 
         timerLabel.text = "⏱ Running..."
         val result = SqlQueryExecutor.execute(conn, sql, limit, "query_results")
@@ -336,9 +367,30 @@ class QueryConsolePanel(private val project: com.intellij.openapi.project.Projec
                 setQueryText("SELECT * FROM users WHERE active = 1 ORDER BY id DESC LIMIT 100;")
             }
         })
-        menu.add(JMenuItem("🗄️ Join Two Tables").apply {
+        menu.addSeparator()
+        menu.add(JMenuItem("📜 PL/SQL: Anonymous Block with DBMS_OUTPUT").apply {
             addActionListener {
-                setQueryText("SELECT o.*, u.name AS user_name, u.email\nFROM orders o\nJOIN users u ON o.user_id = u.id\nLIMIT 50;")
+                setQueryText(org.jormungandr.database.dialect.plsql.PlSqlEngine.TEMPLATE_ANONYMOUS_BLOCK)
+            }
+        })
+        menu.add(JMenuItem("📜 PL/SQL: Cursor FOR Loop").apply {
+            addActionListener {
+                setQueryText(org.jormungandr.database.dialect.plsql.PlSqlEngine.TEMPLATE_CURSOR_FOR_LOOP)
+            }
+        })
+        menu.add(JMenuItem("📜 PL/SQL: Stored Procedure").apply {
+            addActionListener {
+                setQueryText(org.jormungandr.database.dialect.plsql.PlSqlEngine.TEMPLATE_STORED_PROCEDURE)
+            }
+        })
+        menu.add(JMenuItem("📜 PL/SQL: Package Spec & Body").apply {
+            addActionListener {
+                setQueryText(org.jormungandr.database.dialect.plsql.PlSqlEngine.TEMPLATE_PACKAGE)
+            }
+        })
+        menu.add(JMenuItem("📜 PL/SQL: Audit Salary Trigger").apply {
+            addActionListener {
+                setQueryText(org.jormungandr.database.dialect.plsql.PlSqlEngine.TEMPLATE_AUDIT_TRIGGER)
             }
         })
         menu.show(anchor, 0, anchor.height)

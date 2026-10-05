@@ -84,4 +84,16 @@ class DdlGeneratorTest {
         val insertSql = DdlGenerator.generateInsertTemplate(sampleTable, DatabaseDialect.SQLITE)
         assertTrue(insertSql.contains("INSERT INTO \"users\" (\"name\", \"balance\", \"is_active\") VALUES (?, ?, ?);"))
     }
+
+    @Test
+    fun `generateSelectTemplate for Oracle, Cassandra, Kafka produces valid queries`() {
+        val oracleSelect = DdlGenerator.generateSelectTemplate(sampleTable, DatabaseDialect.ORACLE_PLSQL, limit = 25)
+        assertTrue(oracleSelect.contains("FETCH FIRST 25 ROWS ONLY;"))
+
+        val cassandraSelect = DdlGenerator.generateSelectTemplate(sampleTable, DatabaseDialect.CASSANDRA, limit = 25)
+        assertTrue(cassandraSelect.contains("LIMIT 25;"))
+
+        val kafkaSelect = DdlGenerator.generateSelectTemplate(sampleTable, DatabaseDialect.KAFKA, limit = 25)
+        assertTrue(kafkaSelect.startsWith("CONSUME"))
+    }
 }

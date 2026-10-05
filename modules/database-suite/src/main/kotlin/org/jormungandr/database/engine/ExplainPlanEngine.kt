@@ -36,6 +36,7 @@ object ExplainPlanEngine {
             DatabaseDialect.DUCKDB -> "EXPLAIN $trimmed"
             DatabaseDialect.POSTGRESQL -> "EXPLAIN $trimmed"
             DatabaseDialect.MYSQL -> "EXPLAIN $trimmed"
+            DatabaseDialect.ORACLE_PLSQL -> "EXPLAIN PLAN FOR $trimmed"
             else -> "EXPLAIN $trimmed"
         }
 

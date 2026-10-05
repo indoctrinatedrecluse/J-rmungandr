@@ -2,7 +2,6 @@ package org.jormungandr.database.ui
 
 import com.intellij.openapi.project.Project
 import com.intellij.openapi.ui.DialogWrapper
-import com.intellij.openapi.ui.Messages
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBPasswordField
 import com.intellij.ui.components.JBTextField
@@ -34,20 +33,45 @@ class NewConnectionDialog(project: Project? = null) : DialogWrapper(project, tru
         private set
 
     init {
-        title = "New Database Connection"
+        title = "New Database / NoSQL Connection"
         dialectCombo.selectedItem = DatabaseDialect.SQLITE
         dialectCombo.addActionListener {
             val d = dialectCombo.selectedItem as DatabaseDialect
             portField.text = d.defaultPort.toString()
-            if (d == DatabaseDialect.SQLITE) {
-                dbNameField.text = ":memory:"
-                nameField.text = "SQLite Local"
-            } else if (d == DatabaseDialect.DUCKDB) {
-                dbNameField.text = ":memory:"
-                nameField.text = "DuckDB Analytics"
-            } else {
-                dbNameField.text = "postgres"
-                nameField.text = "${d.displayName} Server"
+            when (d) {
+                DatabaseDialect.SQLITE -> {
+                    dbNameField.text = ":memory:"
+                    nameField.text = "SQLite Local"
+                }
+                DatabaseDialect.DUCKDB -> {
+                    dbNameField.text = ":memory:"
+                    nameField.text = "DuckDB Analytics"
+                }
+                DatabaseDialect.ORACLE_PLSQL -> {
+                    dbNameField.text = "ORCL"
+                    nameField.text = "Oracle PL/SQL Server"
+                    userField.text = "system"
+                }
+                DatabaseDialect.MONGODB -> {
+                    dbNameField.text = "ecom_store"
+                    nameField.text = "MongoDB Cluster"
+                }
+                DatabaseDialect.REDIS -> {
+                    dbNameField.text = "0"
+                    nameField.text = "Redis Cache"
+                }
+                DatabaseDialect.CASSANDRA -> {
+                    dbNameField.text = "ecommerce_ks"
+                    nameField.text = "Cassandra Cluster"
+                }
+                DatabaseDialect.KAFKA -> {
+                    dbNameField.text = ""
+                    nameField.text = "Kafka Broker"
+                }
+                else -> {
+                    dbNameField.text = "postgres"
+                    nameField.text = "${d.displayName} Server"
+                }
             }
         }
         init()
@@ -92,9 +116,9 @@ class NewConnectionDialog(project: Project? = null) : DialogWrapper(project, tru
 
         addRow("Connection Name:", nameField, 0)
         addRow("Dialect / Engine:", dialectCombo, 1)
-        addRow("Host:", hostField, 2)
+        addRow("Host / Broker:", hostField, 2)
         addRow("Port:", portField, 3)
-        addRow("Database / File:", dbFilePanel, 4)
+        addRow("Database / Keyspace / File:", dbFilePanel, 4)
         addRow("Username:", userField, 5)
         addRow("Password:", passField, 6)
 

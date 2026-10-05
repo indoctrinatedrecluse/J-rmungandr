@@ -20,8 +20,8 @@ class DatabaseSuiteExtension : JormungandrExtension {
         version = "0.1.0",
         description = "Provides unified SQL & NoSQL connection management, schema browsing, and query runners.",
         author = "indoctrinatedrecluse",
-        supportedLanguages = listOf("SQL", "JSON", "BSON"),
-        associatedStacks = listOf("DuckDB", "PostgreSQL", "SQLite", "MySQL", "MongoDB"),
+        supportedLanguages = listOf("SQL", "PL/SQL", "CQL", "JSON", "BSON", "RESP"),
+        associatedStacks = listOf("DuckDB", "PostgreSQL", "SQLite", "MySQL", "Oracle PL/SQL", "MongoDB", "Redis", "Apache Cassandra", "Apache Kafka"),
         quota = ResourceQuota(
             maxHeapBytes = 512L * 1024 * 1024,
             maxOffHeapBytes = 2L * 1024 * 1024 * 1024, // 2 GB for DuckDB / query result cache
