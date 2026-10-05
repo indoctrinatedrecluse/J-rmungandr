@@ -18,7 +18,13 @@ import java.awt.event.KeyEvent
 import javax.swing.*
 import javax.swing.border.EmptyBorder
 
-class QueryConsolePanel : JPanel(BorderLayout()) {
+import org.jormungandr.database.history.QueryHistoryManager
+import org.jormungandr.dataframe.codegen.DataFrameCodeGenerator
+import org.jormungandr.dataframe.io.DataFrameExporter
+import java.awt.Toolkit
+import java.awt.datatransfer.StringSelection
+
+class QueryConsolePanel(private val project: com.intellij.openapi.project.Project? = null) : JPanel(BorderLayout()) {
 
     private val connectionCombo = JComboBox<String>()
     private val queryEditor = JBTextArea(6, 40)
@@ -43,9 +49,30 @@ class QueryConsolePanel : JPanel(BorderLayout()) {
             addActionListener { executeCurrentQuery() }
         }
 
+        val historyBtn = JButton("📜 History").apply {
+            isFocusable = false
+            toolTipText = "View execution history"
+            addActionListener {
+                val dlg = QueryHistoryDialog(project) { sql ->
+                    setQueryText(sql)
+                }
+                dlg.show()
+            }
+        }
+
+        val exportBtn = JButton("⤓ Export").apply {
+            isFocusable = false
+            toolTipText = "Export query results"
+            addActionListener {
+                showExportMenu(this)
+            }
+        }
+
         leftTools.add(JBLabel("Connection:"))
         leftTools.add(connectionCombo)
         leftTools.add(runBtn)
+        leftTools.add(historyBtn)
+        leftTools.add(exportBtn)
         leftTools.add(JBLabel("Limit:"))
         leftTools.add(limitCombo)
 
@@ -135,5 +162,65 @@ class QueryConsolePanel : JPanel(BorderLayout()) {
             statusLabel.text = "✗ ${result.errorMessage}"
             statusLabel.foreground = Color(200, 50, 50)
         }
+
+        // Record execution in history
+        QueryHistoryManager.recordExecution(
+            connectionId = config.id,
+            connectionName = config.name,
+            query = sql,
+            durationMs = result.executionTimeMs,
+            rowCount = result.dataFrame?.rowCount?.toInt() ?: result.rowsAffected,
+            isSuccess = result.isSuccess,
+            errorMessage = result.errorMessage
+        )
+    }
+
+    private fun showExportMenu(anchor: JComponent) {
+        val df = gridPanel.dataFrame
+        if (df.rowCount == 0) {
+            statusLabel.text = "⚠️ No query results to export"
+            statusLabel.foreground = Color(200, 140, 40)
+            return
+        }
+
+        val menu = JPopupMenu()
+        menu.add(JMenuItem("Copy as CSV").apply {
+            addActionListener {
+                val csv = DataFrameExporter.toCsv(df)
+                copyToClipboard(csv)
+                statusLabel.text = "✓ Copied CSV (${df.rowCount} rows) to clipboard"
+                statusLabel.foreground = Color(40, 160, 60)
+            }
+        })
+        menu.add(JMenuItem("Copy as JSON").apply {
+            addActionListener {
+                val json = DataFrameExporter.toJson(df)
+                copyToClipboard(json)
+                statusLabel.text = "✓ Copied JSON (${df.rowCount} rows) to clipboard"
+                statusLabel.foreground = Color(40, 160, 60)
+            }
+        })
+        menu.add(JMenuItem("Copy as Markdown").apply {
+            addActionListener {
+                val md = DataFrameExporter.toMarkdown(df)
+                copyToClipboard(md)
+                statusLabel.text = "✓ Copied Markdown to clipboard"
+                statusLabel.foreground = Color(40, 160, 60)
+            }
+        })
+        menu.add(JMenuItem("Copy as SQL DDL + INSERTs").apply {
+            addActionListener {
+                val sql = DataFrameCodeGenerator.toSqlDdlAndInserts(df)
+                copyToClipboard(sql)
+                statusLabel.text = "✓ Copied SQL statements to clipboard"
+                statusLabel.foreground = Color(40, 160, 60)
+            }
+        })
+        menu.show(anchor, 0, anchor.height)
+    }
+
+    private fun copyToClipboard(text: String) {
+        val sel = StringSelection(text)
+        Toolkit.getDefaultToolkit().systemClipboard.setContents(sel, sel)
     }
 }

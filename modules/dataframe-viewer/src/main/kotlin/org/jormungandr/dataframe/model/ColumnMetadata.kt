@@ -25,8 +25,17 @@ data class ColumnMetadata(
     val meanVal: Double? = null,
     val stdDev: Double? = null,
     val medianVal: Double? = null,
-    val histogramBins: List<HistogramBin> = emptyList()
+    val q25: Double? = null,
+    val q75: Double? = null,
+    val iqr: Double? = null,
+    val variance: Double? = null,
+    val skewness: Double? = null,
+    val histogramBins: List<HistogramBin> = emptyList(),
+    val topValues: List<Pair<String, Int>> = emptyList()
 ) {
+    val isNumeric: Boolean
+        get() = category == DataTypeCategory.INTEGER || category == DataTypeCategory.FLOAT
+
     val nullPercentage: Double
         get() = if (totalCount > 0) (nullCount.toDouble() / totalCount.toDouble()) * 100.0 else 0.0
 }

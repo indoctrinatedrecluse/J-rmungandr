@@ -98,6 +98,20 @@ data class DataFrame(
     fun tail(n: Int = 10): DataFrame = slice((rowCount - n).coerceAtLeast(0), n)
 
     /**
+     * Projects DataFrame keeping only the requested columns.
+     */
+    fun selectColumns(names: List<String>): DataFrame {
+        val indices = names.mapNotNull { name ->
+            val idx = getColumnIndex(name)
+            if (idx >= 0) Pair(idx, columns[idx]) else null
+        }
+        if (indices.isEmpty()) return this
+        val newCols = indices.map { it.second }
+        val newRows = rows.map { row -> indices.map { (idx, _) -> row.getOrNull(idx) } }
+        return DataFrame(name, newCols, newRows)
+    }
+
+    /**
      * Estimates in-memory size of data in bytes.
      */
     fun estimateMemoryBytes(): Long {
@@ -143,6 +157,11 @@ data class DataFrame(
                 var mean: Double? = null
                 var stdDev: Double? = null
                 var median: Double? = null
+                var varianceVal: Double? = null
+                var skewnessVal: Double? = null
+                var q25Val: Double? = null
+                var q75Val: Double? = null
+                var iqrVal: Double? = null
                 val bins = mutableListOf<HistogramBin>()
 
                 if (nonNull.isNotEmpty()) {
@@ -155,12 +174,14 @@ data class DataFrame(
                                     else -> null
                                 }
                             }
+
                             if (numbers.isNotEmpty()) {
                                 val minNum = numbers.minOrNull() ?: 0.0
                                 val maxNum = numbers.maxOrNull() ?: 0.0
                                 val avg = numbers.average()
                                 val variance = numbers.map { (it - avg).pow(2) }.average()
                                 val sd = sqrt(variance)
+                                val skew = if (sd > 0.0) numbers.map { ((it - avg) / sd).pow(3) }.average() else 0.0
 
                                 val sortedNums = numbers.sorted()
                                 val med = if (sortedNums.size % 2 == 0) {
@@ -169,11 +190,22 @@ data class DataFrame(
                                     sortedNums[sortedNums.size / 2]
                                 }
 
+                                val q25Index = (sortedNums.size * 0.25).toInt().coerceIn(0, sortedNums.size - 1)
+                                val q75Index = (sortedNums.size * 0.75).toInt().coerceIn(0, sortedNums.size - 1)
+                                val q25 = sortedNums[q25Index]
+                                val q75 = sortedNums[q75Index]
+                                val iqr = q75 - q25
+
                                 minStr = if (category == DataTypeCategory.INTEGER) minNum.toLong().toString() else "%.4f".format(minNum)
                                 maxStr = if (category == DataTypeCategory.INTEGER) maxNum.toLong().toString() else "%.4f".format(maxNum)
                                 mean = avg
                                 stdDev = sd
                                 median = med
+                                varianceVal = variance
+                                skewnessVal = skew
+                                q25Val = q25
+                                q75Val = q75
+                                iqrVal = iqr
 
                                 // Compute 5-bin histogram
                                 val binCount = 5
@@ -206,6 +238,12 @@ data class DataFrame(
                     }
                 }
 
+                val topValuesList = nonNull.map { it.toString() }
+                    .groupingBy { it }.eachCount().entries
+                    .sortedByDescending { it.value }
+                    .take(10)
+                    .map { Pair(it.key, it.value) }
+
                 ColumnMetadata(
                     name = colName,
                     typeName = category.displayName,
@@ -218,7 +256,13 @@ data class DataFrame(
                     meanVal = mean,
                     stdDev = stdDev,
                     medianVal = median,
-                    histogramBins = bins
+                    q25 = q25Val,
+                    q75 = q75Val,
+                    iqr = iqrVal,
+                    variance = varianceVal,
+                    skewness = skewnessVal,
+                    histogramBins = bins,
+                    topValues = topValuesList
                 )
             }
 

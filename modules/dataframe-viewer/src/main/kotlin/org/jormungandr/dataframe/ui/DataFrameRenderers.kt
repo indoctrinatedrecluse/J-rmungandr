@@ -101,6 +101,8 @@ class DataFrameCellRenderer(
     private var themeTokens: DataGridThemeTokens
 ) : DefaultTableCellRenderer() {
 
+    var isHeatmapEnabled: Boolean = false
+
     fun updateTheme(tokens: DataGridThemeTokens) {
         this.themeTokens = tokens
     }
@@ -126,6 +128,25 @@ class DataFrameCellRenderer(
         if (isSelected) {
             background = selBg
             foreground = selFg
+        } else if (isHeatmapEnabled && meta?.isNumeric == true && value != null) {
+            val num = when (value) {
+                is Number -> value.toDouble()
+                is String -> value.toDoubleOrNull()
+                else -> null
+            }
+            val minD = meta.minVal?.toDoubleOrNull()
+            val maxD = meta.maxVal?.toDoubleOrNull()
+            if (num != null && minD != null && maxD != null && maxD > minD) {
+                val ratio = ((num - minD) / (maxD - minD)).coerceIn(0.0, 1.0).toFloat()
+                // Blend from cool pale cyan/white to warm sunny amber
+                val r = (235 + (20 * ratio)).toInt().coerceIn(0, 255)
+                val g = (245 - (40 * ratio)).toInt().coerceIn(0, 255)
+                val b = (255 - (110 * ratio)).toInt().coerceIn(0, 255)
+                background = Color(r, g, b)
+            } else {
+                background = if (row % 2 == 0) rowEven else rowOdd
+            }
+            foreground = parseHexColor(themeTokens.headerForeground, Color(30, 30, 30))
         } else {
             background = if (row % 2 == 0) rowEven else rowOdd
             foreground = parseHexColor(themeTokens.headerForeground, Color(30, 30, 30))

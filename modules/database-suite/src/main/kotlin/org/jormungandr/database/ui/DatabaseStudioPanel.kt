@@ -3,6 +3,7 @@ package org.jormungandr.database.ui
 import com.intellij.openapi.project.Project
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.treeStructure.Tree
+import org.jormungandr.database.engine.DdlGenerator
 import org.jormungandr.database.engine.DatabaseConnectionManager
 import org.jormungandr.database.engine.SchemaIntrospector
 import org.jormungandr.database.model.ConnectionConfig
@@ -23,7 +24,7 @@ class DatabaseStudioPanel(private val project: Project? = null) : JPanel(BorderL
     private val rootNode = DefaultMutableTreeNode("Data Sources")
     private val treeModel = DefaultTreeModel(rootNode)
     private val tree = Tree(treeModel)
-    private val consolePanel = QueryConsolePanel()
+    private val consolePanel = QueryConsolePanel(project)
 
     init {
         // Ensure default SQLite in-memory sample connection is registered
@@ -116,6 +117,25 @@ class DatabaseStudioPanel(private val project: Project? = null) : JPanel(BorderL
                             addActionListener {
                                 consolePanel.setQueryText("SELECT COUNT(*) AS total_count FROM ${userObj.name};")
                                 consolePanel.executeCurrentQuery()
+                            }
+                        })
+                        menu.addSeparator()
+                        menu.add(JMenuItem("Generate CREATE TABLE DDL").apply {
+                            addActionListener {
+                                val ddl = DdlGenerator.generateCreateTable(userObj)
+                                consolePanel.setQueryText(ddl)
+                            }
+                        })
+                        menu.add(JMenuItem("Generate INSERT Template").apply {
+                            addActionListener {
+                                val template = DdlGenerator.generateInsertTemplate(userObj)
+                                consolePanel.setQueryText(template)
+                            }
+                        })
+                        menu.add(JMenuItem("Generate DROP TABLE Statement").apply {
+                            addActionListener {
+                                val drop = DdlGenerator.generateDropTable(userObj)
+                                consolePanel.setQueryText(drop)
                             }
                         })
                         menu.show(tree, e.x, e.y)
