@@ -1,7 +1,10 @@
 package org.jormungandr.shell.extension
 
+import com.intellij.ide.plugins.PluginManager
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.Logger
+import com.intellij.openapi.extensions.ExtensionPointName
+import com.intellij.openapi.extensions.PluginId
 import com.intellij.openapi.project.Project
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -9,9 +12,7 @@ import kotlinx.coroutines.launch
 import org.jormungandr.core.extension.ExtensionContext
 import org.jormungandr.core.extension.ExtensionId
 import org.jormungandr.core.extension.ExtensionManager
-import org.jormungandr.database.DatabaseSuiteExtension
-import org.jormungandr.dataframe.DataFrameViewerExtension
-import org.jormungandr.jupyter.JupyterExtension
+import org.jormungandr.core.extension.JormungandrExtension
 import org.jormungandr.core.theme.ThemeManager
 import org.jormungandr.shell.theme.ThemeExtension
 
@@ -39,6 +40,7 @@ class ShellExtensionContext(
 object CoreExtensionsRegistry {
 
     private val LOG = Logger.getInstance(CoreExtensionsRegistry::class.java)
+    val EP_NAME = ExtensionPointName.create<JormungandrExtension>("org.jormungandr.ide.extension")
 
     /**
      * Ensures all built-in core extensions are registered and activated.
@@ -52,12 +54,25 @@ object CoreExtensionsRegistry {
                 ?: ApplicationManager.getApplication()?.getService(ThemeExtension::class.java)
         }.getOrNull() ?: ThemeExtension()
 
-        val coreExtensions = listOfNotNull(
-            themeService,
-            DataFrameViewerExtension(),
-            DatabaseSuiteExtension(),
-            JupyterExtension()
+        val coreExtensions = mutableListOf<JormungandrExtension>()
+        coreExtensions.add(themeService)
+
+        // 1. Discover extensions registered via IntelliJ Extension Point
+        val epExtensions = runCatching { EP_NAME.extensionList }.getOrElse { emptyList() }
+        coreExtensions.addAll(epExtensions)
+
+        // 2. Discover via dynamic plugin classloaders if not already registered
+        val knownSubsystems = mapOf(
+            "org.jormungandr.dataframe.DataFrameViewerExtension" to "org.jormungandr.dataframe",
+            "org.jormungandr.database.DatabaseSuiteExtension" to "org.jormungandr.database",
+            "org.jormungandr.jupyter.JupyterExtension" to "org.jormungandr.jupyter"
         )
+        for ((fqcn, pluginIdStr) in knownSubsystems) {
+            val alreadyPresent = coreExtensions.any { it.javaClass.name == fqcn }
+            if (!alreadyPresent) {
+                loadSubsystem(fqcn, pluginIdStr)?.let { coreExtensions.add(it) }
+            }
+        }
 
         for (ext in coreExtensions) {
             if (extensionManager.getExtension(ext.id) == null) {
@@ -78,5 +93,21 @@ object CoreExtensionsRegistry {
                 }
             }
         }
+    }
+
+    private fun loadSubsystem(className: String, pluginIdStr: String): JormungandrExtension? {
+        return runCatching {
+            val appCl = CoreExtensionsRegistry::class.java.classLoader
+            val clazz = runCatching { Class.forName(className, true, appCl) }.getOrNull()
+                ?: runCatching {
+                    val pid = PluginId.getId(pluginIdStr)
+                    val plugin = PluginManager.getInstance().findEnabledPlugin(pid)
+                    plugin?.pluginClassLoader?.loadClass(className)
+                }.getOrNull()
+                ?: PluginManager.getLoadedPlugins().firstNotNullOfOrNull { p ->
+                    runCatching { p.pluginClassLoader?.loadClass(className) }.getOrNull()
+                }
+            clazz?.getDeclaredConstructor()?.newInstance() as? JormungandrExtension
+        }.getOrNull()
     }
 }

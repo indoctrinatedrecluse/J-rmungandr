@@ -22,6 +22,10 @@
     <depends>org.jormungandr.ide</depends>
     <depends>org.jormungandr.dataframe</depends>
 
+    <extensions defaultExtensionNs="org.jormungandr.ide">
+        <extension implementation="org.jormungandr.database.DatabaseSuiteExtension"/>
+    </extensions>
+
     <extensions defaultExtensionNs="com.intellij">
         <toolWindow id="Database Studio"
                     anchor="right"

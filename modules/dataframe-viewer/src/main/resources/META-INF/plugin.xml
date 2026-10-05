@@ -23,10 +23,15 @@
     <depends>com.intellij.modules.platform</depends>
     <depends>org.jormungandr.ide</depends>
 
+    <extensions defaultExtensionNs="org.jormungandr.ide">
+        <extension implementation="org.jormungandr.dataframe.DataFrameViewerExtension"/>
+    </extensions>
+
     <extensions defaultExtensionNs="com.intellij">
         <applicationService serviceImplementation="org.jormungandr.dataframe.service.DataFrameService"/>
 
         <fileType name="CSV Dataset"
+                  language="TEXT"
                   implementationClass="org.jormungandr.dataframe.filetype.CsvFileType"
                   fieldName="INSTANCE"
                   extensions="csv;tsv;tab"/>

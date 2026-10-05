@@ -20,6 +20,10 @@
     <depends>com.intellij.modules.platform</depends>
     <depends>org.jormungandr.ide</depends>
 
+    <extensions defaultExtensionNs="org.jormungandr.ide">
+        <extension implementation="org.jormungandr.jupyter.JupyterExtension"/>
+    </extensions>
+
     <extensions defaultExtensionNs="com.intellij">
         <applicationService serviceImplementation="org.jormungandr.jupyter.kernel.JupyterKernelService"/>
 
