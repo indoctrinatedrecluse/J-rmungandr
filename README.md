@@ -297,7 +297,121 @@ flowchart LR
 
 ---
 
-## 💻 8. Technology Stack
+## 🖥️ 8. Accessing Extension UIs in Jörmungandr
+
+Jörmungandr exposes its data science tooling through native editors, dedicated tool windows, tailored perspectives, and standard IntelliJ menus. Here is how users can access every UI:
+
+### 📊 1. Flagship DataFrame Studio & Tabular Viewer
+The flagship DataFrame Studio provides exploratory data analysis, visual vector charting, column statistics, dynamic pivot tables, and embedded in-memory SQL querying.
+
+- **Opening Datasets via File Association**:
+  - In the **Project Explorer** tree (`Alt + 1`), double-click any `.csv`, `.tsv`, or `.parquet` (Apache Parquet) dataset.
+  - The IDE automatically opens the file using the high-performance `DataFrameFileEditor`.
+- **Opening Datasets via Context Menu**:
+  - Right-click any dataset file in the project tree &rarr; choose **Open with DataFrame Studio**.
+- **Opening the Tool Window**:
+  - Main menu: `View` &rarr; `Tool Windows` &rarr; `DataFrame Viewer`.
+  - Or click the **DataFrame Viewer** button on the bottom/right tool window stripe.
+- **Features Inside the Studio**:
+  - 📋 **Grid View Tab**: High-speed virtualized data table with sortable columns, instant full-text search, **🎨 Heatmap** numeric cell gradient formatting, **Σ Describe** summary dataset generator, **Group By ▾** aggregations, **Columns ▾** visibility selector, **🔍 Filter Builder** (compound multi-condition filtering with `>`, `<`, `=`, `!=`, `contains`, `regex`), **⚡ Code ▾** exporter (generate Pandas, Polars, and SQL DDL / Inserts), and **💾 Export ▾** (copy as CSV, TSV, Markdown, JSON, JSON Lines `.jsonl`, or Excel XML `.xml`).
+  - 📊 **Right Statistical Inspector**: Detailed per-column summary metrics (null counts & percentages, distinct values, min, max, mean, median, 25%/75% quantiles, IQR, standard deviation, skewness) and inline distribution bar histograms.
+  - 📈 **Chart View Tab**: 2D vector chart studio supporting Line charts, Bar charts, Scatter plots, and Area graphs with configurable X/Y axis bindings, grid lines, and responsive viewport sizing.
+  - 🩺 **Column Profiler Tab**: Holistic dataset health audit showing data type category distributions, null percentage gauges, and distinct value cardinality across every column.
+  - 🧊 **Pivot Studio Tab**: Interactive 2D cross-tabulation matrix studio. Configure Row dimension, Column dimension, Value metric, and Aggregation function (`Sum`, `Average (Mean)`, `Count`, `Min`, `Max`, `Median`, `Std Dev`) with toggleable Grand Totals, and one-click export to clipboard as CSV, Markdown, or Excel XML.
+  - 🗄️ **In-Memory SQL Tab**: Embedded ANSI SQL console running directly in-memory against the loaded dataset table (`df`). Write and run `SELECT`, `WHERE`, `GROUP BY`, `HAVING`, `ORDER BY`, `LIMIT` queries with `Ctrl + Enter`, built-in query templates dropdown, tabular results view, error banner, and one-click export.
+
+---
+
+### 🪐 2. Interactive Jupyter Notebook Subsystem
+Full-featured notebook editing and kernel interaction powered by asynchronous ZeroMQ communication:
+
+- **Creating a New Notebook**:
+  - Main menu: `File` &rarr; `New` &rarr; `Jupyter Notebook (.ipynb)`.
+  - Or right-click any directory in the **Project Explorer** &rarr; `New` &rarr; `Jupyter Notebook`.
+- **Opening Existing Notebooks**:
+  - Double-click any `.ipynb` file in the **Project Explorer**.
+- **Jupyter Kernels Tool Window**:
+  - Main menu: `View` &rarr; `Tool Windows` &rarr; `Jupyter Kernels`.
+  - View running local/remote kernel instances, connection status, execution queue, and memory usage.
+- **Executing Cells**:
+  - Press `Shift + Enter` to execute the active cell and advance to the next.
+  - Press `Ctrl + Enter` to execute the active cell in place.
+  - Toggle cell type between **Code** and **Markdown** from the cell toolbar or shortcut keys.
+- **Variable Inspector**:
+  - Inspect in-scope Python variables, shapes, types, and memory sizes during live sessions.
+
+---
+
+### 🗄️ 3. Database Analytics Studio
+Unified analytical console for SQL and NoSQL engines:
+
+- **Opening the Tool Window**:
+  - Main menu: `View` &rarr; `Tool Windows` &rarr; `Database Studio`.
+  - Or click the **Database Studio** icon on the right tool window stripe.
+- **Opening & Running SQL Scripts**:
+  - Open or create any `.sql` file in the project.
+  - Click the green **Run (Ctrl + Enter)** button in the query editor toolbar.
+- **Capabilities**:
+  - Multi-dialect connection manager: PostgreSQL, MySQL, SQLite, DuckDB, Snowflake, MongoDB, and Redis.
+  - Tree explorer for schemas, catalogs, tables, views, columns, and indexes.
+  - Streaming tabular query result grids with live export.
+
+---
+
+### 🖥️ 4. Data Science Subsystems & Resource Monitor
+Real-time resource manager and memory guardian:
+
+- **Opening the Monitor**:
+  - Main menu: `View` &rarr; `Data Science Subsystems & Resource Monitor...`.
+  - Or click the memory indicator gauge on the right side of the bottom status bar.
+- **Capabilities**:
+  - Real-time heap and off-heap memory consumption meters for each loaded subsystem (Jupyter, DataFrame Viewer, Database Suite, Apache Arrow buffers).
+  - Background thread pool status and worker task monitoring.
+  - One-click memory trimming (`Trim Caches`), buffer flushing, and garbage collection.
+
+---
+
+### 🎨 5. Data Science Themes & Color Palettes
+High-contrast daylight and dark themes optimized for long data science sessions:
+
+- **Opening Theme Switcher**:
+  - Main menu: `View` &rarr; `Themes...`.
+  - Or `File` &rarr; `Settings` &rarr; `Appearance & Behavior` &rarr; `Appearance` &rarr; `Theme`.
+- **Available Themes**:
+  - ☀️ **Solarized Light** (default data science daylight theme)
+  - 🌙 **Solarized Dark**
+  - ❄️ **Nord**
+  - 🌃 **Tokyo Night**
+  - 🧛 **Dracula**
+  - ⚡ **Cyberpunk Neon**
+
+---
+
+### 🔀 6. Tailored IDE Perspectives
+Switch workspace tool window layouts instantly depending on the current task:
+
+- **Switching Perspectives**:
+  - Main menu: `View` &rarr; `Perspective` &rarr; choose:
+    - **Analysis Mode** (Balanced layout: Editor center, DataFrame grid bottom, Project left, Stats right).
+    - **Notebook Mode** (Distraction-free notebook canvas with Kernel status and Variable Inspector).
+    - **Database Console Mode** (Expanded schema tree explorer, full-height SQL console, and results table).
+
+---
+
+### 🧩 7. Built-in Plugin Manager Integration
+All core Jörmungandr modules are first-class plugins registered with custom serpent iconography:
+
+- **Opening the Plugin Manager**:
+  - Main menu: `File` &rarr; `Settings` &rarr; `Plugins` (or `Preferences` &rarr; `Plugins` on macOS).
+  - Under the **Installed** tab, find:
+    - 🐍 **Jörmungandr Platform Shell** (`org.jormungandr.shell`)
+    - 🪐 **Jupyter Notebook Integration** (`org.jormungandr.jupyter`)
+    - 📊 **DataFrame Viewer & Studio** (`org.jormungandr.dataframe`)
+    - 🗄️ **Database Analytics Suite** (`org.jormungandr.database`)
+
+---
+
+## 💻 9. Technology Stack
 
 | Component | Technology | Role & Purpose |
 | :--- | :--- | :--- |
@@ -311,7 +425,7 @@ flowchart LR
 
 ---
 
-## 🚀 9. Getting Started & Development
+## 🚀 10. Getting Started & Development
 
 ### 📋 Prerequisites
 - **JDK**: Java Development Kit 21 LTS (Temurin, Microsoft, Oracle, or JetBrains Runtime).
@@ -424,7 +538,7 @@ Jörmungandr features a comprehensive runtime white-labeling and branding overha
 
 ---
 
-## 📄 10. License & Open Source Attribution
+## 📄 11. License & Open Source Attribution
 
 Jörmungandr is free, open-source software licensed under the [Apache License 2.0](LICENSE).  
 Copyright © 2025–2026 **indoctrinatedrecluse**.

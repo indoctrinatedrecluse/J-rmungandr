@@ -62,6 +62,8 @@ class DataFrameGridPanel(
     // Advanced features
     private val chartView = DataFrameChartView(initialDataFrame)
     private val profilerView = ColumnProfilerPanel(initialDataFrame)
+    private val pivotView = PivotTablePanel(initialDataFrame, gridTheme)
+    private val sqlView = DataFrameSqlPanel(initialDataFrame, gridTheme)
     private val filterBuilder = FilterBuilderPanel(initialDataFrame) { compoundFilter ->
         applyCompoundFilter(compoundFilter)
     }
@@ -93,12 +95,15 @@ class DataFrameGridPanel(
         tabbedPane.addTab("Grid View", gridTab)
         tabbedPane.addTab("Chart View", chartView)
         tabbedPane.addTab("Column Profiler", profilerView)
+        tabbedPane.addTab("Pivot Studio", pivotView)
+        tabbedPane.addTab("In-Memory SQL", sqlView)
 
         tabbedPane.addChangeListener {
-            if (tabbedPane.selectedIndex == 1) {
-                chartView.setDataFrame(dataFrame)
-            } else if (tabbedPane.selectedIndex == 2) {
-                profilerView.setDataFrame(dataFrame)
+            when (tabbedPane.selectedIndex) {
+                1 -> chartView.setDataFrame(dataFrame)
+                2 -> profilerView.setDataFrame(dataFrame)
+                3 -> pivotView.setDataFrame(dataFrame)
+                4 -> sqlView.setDataFrame(dataFrame)
             }
         }
 
@@ -115,6 +120,8 @@ class DataFrameGridPanel(
             headerRenderer.sortColumn = -1
             chartView.setDataFrame(value)
             profilerView.setDataFrame(value)
+            pivotView.setDataFrame(value)
+            sqlView.setDataFrame(value)
             filterBuilder.setDataFrame(value)
             updateMetadataViews()
         }
@@ -125,6 +132,8 @@ class DataFrameGridPanel(
         cellRenderer.updateTheme(themeTokens)
         table.tableHeader.repaint()
         table.repaint()
+        pivotView.applyTheme(themeTokens)
+        sqlView.applyTheme(themeTokens)
     }
 
     private fun setupTable() {
@@ -268,6 +277,9 @@ class DataFrameGridPanel(
             isFocusable = false
             addActionListener {
                 val menu = JBPopupMenu()
+                menu.add(JMenuItem("Copy as CSV").apply {
+                    addActionListener { copyToClipboard(DataFrameExporter.toCsv(dataFrame)) }
+                })
                 menu.add(JMenuItem("Copy as TSV").apply {
                     addActionListener { copyToClipboard(DataFrameExporter.toTsv(dataFrame)) }
                 })
@@ -276,6 +288,12 @@ class DataFrameGridPanel(
                 })
                 menu.add(JMenuItem("Copy as JSON").apply {
                     addActionListener { copyToClipboard(DataFrameExporter.toJson(dataFrame)) }
+                })
+                menu.add(JMenuItem("Copy as JSON Lines (.jsonl)").apply {
+                    addActionListener { copyToClipboard(DataFrameExporter.toJsonLines(dataFrame)) }
+                })
+                menu.add(JMenuItem("Copy as Excel XML (.xml)").apply {
+                    addActionListener { copyToClipboard(DataFrameExporter.toExcelXml(dataFrame)) }
                 })
                 menu.show(this, 0, height)
             }

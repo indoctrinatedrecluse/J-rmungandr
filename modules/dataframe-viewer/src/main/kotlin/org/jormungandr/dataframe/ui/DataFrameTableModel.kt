@@ -22,6 +22,10 @@ class DataFrameTableModel(
             fireTableStructureChanged()
         }
 
+    fun updateDataFrame(newDataFrame: DataFrame) {
+        this.dataFrame = newDataFrame
+    }
+
     fun applyFilter(query: String) {
         displayDataFrame = if (query.isBlank()) currentDataFrame else currentDataFrame.filterText(query)
         fireTableDataChanged()

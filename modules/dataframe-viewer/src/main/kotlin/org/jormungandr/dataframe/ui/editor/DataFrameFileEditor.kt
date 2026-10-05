@@ -7,6 +7,7 @@ import com.intellij.openapi.project.Project
 import com.intellij.openapi.util.UserDataHolderBase
 import com.intellij.openapi.vfs.VirtualFile
 import org.jormungandr.dataframe.io.CsvDataLoader
+import org.jormungandr.dataframe.io.ParquetDataLoader
 import org.jormungandr.dataframe.model.DataFrame
 import org.jormungandr.dataframe.ui.DataFrameGridPanel
 import java.beans.PropertyChangeListener
@@ -21,8 +22,13 @@ class DataFrameFileEditor(
 
     init {
         val initialDf = try {
+            val isParquet = virtualFile.extension?.equals("parquet", ignoreCase = true) == true
             virtualFile.inputStream.use { input ->
-                CsvDataLoader.loadFromStream(virtualFile.name, input)
+                if (isParquet) {
+                    ParquetDataLoader.loadFromStream(virtualFile.name, input)
+                } else {
+                    CsvDataLoader.loadFromStream(virtualFile.name, input)
+                }
             }
         } catch (e: Exception) {
             DataFrame.empty(virtualFile.name)

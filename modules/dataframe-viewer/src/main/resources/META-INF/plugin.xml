@@ -36,6 +36,11 @@
                   fieldName="INSTANCE"
                   extensions="csv;tsv;tab"/>
 
+        <fileType name="Parquet Dataset"
+                  implementationClass="org.jormungandr.dataframe.filetype.ParquetFileType"
+                  fieldName="INSTANCE"
+                  extensions="parquet"/>
+
         <fileEditorProvider implementation="org.jormungandr.dataframe.ui.editor.DataFrameEditorProvider"/>
 
         <toolWindow id="DataFrame Viewer"
