@@ -26,6 +26,7 @@
 
     <extensions defaultExtensionNs="com.intellij">
         <applicationService serviceImplementation="org.jormungandr.jupyter.kernel.JupyterKernelService"/>
+        <projectService serviceImplementation="org.jormungandr.jupyter.variable.VariableInspectorService"/>
 
         <fileType name="Jupyter Notebook"
                   implementationClass="org.jormungandr.jupyter.filetype.JupyterNotebookFileType"

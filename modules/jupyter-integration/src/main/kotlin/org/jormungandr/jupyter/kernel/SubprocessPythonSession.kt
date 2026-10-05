@@ -44,7 +44,7 @@ class SubprocessPythonSession(
         if (_status.value.isRunning && process?.isAlive == true) return@withContext true
         _status.value = KernelStatus.STARTING
         try {
-            val runnerScript = "import sys, base64, traceback\n" +
+            val runnerScript = "import sys, base64, traceback, ast\n" +
                 "cell_globals = {'__name__': '__main__', '__doc__': None}\n" +
                 "print('__JG_KERNEL_READY__', flush=True)\n" +
                 "while True:\n" +
@@ -59,8 +59,35 @@ class SubprocessPythonSession(
                 "    if tag == 'EXEC':\n" +
                 "        code = base64.b64decode(payload).decode('utf-8')\n" +
                 "        try:\n" +
-                "            compiled = compile(code, '<cell>', 'exec')\n" +
-                "            exec(compiled, cell_globals)\n" +
+                "            tree = ast.parse(code)\n" +
+                "            if tree.body and isinstance(tree.body[-1], ast.Expr):\n" +
+                "                exec_body = tree.body[:-1]\n" +
+                "                if exec_body:\n" +
+                "                    exec_mod = ast.Module(body=exec_body, type_ignores=[])\n" +
+                "                    exec(compile(exec_mod, '<cell>', 'exec'), cell_globals)\n" +
+                "                expr_ast = ast.Expression(body=tree.body[-1].value)\n" +
+                "                res = eval(compile(expr_ast, '<cell>', 'eval'), cell_globals)\n" +
+                "                if res is not None:\n" +
+                "                    handled = False\n" +
+                "                    if hasattr(res, '_repr_html_'):\n" +
+                "                        try:\n" +
+                "                            h = res._repr_html_()\n" +
+                "                            if h:\n" +
+                "                                print('__JG_MIME_HTML__' + base64.b64encode(h.encode('utf-8')).decode('ascii') + '__JG_MIME_HTML_END__', flush=True)\n" +
+                "                                handled = True\n" +
+                "                        except Exception: pass\n" +
+                "                    if not handled and hasattr(res, '_repr_png_'):\n" +
+                "                        try:\n" +
+                "                            p = res._repr_png_()\n" +
+                "                            if p:\n" +
+                "                                b64 = p if isinstance(p, str) else base64.b64encode(p).decode('ascii')\n" +
+                "                                print('__JG_MIME_PNG__' + b64 + '__JG_MIME_PNG_END__', flush=True)\n" +
+                "                                handled = True\n" +
+                "                        except Exception: pass\n" +
+                "                    if not handled:\n" +
+                "                        print(repr(res), flush=True)\n" +
+                "            else:\n" +
+                "                exec(compile(tree, '<cell>', 'exec'), cell_globals)\n" +
                 "        except Exception:\n" +
                 "            traceback.print_exc()\n" +
                 "        finally:\n" +
@@ -140,7 +167,18 @@ class SubprocessPythonSession(
                     if (line.contains("__JG_EXEC_DONE__")) {
                         break
                     }
-                    if (line.startsWith("Traceback (most recent call last):") || errorLines.isNotEmpty()) {
+                    if (line.startsWith("__JG_MIME_HTML__") && line.contains("__JG_MIME_HTML_END__")) {
+                        val b64 = line.substringAfter("__JG_MIME_HTML__").substringBefore("__JG_MIME_HTML_END__")
+                        val decodedHtml = String(Base64.getDecoder().decode(b64), StandardCharsets.UTF_8)
+                        val disp = CellOutput.DisplayDataOutput(mapOf("text/html" to decodedHtml))
+                        outputs.add(disp)
+                        onOutput(disp)
+                    } else if (line.startsWith("__JG_MIME_PNG__") && line.contains("__JG_MIME_PNG_END__")) {
+                        val b64 = line.substringAfter("__JG_MIME_PNG__").substringBefore("__JG_MIME_PNG_END__")
+                        val disp = CellOutput.DisplayDataOutput(mapOf("image/png" to b64))
+                        outputs.add(disp)
+                        onOutput(disp)
+                    } else if (line.startsWith("Traceback (most recent call last):") || errorLines.isNotEmpty()) {
                         isError = true
                         errorLines.add(line)
                     } else {

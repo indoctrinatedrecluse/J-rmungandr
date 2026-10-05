@@ -181,7 +181,14 @@ class NotebookPanel(
                 onDeleteRequested = { deleteCell(it) },
                 onMoveUpRequested = { moveCellUp(it) },
                 onMoveDownRequested = { moveCellDown(it) },
-                onModified = { saveNotebook() }
+                onModified = { saveNotebook() },
+                onRunAllAboveRequested = { runAllAbove(it) },
+                onRunAllBelowRequested = { runAllBelow(it) },
+                onClearOutputsRequested = {
+                    it.cell.clearOutputs()
+                    it.renderOutputs()
+                    saveNotebook()
+                }
             )
             cellComponents.add(comp)
             cellsContainer.add(comp)
@@ -284,6 +291,12 @@ class NotebookPanel(
                 comp.renderOutputs()
                 saveNotebook()
             }
+
+            // Asynchronously refresh Variable Inspector
+            runCatching {
+                val varService = org.jormungandr.jupyter.variable.VariableInspectorService.getInstance(project)
+                varService.refresh(session)
+            }
         }
     }
 
@@ -296,6 +309,34 @@ class NotebookPanel(
                     while (comp.cell.isExecuting) {
                         delay(50)
                     }
+                }
+            }
+        }
+    }
+
+    fun runAllAbove(comp: CellComponent) {
+        val targetIdx = cellComponents.indexOf(comp)
+        if (targetIdx <= 0) return
+        panelScope.launch(Dispatchers.IO) {
+            for (i in 0 until targetIdx) {
+                val c = cellComponents.getOrNull(i) ?: continue
+                if (c.cell.cellType == CellType.CODE) {
+                    runCell(c)
+                    while (c.cell.isExecuting) delay(50)
+                }
+            }
+        }
+    }
+
+    fun runAllBelow(comp: CellComponent) {
+        val targetIdx = cellComponents.indexOf(comp)
+        if (targetIdx < 0 || targetIdx >= cellComponents.size - 1) return
+        panelScope.launch(Dispatchers.IO) {
+            for (i in targetIdx + 1 until cellComponents.size) {
+                val c = cellComponents.getOrNull(i) ?: continue
+                if (c.cell.cellType == CellType.CODE) {
+                    runCell(c)
+                    while (c.cell.isExecuting) delay(50)
                 }
             }
         }

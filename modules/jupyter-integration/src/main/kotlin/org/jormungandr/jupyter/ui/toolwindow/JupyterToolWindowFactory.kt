@@ -96,7 +96,11 @@ class JupyterToolWindowFactory : ToolWindowFactory, DumbAware {
 
         refreshTable()
 
-        val content = ContentFactory.getInstance().createContent(panel, "Kernels", false)
-        toolWindow.contentManager.addContent(content)
+        val kernelsContent = ContentFactory.getInstance().createContent(panel, "Active Kernels", false)
+        toolWindow.contentManager.addContent(kernelsContent)
+
+        val variablePanel = org.jormungandr.jupyter.ui.VariableInspectorPanel(project)
+        val varsContent = ContentFactory.getInstance().createContent(variablePanel, "Variable Inspector", false)
+        toolWindow.contentManager.addContent(varsContent)
     }
 }

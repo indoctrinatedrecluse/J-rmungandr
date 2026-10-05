@@ -5,8 +5,10 @@ import com.intellij.openapi.editor.Editor
 import com.intellij.openapi.editor.EditorFactory
 import com.intellij.openapi.editor.event.DocumentEvent
 import com.intellij.openapi.editor.event.DocumentListener
+import com.intellij.openapi.fileEditor.FileEditorManager
 import com.intellij.openapi.fileTypes.FileTypeManager
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.vfs.LocalFileSystem
 import com.intellij.ui.JBColor
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBScrollPane
@@ -15,9 +17,11 @@ import com.intellij.util.ui.JBUI
 import org.jormungandr.core.theme.ThemeManager
 import org.jormungandr.jupyter.model.*
 import java.awt.*
+import java.awt.datatransfer.StringSelection
 import java.awt.event.KeyAdapter
 import java.awt.event.KeyEvent
 import java.io.ByteArrayInputStream
+import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 import javax.imageio.ImageIO
@@ -41,7 +45,10 @@ class CellComponent(
     private val onDeleteRequested: (CellComponent) -> Unit,
     private val onMoveUpRequested: (CellComponent) -> Unit,
     private val onMoveDownRequested: (CellComponent) -> Unit,
-    private val onModified: () -> Unit
+    private val onModified: () -> Unit,
+    private val onRunAllAboveRequested: ((CellComponent) -> Unit)? = null,
+    private val onRunAllBelowRequested: ((CellComponent) -> Unit)? = null,
+    private val onClearOutputsRequested: ((CellComponent) -> Unit)? = null
 ) : JPanel(BorderLayout()) {
 
     private val themeManager: ThemeManager? = runCatching {
@@ -163,8 +170,58 @@ class CellComponent(
             addActionListener { onDeleteRequested(this@CellComponent) }
         }
 
+        val moreBtn = JButton("⋮").apply {
+            isFocusPainted = false
+            font = font.deriveFont(Font.BOLD, 12f)
+            toolTipText = "More cell actions"
+            addActionListener {
+                val menu = JPopupMenu()
+                val runItem = JMenuItem("▶ Run Cell").apply {
+                    addActionListener { onRunRequested(this@CellComponent) }
+                }
+                val runAboveItem = JMenuItem("⏩ Run All Above").apply {
+                    addActionListener { onRunAllAboveRequested?.invoke(this@CellComponent) }
+                }
+                val runBelowItem = JMenuItem("⏩ Run All Below").apply {
+                    addActionListener { onRunAllBelowRequested?.invoke(this@CellComponent) }
+                }
+                val clearOutItem = JMenuItem("🧹 Clear Output").apply {
+                    addActionListener {
+                        if (onClearOutputsRequested != null) {
+                            onClearOutputsRequested.invoke(this@CellComponent)
+                        } else {
+                            cell.clearOutputs()
+                            renderOutputs()
+                            onModified()
+                        }
+                    }
+                }
+                val copyCodeItem = JMenuItem("📋 Copy Code").apply {
+                    addActionListener {
+                        val sel = StringSelection(cell.source)
+                        Toolkit.getDefaultToolkit().systemClipboard.setContents(sel, sel)
+                    }
+                }
+                val delItem = JMenuItem("✕ Delete Cell").apply {
+                    addActionListener { onDeleteRequested(this@CellComponent) }
+                }
+
+                menu.add(runItem)
+                menu.add(runAboveItem)
+                menu.add(runBelowItem)
+                menu.addSeparator()
+                menu.add(clearOutItem)
+                menu.add(copyCodeItem)
+                menu.addSeparator()
+                menu.add(delItem)
+
+                menu.show(this, 0, height)
+            }
+        }
+
         right.add(upBtn)
         right.add(downBtn)
+        right.add(moreBtn)
         right.add(delBtn)
 
         headerPanel.add(right, BorderLayout.EAST)
@@ -342,22 +399,129 @@ class CellComponent(
     }
 
     private fun renderRichMime(data: Map<String, Any>, execCount: Int?) {
-        // 1. Check for PNG image
-        val pngBase64 = data["image/png"]?.toString()
-        if (pngBase64 != null) {
+        // 1. Check for Images (PNG, JPEG)
+        val imageBase64 = data["image/png"]?.toString() ?: data["image/jpeg"]?.toString()
+        if (imageBase64 != null) {
             runCatching {
-                val cleanBase64 = pngBase64.replace("\n", "").trim()
+                val cleanBase64 = imageBase64.replace("\n", "").replace("\r", "").trim()
                 val bytes = Base64.getDecoder().decode(cleanBase64)
                 val img = ImageIO.read(ByteArrayInputStream(bytes))
                 if (img != null) {
-                    val imgLabel = JLabel(ImageIcon(img))
-                    outputPanel.add(imgLabel)
+                    val imgContainer = JPanel(BorderLayout()).apply {
+                        isOpaque = false
+                        border = EmptyBorder(4, 0, 4, 0)
+                    }
+
+                    val imgLabel = JLabel(ImageIcon(img)).apply {
+                        border = CompoundBorder(
+                            LineBorder(Color(229, 231, 235), 1),
+                            EmptyBorder(4, 4, 4, 4)
+                        )
+                    }
+
+                    val toolbar = JPanel(FlowLayout(FlowLayout.RIGHT, 4, 0)).apply { isOpaque = false }
+                    val copyImgBtn = JButton("📋 Copy Image").apply {
+                        font = font.deriveFont(Font.PLAIN, 10f)
+                        addActionListener {
+                            Toolkit.getDefaultToolkit().systemClipboard.setContents(
+                                ImageTransferable(img),
+                                null
+                            )
+                        }
+                    }
+                    toolbar.add(copyImgBtn)
+
+                    imgContainer.add(toolbar, BorderLayout.NORTH)
+                    imgContainer.add(imgLabel, BorderLayout.CENTER)
+                    outputPanel.add(imgContainer)
                     return
                 }
             }
         }
 
-        // 2. Check for Plain Text
+        // 2. Check for HTML
+        val htmlContent = data["text/html"]?.toString()
+        if (htmlContent != null) {
+            val parsedTable = HtmlTableParser.parse(htmlContent)
+            if (parsedTable != null) {
+                // Rich DataFrame Card
+                val tableCard = JPanel(BorderLayout()).apply {
+                    isOpaque = true
+                    background = Color(255, 255, 255)
+                    border = CompoundBorder(
+                        LineBorder(Color(203, 213, 225), 1, true),
+                        EmptyBorder(4, 8, 8, 8)
+                    )
+                }
+
+                // Table Card Header Bar
+                val headerBar = JPanel(BorderLayout()).apply {
+                    isOpaque = false
+                    border = EmptyBorder(4, 4, 6, 4)
+                }
+                val infoLabel = JLabel("📊 DataFrame Output [${parsedTable.rows.size} rows × ${parsedTable.headers.size} cols]").apply {
+                    font = font.deriveFont(Font.BOLD, 11f)
+                    foreground = Color(30, 41, 59)
+                }
+                headerBar.add(infoLabel, BorderLayout.WEST)
+
+                val actions = JPanel(FlowLayout(FlowLayout.RIGHT, 4, 0)).apply { isOpaque = false }
+                val openDfBtn = JButton("📊 Open in DataFrame Studio").apply {
+                    font = font.deriveFont(Font.BOLD, 10f)
+                    foreground = Color(30, 64, 175)
+                    toolTipText = "Open this table directly in Jörmungandr DataFrame Studio"
+                    addActionListener {
+                        runCatching {
+                            val tempFile = File.createTempFile("jupyter_table_", ".csv")
+                            tempFile.writeText(parsedTable.toCsv(), Charsets.UTF_8)
+                            tempFile.deleteOnExit()
+                            val vFile = LocalFileSystem.getInstance().refreshAndFindFileByIoFile(tempFile)
+                            if (vFile != null) {
+                                FileEditorManager.getInstance(project).openFile(vFile, true)
+                            }
+                        }
+                    }
+                }
+                val copyCsvBtn = JButton("📋 Copy CSV").apply {
+                    font = font.deriveFont(Font.PLAIN, 10f)
+                    addActionListener {
+                        val sel = StringSelection(parsedTable.toCsv())
+                        Toolkit.getDefaultToolkit().systemClipboard.setContents(sel, sel)
+                    }
+                }
+                actions.add(openDfBtn)
+                actions.add(copyCsvBtn)
+                headerBar.add(actions, BorderLayout.EAST)
+
+                tableCard.add(headerBar, BorderLayout.NORTH)
+
+                // HTML Table Viewer
+                val editorPane = JEditorPane("text/html", formatTableHtml(htmlContent)).apply {
+                    isEditable = false
+                    background = Color(255, 255, 255)
+                    border = null
+                }
+                val scroll = JBScrollPane(editorPane).apply {
+                    preferredSize = Dimension(editorPane.preferredSize.width, (editorPane.preferredSize.height + 20).coerceIn(60, 320))
+                    border = null
+                }
+                tableCard.add(scroll, BorderLayout.CENTER)
+
+                outputPanel.add(tableCard)
+                return
+            } else {
+                // General HTML
+                val editorPane = JEditorPane("text/html", htmlContent).apply {
+                    isEditable = false
+                    background = getSurfaceColor()
+                    border = null
+                }
+                outputPanel.add(editorPane)
+                return
+            }
+        }
+
+        // 3. Fallback to Plain Text
         val plainText = data["text/plain"]?.toString() ?: data.values.firstOrNull()?.toString() ?: ""
         val resultRow = JPanel(BorderLayout(6, 0)).apply { isOpaque = false }
         if (execCount != null) {
@@ -376,6 +540,33 @@ class CellComponent(
         }
         resultRow.add(textComp, BorderLayout.CENTER)
         outputPanel.add(resultRow)
+    }
+
+    private fun formatTableHtml(tableHtml: String): String {
+        return """
+            <html>
+            <head>
+            <style>
+                body { font-family: sans-serif; font-size: 11px; margin: 0; padding: 4px; }
+                table { border-collapse: collapse; width: 100%; }
+                th { background-color: #f1f5f9; color: #1e293b; padding: 4px 8px; border: 1px solid #cbd5e1; font-weight: bold; text-align: left; }
+                td { padding: 4px 8px; border: 1px solid #e2e8f0; color: #334155; }
+                tr:nth-child(even) { background-color: #f8fafc; }
+            </style>
+            </head>
+            <body>
+            $tableHtml
+            </body>
+            </html>
+        """.trimIndent()
+    }
+
+    private class ImageTransferable(private val image: Image) : java.awt.datatransfer.Transferable {
+        override fun getTransferDataFlavors(): Array<java.awt.datatransfer.DataFlavor> =
+            arrayOf(java.awt.datatransfer.DataFlavor.imageFlavor)
+        override fun isDataFlavorSupported(flavor: java.awt.datatransfer.DataFlavor): Boolean =
+            java.awt.datatransfer.DataFlavor.imageFlavor.equals(flavor)
+        override fun getTransferData(flavor: java.awt.datatransfer.DataFlavor): Any = image
     }
 
     /**

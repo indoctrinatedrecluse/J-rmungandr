@@ -84,4 +84,20 @@ class SubprocessPythonSessionTest {
         assertNotNull(err)
         assertTrue(err?.ename?.contains("ZeroDivisionError") == true || err?.traceback?.any { it.contains("ZeroDivisionError") } == true)
     }
+
+    @Test
+    @Timeout(value = 10, unit = TimeUnit.SECONDS)
+    fun `test expression evaluation as cell output`() = runTest {
+        val s = session ?: return@runTest
+        val started = s.start()
+        if (!started) return@runTest
+
+        val captured = mutableListOf<CellOutput>()
+        val result = s.execute("a = 15\nb = 27\na + b") { out ->
+            captured.add(out)
+        }
+
+        assertTrue(result.isSuccess)
+        assertTrue(captured.any { it is CellOutput.StreamOutput && it.text.contains("42") })
+    }
 }
