@@ -1,9 +1,12 @@
 package org.jormungandr.jupyter
 
+import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.logger
 import org.jormungandr.core.extension.*
+import org.jormungandr.jupyter.kernel.JupyterKernelService
+import org.jormungandr.jupyter.kernel.KernelDiscovery
 import org.jormungandr.jupyter.model.JupyterKernelSpec
-import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.CopyOnWriteArrayList
 
 private val LOG = logger<JupyterExtension>()
 
@@ -33,7 +36,7 @@ class JupyterExtension : JormungandrExtension {
     override val state: ExtensionState get() = _state
 
     private var context: ExtensionContext? = null
-    private val activeKernels = ConcurrentHashMap<String, JupyterKernelSpec>()
+    val discoveredKernels = CopyOnWriteArrayList<JupyterKernelSpec>()
 
     override suspend fun initialize(context: ExtensionContext) {
         this.context = context
@@ -47,6 +50,11 @@ class JupyterExtension : JormungandrExtension {
         }
         _state = ExtensionState.ACTIVE
         LOG.info("JupyterExtension activated. Scanning available local/conda Jupyter kernels...")
+
+        val kernels = KernelDiscovery.discoverKernels()
+        discoveredKernels.clear()
+        discoveredKernels.addAll(kernels)
+        LOG.info("Discovered ${kernels.size} Jupyter kernels: ${kernels.joinToString { it.displayName }}")
     }
 
     override suspend fun pause() {
@@ -61,20 +69,33 @@ class JupyterExtension : JormungandrExtension {
 
     override suspend fun trimMemory(level: MemoryPressureLevel) {
         LOG.warn("JupyterExtension trimming output caches and unpinned cell buffers under $level pressure.")
-        // Evict cached cell MIME outputs from heap
+        if (level == MemoryPressureLevel.CRITICAL) {
+            val kernelService = runCatching {
+                ApplicationManager.getApplication()?.getService(JupyterKernelService::class.java)
+            }.getOrNull()
+            kernelService?.getActiveSessions()?.forEach { session ->
+                if (!session.status.value.isRunning) {
+                    session.shutdown()
+                }
+            }
+        }
     }
 
     override suspend fun deactivate() {
         _state = ExtensionState.DISPOSING
         LOG.info("JupyterExtension deactivating: terminating active kernels and closing ZeroMQ sockets...")
-        activeKernels.clear()
+        discoveredKernels.clear()
+        val kernelService = runCatching {
+            ApplicationManager.getApplication()?.getService(JupyterKernelService::class.java)
+        }.getOrNull()
+        kernelService?.dispose()
         _state = ExtensionState.TERMINATED
     }
 
     override fun dispose() {
         if (_state != ExtensionState.TERMINATED) {
             LOG.info("Disposing JupyterExtension through IntelliJ Disposer.")
-            activeKernels.clear()
+            discoveredKernels.clear()
             _state = ExtensionState.TERMINATED
         }
     }

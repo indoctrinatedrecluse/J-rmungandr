@@ -1,0 +1,553 @@
+package org.jormungandr.jupyter.ui
+
+import com.intellij.openapi.application.ApplicationManager
+import com.intellij.openapi.editor.Editor
+import com.intellij.openapi.editor.EditorFactory
+import com.intellij.openapi.editor.event.DocumentEvent
+import com.intellij.openapi.editor.event.DocumentListener
+import com.intellij.openapi.fileTypes.FileTypeManager
+import com.intellij.openapi.project.Project
+import com.intellij.ui.JBColor
+import com.intellij.ui.components.JBLabel
+import com.intellij.ui.components.JBScrollPane
+import com.intellij.ui.components.JBTextArea
+import com.intellij.util.ui.JBUI
+import org.jormungandr.core.theme.ThemeManager
+import org.jormungandr.jupyter.model.*
+import java.awt.*
+import java.awt.event.KeyAdapter
+import java.awt.event.KeyEvent
+import java.io.ByteArrayInputStream
+import java.text.SimpleDateFormat
+import java.util.*
+import javax.imageio.ImageIO
+import javax.swing.*
+import javax.swing.border.CompoundBorder
+import javax.swing.border.EmptyBorder
+import javax.swing.border.LineBorder
+import javax.swing.border.MatteBorder
+
+/**
+ * UI Component rendering an individual Jupyter notebook cell:
+ * - Code/Markdown editor
+ * - Gutter execution count `In [1]:` / `In [*]:`
+ * - Live streaming output container (stdout, stderr, rich PNG/HTML, tracebacks)
+ * - Threaded cell comments and reply system
+ */
+class CellComponent(
+    val cell: NotebookCell,
+    private val project: Project,
+    private val onRunRequested: (CellComponent) -> Unit,
+    private val onDeleteRequested: (CellComponent) -> Unit,
+    private val onMoveUpRequested: (CellComponent) -> Unit,
+    private val onMoveDownRequested: (CellComponent) -> Unit,
+    private val onModified: () -> Unit
+) : JPanel(BorderLayout()) {
+
+    private val themeManager: ThemeManager? = runCatching {
+        ApplicationManager.getApplication()?.getService(ThemeManager::class.java)
+    }.getOrNull()
+
+    private val headerPanel = JPanel(BorderLayout())
+    private val execLabel = JLabel()
+    private val typeCombo = JComboBox(arrayOf("Code", "Markdown", "Raw"))
+    private val commentsToggleBtn = JButton()
+
+    private var editor: Editor? = null
+    private var fallbackTextArea: JTextArea? = null
+    private val editorContainer = JPanel(BorderLayout())
+
+    private val outputPanel = JPanel()
+    private val commentsPanel = JPanel()
+    private var commentsVisible = cell.comments.isNotEmpty()
+
+    init {
+        border = CompoundBorder(
+            EmptyBorder(4, 8, 8, 8),
+            LineBorder(getBorderColor(), 1, true)
+        )
+        background = getSurfaceColor()
+
+        buildHeader()
+        buildEditor()
+        buildOutputPanel()
+        buildCommentsPanel()
+
+        val centerPanel = JPanel()
+        centerPanel.layout = BoxLayout(centerPanel, BoxLayout.Y_AXIS)
+        centerPanel.isOpaque = false
+        centerPanel.add(editorContainer)
+        centerPanel.add(outputPanel)
+        centerPanel.add(commentsPanel)
+
+        add(headerPanel, BorderLayout.NORTH)
+        add(centerPanel, BorderLayout.CENTER)
+
+        updateExecutionDisplay()
+        renderOutputs()
+        renderComments()
+    }
+
+    private fun buildHeader() {
+        headerPanel.isOpaque = true
+        headerPanel.background = getSecondaryBgColor()
+        headerPanel.border = EmptyBorder(4, 8, 4, 8)
+
+        // Left Header: Execution Count & Type
+        val left = JPanel(FlowLayout(FlowLayout.LEFT, 6, 0)).apply { isOpaque = false }
+        execLabel.font = Font("Monospaced", Font.BOLD, 12)
+        execLabel.foreground = getAccentColor()
+        left.add(execLabel)
+
+        typeCombo.selectedItem = when (cell.cellType) {
+            CellType.CODE -> "Code"
+            CellType.MARKDOWN -> "Markdown"
+            CellType.RAW -> "Raw"
+        }
+        typeCombo.isFocusable = false
+        typeCombo.addActionListener {
+            val newType = when (typeCombo.selectedItem as String) {
+                "Markdown" -> CellType.MARKDOWN
+                "Raw" -> CellType.RAW
+                else -> CellType.CODE
+            }
+            if (cell.cellType != newType) {
+                cell.cellType = newType
+                updateExecutionDisplay()
+                onModified()
+            }
+        }
+        left.add(typeCombo)
+        headerPanel.add(left, BorderLayout.WEST)
+
+        // Right Header: Run, Comments Badge, Move, Delete
+        val right = JPanel(FlowLayout(FlowLayout.RIGHT, 4, 0)).apply { isOpaque = false }
+
+        val runBtn = JButton("▶ Run").apply {
+            isFocusPainted = false
+            font = font.deriveFont(Font.BOLD, 11f)
+            cursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
+            toolTipText = "Execute cell (Shift+Enter)"
+            addActionListener { onRunRequested(this@CellComponent) }
+        }
+        right.add(runBtn)
+
+        updateCommentButtonText()
+        commentsToggleBtn.apply {
+            isFocusPainted = false
+            font = font.deriveFont(Font.PLAIN, 11f)
+            cursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
+            toolTipText = "Toggle cell review comments"
+            addActionListener {
+                commentsVisible = !commentsVisible
+                commentsPanel.isVisible = commentsVisible
+                revalidate()
+                repaint()
+            }
+        }
+        right.add(commentsToggleBtn)
+
+        val upBtn = JButton("▲").apply {
+            isFocusPainted = false
+            toolTipText = "Move cell up"
+            addActionListener { onMoveUpRequested(this@CellComponent) }
+        }
+        val downBtn = JButton("▼").apply {
+            isFocusPainted = false
+            toolTipText = "Move cell down"
+            addActionListener { onMoveDownRequested(this@CellComponent) }
+        }
+        val delBtn = JButton("✕").apply {
+            isFocusPainted = false
+            toolTipText = "Delete cell"
+            addActionListener { onDeleteRequested(this@CellComponent) }
+        }
+
+        right.add(upBtn)
+        right.add(downBtn)
+        right.add(delBtn)
+
+        headerPanel.add(right, BorderLayout.EAST)
+    }
+
+    private fun buildEditor() {
+        editorContainer.border = EmptyBorder(4, 4, 4, 4)
+        editorContainer.isOpaque = false
+
+        runCatching {
+            val editorFactory = EditorFactory.getInstance()
+            val document = editorFactory.createDocument(cell.source)
+            document.addDocumentListener(object : DocumentListener {
+                override fun documentChanged(event: DocumentEvent) {
+                    cell.source = document.text
+                    onModified()
+                }
+            })
+
+            val pyFileType = FileTypeManager.getInstance().getFileTypeByExtension("py")
+            val newEditor = editorFactory.createEditor(document, project, pyFileType, false)
+            newEditor.settings.apply {
+                isLineNumbersShown = true
+                isAutoCodeFoldingEnabled = false
+                isLineMarkerAreaShown = false
+                isIndentGuidesShown = true
+            }
+
+            // Keyboard shortcut for Shift+Enter (Run) & Ctrl+Enter (Run in place)
+            newEditor.contentComponent.addKeyListener(object : KeyAdapter() {
+                override fun keyPressed(e: KeyEvent) {
+                    if (e.keyCode == KeyEvent.VK_ENTER && e.isShiftDown) {
+                        e.consume()
+                        onRunRequested(this@CellComponent)
+                    } else if (e.keyCode == KeyEvent.VK_ENTER && (e.isControlDown || e.isMetaDown)) {
+                        e.consume()
+                        onRunRequested(this@CellComponent)
+                    }
+                }
+            })
+
+            editor = newEditor
+            editorContainer.add(newEditor.component, BorderLayout.CENTER)
+        }.onFailure {
+            // Fallback lightweight Swing text area
+            val textArea = JBTextArea(cell.source).apply {
+                font = Font("Consolas", Font.PLAIN, 13)
+                rows = (cell.source.lines().size.coerceAtLeast(2))
+                lineWrap = false
+                addKeyListener(object : KeyAdapter() {
+                    override fun keyReleased(e: KeyEvent?) {
+                        cell.source = text
+                        onModified()
+                    }
+                    override fun keyPressed(e: KeyEvent) {
+                        if (e.keyCode == KeyEvent.VK_ENTER && e.isShiftDown) {
+                            e.consume()
+                            onRunRequested(this@CellComponent)
+                        }
+                    }
+                })
+            }
+            fallbackTextArea = textArea
+            val scroll = JBScrollPane(textArea)
+            editorContainer.add(scroll, BorderLayout.CENTER)
+        }
+    }
+
+    private fun buildOutputPanel() {
+        outputPanel.layout = BoxLayout(outputPanel, BoxLayout.Y_AXIS)
+        outputPanel.isOpaque = false
+        outputPanel.border = EmptyBorder(2, 8, 4, 8)
+    }
+
+    private fun buildCommentsPanel() {
+        commentsPanel.layout = BoxLayout(commentsPanel, BoxLayout.Y_AXIS)
+        commentsPanel.isOpaque = true
+        commentsPanel.background = getSecondaryBgColor()
+        commentsPanel.border = MatteBorder(1, 0, 0, 0, getBorderColor())
+        commentsPanel.isVisible = commentsVisible
+    }
+
+    fun updateExecutionDisplay() {
+        SwingUtilities.invokeLater {
+            if (cell.cellType != CellType.CODE) {
+                execLabel.text = "        "
+                return@invokeLater
+            }
+
+            if (cell.isExecuting) {
+                execLabel.text = "In [*]: "
+                execLabel.foreground = Color(203, 75, 22) // Orange
+            } else if (cell.executionCount != null) {
+                execLabel.text = "In [${cell.executionCount}]: "
+                execLabel.foreground = getAccentColor()
+            } else {
+                execLabel.text = "In [ ]: "
+                execLabel.foreground = Color.GRAY
+            }
+        }
+    }
+
+    fun appendStreamOutput(stream: CellOutput.StreamOutput) {
+        SwingUtilities.invokeLater {
+            cell.outputs.add(stream)
+            val lineLabel = JBLabel(stripAnsi(stream.text)).apply {
+                font = Font("Consolas", Font.PLAIN, 12)
+                foreground = if (stream.name == "stderr") Color(220, 50, 47) else getForegroundColor()
+            }
+            outputPanel.add(lineLabel)
+            outputPanel.revalidate()
+            outputPanel.repaint()
+        }
+    }
+
+    fun renderOutputs() {
+        SwingUtilities.invokeLater {
+            outputPanel.removeAll()
+            if (cell.outputs.isEmpty()) {
+                outputPanel.revalidate()
+                outputPanel.repaint()
+                return@invokeLater
+            }
+
+            for (output in cell.outputs) {
+                when (output) {
+                    is CellOutput.StreamOutput -> {
+                        val text = stripAnsi(output.text)
+                        val area = JTextArea(text).apply {
+                            isEditable = false
+                            font = Font("Consolas", Font.PLAIN, 12)
+                            foreground = if (output.name == "stderr") Color(220, 50, 47) else getForegroundColor()
+                            background = getSurfaceColor()
+                            border = EmptyBorder(2, 4, 2, 4)
+                        }
+                        outputPanel.add(area)
+                    }
+                    is CellOutput.ExecuteResultOutput -> {
+                        renderRichMime(output.data, output.executionCount)
+                    }
+                    is CellOutput.DisplayDataOutput -> {
+                        renderRichMime(output.data, null)
+                    }
+                    is CellOutput.ErrorOutput -> {
+                        val errorBox = JPanel().apply {
+                            layout = BoxLayout(this, BoxLayout.Y_AXIS)
+                            background = Color(255, 235, 238)
+                            border = CompoundBorder(LineBorder(Color(239, 154, 154), 1), EmptyBorder(6, 8, 6, 8))
+                            val title = JLabel("${output.ename}: ${output.evalue}").apply {
+                                font = font.deriveFont(Font.BOLD, 12f)
+                                foreground = Color(183, 28, 28)
+                            }
+                            add(title)
+
+                            if (output.traceback.isNotEmpty()) {
+                                add(Box.createVerticalStrut(4))
+                                val tb = JTextArea(output.traceback.joinToString("\n") { stripAnsi(it) }).apply {
+                                    isEditable = false
+                                    font = Font("Consolas", Font.PLAIN, 11)
+                                    foreground = Color(136, 14, 79)
+                                    background = Color(255, 235, 238)
+                                }
+                                add(tb)
+                            }
+                        }
+                        outputPanel.add(errorBox)
+                    }
+                }
+                outputPanel.add(Box.createVerticalStrut(4))
+            }
+
+            outputPanel.revalidate()
+            outputPanel.repaint()
+        }
+    }
+
+    private fun renderRichMime(data: Map<String, Any>, execCount: Int?) {
+        // 1. Check for PNG image
+        val pngBase64 = data["image/png"]?.toString()
+        if (pngBase64 != null) {
+            runCatching {
+                val cleanBase64 = pngBase64.replace("\n", "").trim()
+                val bytes = Base64.getDecoder().decode(cleanBase64)
+                val img = ImageIO.read(ByteArrayInputStream(bytes))
+                if (img != null) {
+                    val imgLabel = JLabel(ImageIcon(img))
+                    outputPanel.add(imgLabel)
+                    return
+                }
+            }
+        }
+
+        // 2. Check for Plain Text
+        val plainText = data["text/plain"]?.toString() ?: data.values.firstOrNull()?.toString() ?: ""
+        val resultRow = JPanel(BorderLayout(6, 0)).apply { isOpaque = false }
+        if (execCount != null) {
+            val outLabel = JLabel("Out [$execCount]: ").apply {
+                font = Font("Monospaced", Font.BOLD, 11)
+                foreground = Color(203, 75, 22) // Orange accent
+            }
+            resultRow.add(outLabel, BorderLayout.WEST)
+        }
+        val textComp = JTextArea(plainText).apply {
+            isEditable = false
+            font = Font("Consolas", Font.PLAIN, 12)
+            foreground = getForegroundColor()
+            background = getSurfaceColor()
+            border = EmptyBorder(2, 0, 2, 0)
+        }
+        resultRow.add(textComp, BorderLayout.CENTER)
+        outputPanel.add(resultRow)
+    }
+
+    /**
+     * Renders the interactive Threaded Comments Section for this cell.
+     */
+    fun renderComments() {
+        commentsPanel.removeAll()
+        updateCommentButtonText()
+
+        val header = JPanel(BorderLayout()).apply {
+            isOpaque = false
+            border = EmptyBorder(6, 12, 6, 12)
+            val lbl = JLabel("💬 Cell Review & Threaded Discussions (${cell.comments.size})").apply {
+                font = font.deriveFont(Font.BOLD, 12f)
+                foreground = getAccentColor()
+            }
+            add(lbl, BorderLayout.WEST)
+        }
+        commentsPanel.add(header)
+
+        // List each comment thread
+        val sdf = SimpleDateFormat("MMM dd, yyyy HH:mm", Locale.getDefault())
+        for (comment in cell.comments) {
+            val card = JPanel().apply {
+                layout = BoxLayout(this, BoxLayout.Y_AXIS)
+                isOpaque = true
+                background = if (comment.resolved) Color(245, 245, 245) else getSurfaceColor()
+                border = CompoundBorder(
+                    LineBorder(if (comment.resolved) Color.LIGHT_GRAY else getBorderColor(), 1, true),
+                    EmptyBorder(8, 10, 8, 10)
+                )
+            }
+
+            // Top row: Author, Date, Resolve Checkbox
+            val metaRow = JPanel(BorderLayout()).apply { isOpaque = false }
+            val authorLabel = JLabel("${comment.author} · ${sdf.format(Date(comment.timestamp))}").apply {
+                font = font.deriveFont(Font.BOLD, 11f)
+                foreground = if (comment.resolved) Color.GRAY else getForegroundColor()
+            }
+            metaRow.add(authorLabel, BorderLayout.WEST)
+
+            val resolveBtn = JButton(if (comment.resolved) "✓ Resolved" else "Resolve").apply {
+                font = font.deriveFont(Font.PLAIN, 10f)
+                isFocusPainted = false
+                cursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
+                addActionListener {
+                    comment.resolved = !comment.resolved
+                    renderComments()
+                    onModified()
+                }
+            }
+            metaRow.add(resolveBtn, BorderLayout.EAST)
+            card.add(metaRow)
+            card.add(Box.createVerticalStrut(4))
+
+            // Comment text
+            val commentBody = JTextArea(comment.text).apply {
+                isEditable = false
+                lineWrap = true
+                wrapStyleWord = true
+                font = font.deriveFont(Font.PLAIN, 12f)
+                foreground = if (comment.resolved) Color.GRAY else getForegroundColor()
+                background = card.background
+                border = EmptyBorder(2, 0, 4, 0)
+            }
+            card.add(commentBody)
+
+            // Replies
+            if (comment.replies.isNotEmpty()) {
+                val repliesBox = JPanel().apply {
+                    layout = BoxLayout(this, BoxLayout.Y_AXIS)
+                    isOpaque = false
+                    border = MatteBorder(0, 2, 0, 0, getAccentColor())
+                }
+                for (reply in comment.replies) {
+                    val repPanel = JPanel(BorderLayout()).apply {
+                        isOpaque = false
+                        border = EmptyBorder(3, 8, 3, 0)
+                        val repMeta = JLabel("${reply.author} (${sdf.format(Date(reply.timestamp))}):").apply {
+                            font = font.deriveFont(Font.BOLD, 10.5f)
+                            foreground = getAccentColor()
+                        }
+                        val repText = JLabel(reply.text).apply { font = font.deriveFont(Font.PLAIN, 11f) }
+                        add(repMeta, BorderLayout.NORTH)
+                        add(repText, BorderLayout.CENTER)
+                    }
+                    repliesBox.add(repPanel)
+                }
+                card.add(repliesBox)
+            }
+
+            // Reply input field
+            val replyRow = JPanel(BorderLayout(6, 0)).apply {
+                isOpaque = false
+                border = EmptyBorder(6, 0, 0, 0)
+            }
+            val replyField = JTextField().apply {
+                toolTipText = "Reply to this discussion..."
+            }
+            val replyBtn = JButton("Reply").apply {
+                font = font.deriveFont(Font.PLAIN, 11f)
+                addActionListener {
+                    val txt = replyField.text.trim()
+                    if (txt.isNotBlank()) {
+                        comment.replies.add(CellCommentReply(author = "indoctrinatedrecluse", text = txt))
+                        replyField.text = ""
+                        renderComments()
+                        onModified()
+                    }
+                }
+            }
+            replyRow.add(replyField, BorderLayout.CENTER)
+            replyRow.add(replyBtn, BorderLayout.EAST)
+            card.add(replyRow)
+
+            commentsPanel.add(card)
+            commentsPanel.add(Box.createVerticalStrut(6))
+        }
+
+        // New Comment Input Section at bottom of thread
+        val newCommentBox = JPanel(BorderLayout(6, 0)).apply {
+            isOpaque = false
+            border = EmptyBorder(6, 12, 10, 12)
+        }
+        val newCommentInput = JTextField().apply {
+            toolTipText = "Add new review comment on this cell..."
+        }
+        val postBtn = JButton("Post Comment").apply {
+            font = font.deriveFont(Font.BOLD, 11f)
+            cursor = Cursor.getPredefinedCursor(Cursor.HAND_CURSOR)
+            addActionListener {
+                val txt = newCommentInput.text.trim()
+                if (txt.isNotBlank()) {
+                    cell.addComment(author = "indoctrinatedrecluse", text = txt)
+                    newCommentInput.text = ""
+                    renderComments()
+                    onModified()
+                }
+            }
+        }
+        newCommentBox.add(newCommentInput, BorderLayout.CENTER)
+        newCommentBox.add(postBtn, BorderLayout.EAST)
+        commentsPanel.add(newCommentBox)
+
+        commentsPanel.revalidate()
+        commentsPanel.repaint()
+    }
+
+    private fun updateCommentButtonText() {
+        val count = cell.comments.size
+        commentsToggleBtn.text = if (count > 0) "💬 Comments ($count)" else "💬 Comment"
+    }
+
+    private fun stripAnsi(text: String): String {
+        return text.replace(Regex("\\u001B\\[[;\\d]*[ -/]*[@-~]"), "")
+    }
+
+    private fun getSurfaceColor(): Color = parseHex(themeManager?.currentTheme?.value?.colors?.surface, Color(250, 242, 220))
+    private fun getSecondaryBgColor(): Color = parseHex(themeManager?.currentTheme?.value?.colors?.secondaryBackground, Color(238, 232, 213))
+    private fun getBorderColor(): Color = parseHex(themeManager?.currentTheme?.value?.colors?.border, Color(224, 216, 195))
+    private fun getAccentColor(): Color = parseHex(themeManager?.currentTheme?.value?.colors?.accent, Color(38, 139, 210))
+    private fun getForegroundColor(): Color = parseHex(themeManager?.currentTheme?.value?.colors?.foreground, Color(101, 123, 131))
+
+    private fun parseHex(hex: String?, fallback: Color): Color {
+        if (hex.isNullOrBlank()) return fallback
+        return try { Color.decode(hex) } catch (e: Exception) { fallback }
+    }
+
+    fun dispose() {
+        editor?.let {
+            EditorFactory.getInstance().releaseEditor(it)
+            editor = null
+        }
+    }
+}

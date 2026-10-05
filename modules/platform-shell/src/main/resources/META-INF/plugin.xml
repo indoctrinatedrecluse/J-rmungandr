@@ -34,9 +34,34 @@
         <!-- Animated Splash Screen & Branding Lifecycle -->
         <applicationInitializedListener implementation="org.jormungandr.shell.splash.JormungandrAppInitializer"/>
         <postStartupActivity implementation="org.jormungandr.shell.splash.JormungandrStartupActivity"/>
+
+        <!-- Jupyter Notebook Integration Subsystem -->
+        <applicationService serviceImplementation="org.jormungandr.jupyter.kernel.JupyterKernelService"/>
+
+        <fileType name="Jupyter Notebook"
+                  implementationClass="org.jormungandr.jupyter.filetype.JupyterNotebookFileType"
+                  fieldName="INSTANCE"
+                  extensions="ipynb"/>
+
+        <fileEditorProvider implementation="org.jormungandr.jupyter.ui.editor.JupyterNotebookEditorProvider"/>
+
+        <toolWindow id="Jupyter Kernels"
+                    anchor="bottom"
+                    canCloseContent="true"
+                    icon="/icons/jormungandr_16.png"
+                    factoryClass="org.jormungandr.jupyter.ui.toolwindow.JupyterToolWindowFactory"/>
     </extensions>
 
     <actions>
+        <!-- New File Group -->
+        <action id="Jormungandr.NewJupyterNotebook"
+                class="org.jormungandr.jupyter.actions.NewNotebookAction"
+                text="Jupyter Notebook (.ipynb)"
+                description="Create a new interactive Jupyter Notebook"
+                icon="/icons/jormungandr_16.png">
+            <add-to-group group-id="NewGroup" anchor="first"/>
+        </action>
+
         <group id="Jormungandr.PerspectiveGroup" text="Perspective" popup="true" icon="/icons/jormungandr_16.png">
             <add-to-group group-id="ViewMenu" anchor="first"/>
             <action id="Jormungandr.Perspective.Analysis"
