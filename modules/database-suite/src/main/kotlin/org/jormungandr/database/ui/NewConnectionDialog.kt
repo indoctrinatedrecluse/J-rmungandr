@@ -11,6 +11,7 @@ import org.jormungandr.database.model.ConnectionConfig
 import org.jormungandr.database.model.DatabaseDialect
 import java.awt.BorderLayout
 import java.awt.Color
+import java.awt.Font
 import java.awt.GridBagConstraints
 import java.awt.GridBagLayout
 import java.awt.Insets
@@ -40,10 +41,13 @@ class NewConnectionDialog(project: Project? = null) : DialogWrapper(project, tru
             portField.text = d.defaultPort.toString()
             if (d == DatabaseDialect.SQLITE) {
                 dbNameField.text = ":memory:"
+                nameField.text = "SQLite Local"
             } else if (d == DatabaseDialect.DUCKDB) {
                 dbNameField.text = ":memory:"
+                nameField.text = "DuckDB Analytics"
             } else {
                 dbNameField.text = "postgres"
+                nameField.text = "${d.displayName} Server"
             }
         }
         init()
@@ -68,11 +72,29 @@ class NewConnectionDialog(project: Project? = null) : DialogWrapper(project, tru
             form.add(comp, gbc)
         }
 
+        val dbFilePanel = JPanel(BorderLayout(4, 0)).apply { isOpaque = false }
+        dbFilePanel.add(dbNameField, BorderLayout.CENTER)
+        val browseBtn = JButton("📁 Browse...").apply {
+            font = font.deriveFont(Font.PLAIN, 11f)
+            toolTipText = "Browse for local SQLite, DuckDB, Parquet, or CSV file"
+            addActionListener {
+                val chooser = JFileChooser()
+                chooser.dialogTitle = "Select Database or Data File (.duckdb, .db, .sqlite, .parquet, .csv)"
+                if (chooser.showOpenDialog(this@NewConnectionDialog.contentPane) == JFileChooser.APPROVE_OPTION) {
+                    dbNameField.text = chooser.selectedFile.absolutePath
+                    if (nameField.text.startsWith("Sample") || nameField.text.isBlank()) {
+                        nameField.text = chooser.selectedFile.nameWithoutExtension.replaceFirstChar { it.uppercase() }
+                    }
+                }
+            }
+        }
+        dbFilePanel.add(browseBtn, BorderLayout.EAST)
+
         addRow("Connection Name:", nameField, 0)
         addRow("Dialect / Engine:", dialectCombo, 1)
         addRow("Host:", hostField, 2)
         addRow("Port:", portField, 3)
-        addRow("Database / File:", dbNameField, 4)
+        addRow("Database / File:", dbFilePanel, 4)
         addRow("Username:", userField, 5)
         addRow("Password:", passField, 6)
 

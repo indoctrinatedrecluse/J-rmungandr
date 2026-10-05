@@ -323,7 +323,7 @@ The flagship DataFrame Studio provides exploratory data analysis, visual vector 
 ---
 
 ### 🪐 2. Interactive Jupyter Notebook Subsystem
-Full-featured notebook editing and kernel interaction powered by asynchronous ZeroMQ communication:
+Full-featured notebook editing and kernel interaction powered by asynchronous ZeroMQ communication and local Python execution:
 
 - **Creating a New Notebook**:
   - Main menu: `File` &rarr; `New` &rarr; `Jupyter Notebook (.ipynb)`.
@@ -332,29 +332,45 @@ Full-featured notebook editing and kernel interaction powered by asynchronous Ze
   - Double-click any `.ipynb` file in the **Project Explorer**.
 - **Jupyter Kernels Tool Window**:
   - Main menu: `View` &rarr; `Tool Windows` &rarr; `Jupyter Kernels`.
-  - View running local/remote kernel instances, connection status, execution queue, and memory usage.
+  - **Active Kernels Tab**: View running local/remote kernel instances, connection status, transport (ZeroMQ TCP / Subprocess), and runtime process ID.
+  - **Variable Inspector Tab**: Live interactive variable workspace inspector. Tracks in-scope Python variables, types, dimensions/shapes, formatted byte sizes (`B`, `KB`, `MB`, `GB`), and value previews. Features instant text search filtering, clipboard copy, and a direct **"📊 Open in DataFrame Studio"** button to export any DataFrame/Series variable directly into the flagship DataFrame Studio!
+- **Multimodal Rich Output Rendering**:
+  - 🖼️ **Image Rendering**: Decodes Base64 `image/png` and `image/jpeg` outputs inline with a one-click **"📋 Copy Image"** button.
+  - 📊 **Rich HTML Table Cards**: Intercepts HTML table outputs (e.g. Pandas and Polars DataFrames) and renders them in styled cards with row & column counts, a **"📋 Copy CSV"** action, and a direct **"📊 Open in DataFrame Studio"** button.
+  - ⚡ **Interactive Cell Actions Menu (`⋮`)**: Per-cell actions dropdown offering **Run Cell**, **Run All Above**, **Run All Below**, **Clear Output**, **Copy Code**, and **Delete Cell**.
 - **Executing Cells**:
   - Press `Shift + Enter` to execute the active cell and advance to the next.
   - Press `Ctrl + Enter` to execute the active cell in place.
-  - Toggle cell type between **Code** and **Markdown** from the cell toolbar or shortcut keys.
-- **Variable Inspector**:
-  - Inspect in-scope Python variables, shapes, types, and memory sizes during live sessions.
+  - Toolbar controls: **▶ Run**, **⏩ Run All**, **⏹ Interrupt**, **🔄 Restart**, **+ Code**, **+ Markdown**, and **🧹 Clear**.
 
 ---
 
 ### 🗄️ 3. Database Analytics Studio
-Unified analytical console for SQL and NoSQL engines:
+Unified analytical console for SQL, analytical engines, and NoSQL databases:
 
 - **Opening the Tool Window**:
   - Main menu: `View` &rarr; `Tool Windows` &rarr; `Database Studio`.
   - Or click the **Database Studio** icon on the right tool window stripe.
-- **Opening & Running SQL Scripts**:
-  - Open or create any `.sql` file in the project.
-  - Click the green **Run (Ctrl + Enter)** button in the query editor toolbar.
-- **Capabilities**:
-  - Multi-dialect connection manager: PostgreSQL, MySQL, SQLite, DuckDB, Snowflake, MongoDB, and Redis.
-  - Tree explorer for schemas, catalogs, tables, views, columns, and indexes.
-  - Streaming tabular query result grids with live export.
+- **Embedded DuckDB Analytical Engine**:
+  - Built-in, zero-configuration **DuckDB** OLAP engine (`org.duckdb:duckdb_jdbc`) running in-process for ultra-fast columnar analytical queries.
+  - Click **"+ 🦆 DuckDB"** in the explorer toolbar to spawn an instant in-memory analytical session.
+  - Query Apache Parquet files directly via SQL: `SELECT * FROM 'data.parquet' LIMIT 50;`.
+  - Query CSV files directly via SQL: `SELECT * FROM read_csv_auto('dataset.csv') LIMIT 50;`.
+  - Pre-packaged with analytical queries, window functions, and sample retail datasets.
+- **Visual EXPLAIN Query Plan Inspector**:
+  - Click **"🔍 Explain Plan"** on the query console toolbar to analyze query execution plans across SQLite, DuckDB, PostgreSQL, and MySQL.
+  - Displays a hierarchical **Visual Plan Tree** highlighting full table scan warnings in amber/red (`⚠️ Full Table Scan`) alongside index searches (`🎯 Index Search`) and joins.
+  - Includes tabs for **🌳 Visual Plan Tree**, **📄 Raw Engine Output**, and **🔍 Query Text**, with millisecond execution profiling.
+- **Flagship DataFrame Studio Bridge**:
+  - Click **"📊 Open in DataFrame Studio"** on the query console toolbar to instantly stream query results into Jörmungandr's `DataFrameFileEditor`.
+  - Perform instant Pivot Table cross-tabulations, column distribution histograms, statistical profiling, and secondary in-memory SQL queries directly on database results!
+- **Interactive Visual Schema Diagram**:
+  - Switch to the **"🗺️ Schema Diagram"** tab in Database Studio.
+  - Interactive table entity cards displaying columns, data types, primary key badges (`🔑 [PK]`), foreign key badges (`🔗 [FK]`), and mapped relationships (e.g. `orders.customer_id ➔ customers.id`).
+  - Real-time schema table search filter, one-click **"📋 Export All DDL"** for the complete schema, and **Query** shortcut button on every card.
+- **Multi-Dialect Connection Manager**:
+  - Support for PostgreSQL, MySQL, SQLite (Embedded), DuckDB (Embedded), Snowflake, MongoDB, and Redis.
+  - File browser button for effortlessly attaching local `.duckdb`, `.db`, `.sqlite`, `.parquet`, or `.csv` files.
 
 ---
 

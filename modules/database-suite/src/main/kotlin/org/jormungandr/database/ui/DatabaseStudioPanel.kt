@@ -11,6 +11,7 @@ import org.jormungandr.database.model.DatabaseDialect
 import org.jormungandr.database.model.TableMetadata
 import java.awt.BorderLayout
 import java.awt.FlowLayout
+import java.awt.Font
 import java.awt.event.MouseAdapter
 import java.awt.event.MouseEvent
 import java.util.UUID
@@ -25,6 +26,12 @@ class DatabaseStudioPanel(private val project: Project? = null) : JPanel(BorderL
     private val treeModel = DefaultTreeModel(rootNode)
     private val tree = Tree(treeModel)
     private val consolePanel = QueryConsolePanel(project)
+    private val tabbedPane = com.intellij.ui.components.JBTabbedPane()
+    private val schemaDiagramPanel = SchemaDiagramPanel(null) { table ->
+        consolePanel.setQueryText("SELECT * FROM ${table.name} LIMIT 100;")
+        tabbedPane.selectedIndex = 0
+        consolePanel.executeCurrentQuery()
+    }
 
     init {
         // Ensure default SQLite in-memory sample connection is registered
@@ -46,6 +53,21 @@ class DatabaseStudioPanel(private val project: Project? = null) : JPanel(BorderL
                     st.execute("CREATE TABLE metrics (metric_id INTEGER PRIMARY KEY, name TEXT, value REAL);")
                     st.execute("INSERT INTO metrics VALUES (101, 'accuracy', 0.942);")
                     st.execute("INSERT INTO metrics VALUES (102, 'loss', 0.058);")
+                }
+            }
+
+            // Register DuckDB in-memory analytical sample
+            val duckConfig = ConnectionConfig(
+                id = UUID.randomUUID().toString(),
+                name = "DuckDB In-Memory (Analytics)",
+                dialect = DatabaseDialect.DUCKDB,
+                databaseName = ":memory:"
+            )
+            runCatching {
+                val duckConn = DatabaseConnectionManager.connect(duckConfig)
+                duckConn.createStatement().use { st ->
+                    st.execute("CREATE TABLE sales (id INTEGER, category VARCHAR, item VARCHAR, price DOUBLE, quantity INTEGER);")
+                    st.execute("INSERT INTO sales VALUES (1, 'Electronics', 'Laptop', 1299.99, 2), (2, 'Electronics', 'Headphones', 149.50, 5), (3, 'Furniture', 'Desk Chair', 249.00, 3), (4, 'Furniture', 'Standing Desk', 499.00, 1), (5, 'Electronics', '4K Monitor', 320.00, 4);")
                 }
             }
         }
@@ -72,6 +94,23 @@ class DatabaseStudioPanel(private val project: Project? = null) : JPanel(BorderL
                 }
             }
         }
+        val addDuckBtn = JButton("+ 🦆 DuckDB").apply {
+            isFocusable = false
+            font = font.deriveFont(Font.PLAIN, 11f)
+            toolTipText = "Launch instant in-memory DuckDB analytical session"
+            addActionListener {
+                val id = UUID.randomUUID().toString()
+                val duckCfg = ConnectionConfig(
+                    id = id,
+                    name = "DuckDB Session (${id.take(4)})",
+                    dialect = DatabaseDialect.DUCKDB,
+                    databaseName = ":memory:"
+                )
+                DatabaseConnectionManager.connect(duckCfg)
+                refreshSchemaTree()
+                consolePanel.refreshConnections()
+            }
+        }
         val refreshBtn = JButton("🔄").apply {
             isFocusable = false
             toolTipText = "Refresh Schema"
@@ -81,13 +120,18 @@ class DatabaseStudioPanel(private val project: Project? = null) : JPanel(BorderL
             }
         }
         explorerToolbar.add(addConnBtn)
+        explorerToolbar.add(addDuckBtn)
         explorerToolbar.add(refreshBtn)
 
         explorerPanel.add(explorerToolbar, BorderLayout.NORTH)
         explorerPanel.add(JBScrollPane(tree), BorderLayout.CENTER)
 
+        // Right Tabs: SQL Console and Visual Schema Diagram
+        tabbedPane.addTab("💻 SQL Console", consolePanel)
+        tabbedPane.addTab("🗺️ Schema Diagram", schemaDiagramPanel)
+
         // Split pane
-        val split = JSplitPane(JSplitPane.HORIZONTAL_SPLIT, explorerPanel, consolePanel).apply {
+        val split = JSplitPane(JSplitPane.HORIZONTAL_SPLIT, explorerPanel, tabbedPane).apply {
             resizeWeight = 0.28
             isContinuousLayout = true
             border = null
@@ -149,6 +193,7 @@ class DatabaseStudioPanel(private val project: Project? = null) : JPanel(BorderL
         rootNode.removeAllChildren()
         val configs = DatabaseConnectionManager.getAllConfigs()
 
+        var primaryCatalog: org.jormungandr.database.model.CatalogMetadata? = null
         for (cfg in configs) {
             val connNode = DefaultMutableTreeNode("${cfg.name} (${cfg.dialect.displayName})")
             val conn = DatabaseConnectionManager.getConnection(cfg.id)
@@ -160,6 +205,9 @@ class DatabaseStudioPanel(private val project: Project? = null) : JPanel(BorderL
                 }.getOrNull()
 
                 if (catalog != null) {
+                    if (primaryCatalog == null) {
+                        primaryCatalog = catalog
+                    }
                     for (schema in catalog.schemas) {
                         val schemaNode = DefaultMutableTreeNode("📁 ${schema.name}")
                         for (table in schema.tables) {
@@ -177,6 +225,8 @@ class DatabaseStudioPanel(private val project: Project? = null) : JPanel(BorderL
             }
             rootNode.add(connNode)
         }
+
+        primaryCatalog?.let { schemaDiagramPanel.setCatalog(it) }
 
         treeModel.reload()
         tree.expandRow(0)

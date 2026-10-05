@@ -19,10 +19,14 @@ object DatabaseConnectionManager {
     private val connectionConfigs = ConcurrentHashMap<String, ConnectionConfig>()
 
     init {
-        // Pre-register SQLite driver
+        // Pre-register embedded drivers (SQLite and DuckDB)
         runCatching {
             Class.forName("org.sqlite.JDBC")
             LOG.info("Registered SQLite JDBC driver.")
+        }
+        runCatching {
+            Class.forName("org.duckdb.DuckDBDriver")
+            LOG.info("Registered DuckDB JDBC driver.")
         }
     }
 

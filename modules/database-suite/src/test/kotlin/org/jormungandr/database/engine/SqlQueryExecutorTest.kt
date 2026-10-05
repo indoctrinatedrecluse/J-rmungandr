@@ -74,4 +74,33 @@ class SqlQueryExecutorTest {
         assertNull(result.dataFrame)
         assertNotNull(result.errorMessage)
     }
+
+    @Test
+    fun `test duckdb analytical query execution with aggregates`() {
+        val duckConfig = ConnectionConfig(
+            id = UUID.randomUUID().toString(),
+            name = "Test DuckDB",
+            dialect = DatabaseDialect.DUCKDB,
+            databaseName = ":memory:"
+        )
+        val duckConn = DatabaseConnectionManager.connect(duckConfig)
+        duckConn.createStatement().use { st ->
+            st.execute("CREATE TABLE sales (id INTEGER, category VARCHAR, amount DOUBLE);")
+            st.execute("INSERT INTO sales VALUES (1, 'Tech', 100.0), (2, 'Tech', 200.0), (3, 'Home', 50.0);")
+        }
+
+        val result = SqlQueryExecutor.execute(
+            duckConn,
+            "SELECT category, SUM(amount) AS total, COUNT(*) AS count FROM sales GROUP BY category ORDER BY total DESC;"
+        )
+
+        assertTrue(result.isSuccess)
+        val df = result.dataFrame
+        assertNotNull(df)
+        assertEquals(2, df?.rowCount)
+        assertEquals("Tech", df?.rows?.get(0)?.get(0))
+        assertEquals(300.0, (df?.rows?.get(0)?.get(1) as? Number)?.toDouble())
+
+        DatabaseConnectionManager.disconnect(duckConfig.id)
+    }
 }

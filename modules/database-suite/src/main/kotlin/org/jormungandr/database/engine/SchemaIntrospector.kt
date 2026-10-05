@@ -55,7 +55,27 @@ object SchemaIntrospector {
                     }
                 }
 
-                tables.add(TableMetadata(tableName, schemaName, tableType, columns))
+                // Fetch foreign keys for this table
+                val foreignKeys = mutableListOf<ForeignKeyMetadata>()
+                runCatching {
+                    meta.getImportedKeys(null, schemaName, tableName).use { fkRs ->
+                        while (fkRs.next()) {
+                            val fkColumn = fkRs.getString("FKCOLUMN_NAME") ?: continue
+                            val pkTable = fkRs.getString("PKTABLE_NAME") ?: continue
+                            val pkColumn = fkRs.getString("PKCOLUMN_NAME") ?: continue
+                            foreignKeys.add(
+                                ForeignKeyMetadata(
+                                    fromTable = tableName,
+                                    fromColumn = fkColumn,
+                                    toTable = pkTable,
+                                    toColumn = pkColumn
+                                )
+                            )
+                        }
+                    }
+                }
+
+                tables.add(TableMetadata(tableName, schemaName, tableType, columns, foreignKeys))
             }
         }
 

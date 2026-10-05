@@ -11,11 +11,19 @@ data class TableColumnMetadata(
     val ordinalPosition: Int = 0
 )
 
+data class ForeignKeyMetadata(
+    val fromTable: String,
+    val fromColumn: String,
+    val toTable: String,
+    val toColumn: String
+)
+
 data class TableMetadata(
     val name: String,
     val schemaName: String = "public",
     val type: String = "TABLE", // TABLE, VIEW, SYSTEM TABLE, COLLECTION
     val columns: List<TableColumnMetadata> = emptyList(),
+    val foreignKeys: List<ForeignKeyMetadata> = emptyList(),
     val rowCountEstimate: Long = -1
 )
 

@@ -38,4 +38,29 @@ class DatabaseConnectionManagerTest {
         DatabaseConnectionManager.disconnect(config.id)
         assertNull(DatabaseConnectionManager.getConnection(config.id))
     }
+
+    @Test
+    fun `test duckdb in-memory connection and testConnection`() {
+        val config = ConnectionConfig(
+            id = UUID.randomUUID().toString(),
+            name = "Test DuckDB",
+            dialect = DatabaseDialect.DUCKDB,
+            databaseName = ":memory:"
+        )
+
+        val testResult = DatabaseConnectionManager.testConnection(config)
+        assertTrue(testResult.isSuccess)
+        assertTrue(testResult.getOrThrow())
+
+        val conn = DatabaseConnectionManager.connect(config)
+        assertNotNull(conn)
+        assertFalse(conn.isClosed)
+
+        val retrieved = DatabaseConnectionManager.getConnection(config.id)
+        assertNotNull(retrieved)
+        assertSame(conn, retrieved)
+
+        DatabaseConnectionManager.disconnect(config.id)
+        assertNull(DatabaseConnectionManager.getConnection(config.id))
+    }
 }
