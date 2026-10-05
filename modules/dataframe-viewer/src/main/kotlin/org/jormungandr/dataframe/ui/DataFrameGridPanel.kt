@@ -78,6 +78,9 @@ class DataFrameGridPanel(
             }
         }
     )
+    private val mlStudioView = org.jormungandr.dataframe.ml.MlTrainingStudioPanel(onDatasetLoaded = { loadedDf ->
+        dataFrame = loadedDf
+    })
     private val filterBuilder = FilterBuilderPanel(initialDataFrame) { compoundFilter ->
         applyCompoundFilter(compoundFilter)
     }
@@ -109,6 +112,7 @@ class DataFrameGridPanel(
         tabbedPane.addTab("Grid View", gridTab)
         tabbedPane.addTab("Data Prep Studio", prepStudioView)
         tabbedPane.addTab("✨ Data Copilot", copilotView)
+        tabbedPane.addTab("🤖 ML Studio", mlStudioView)
         tabbedPane.addTab("Chart View", chartView)
         tabbedPane.addTab("3D & Web Charts", interactivePlotStudio)
         tabbedPane.addTab("Column Profiler", profilerView)
@@ -119,11 +123,12 @@ class DataFrameGridPanel(
             when (tabbedPane.selectedIndex) {
                 1 -> prepStudioView.setDataFrame(dataFrame)
                 2 -> copilotView.updateDataFrame(dataFrame)
-                3 -> chartView.setDataFrame(dataFrame)
-                4 -> interactivePlotStudio.setDataFrame(dataFrame)
-                5 -> profilerView.setDataFrame(dataFrame)
-                6 -> pivotView.setDataFrame(dataFrame)
-                7 -> sqlView.setDataFrame(dataFrame)
+                3 -> mlStudioView.setDataFrame(dataFrame)
+                4 -> chartView.setDataFrame(dataFrame)
+                5 -> interactivePlotStudio.setDataFrame(dataFrame)
+                6 -> profilerView.setDataFrame(dataFrame)
+                7 -> pivotView.setDataFrame(dataFrame)
+                8 -> sqlView.setDataFrame(dataFrame)
             }
         }
 
@@ -140,6 +145,7 @@ class DataFrameGridPanel(
             headerRenderer.sortColumn = -1
             prepStudioView.setDataFrame(value)
             copilotView.updateDataFrame(value)
+            mlStudioView.setDataFrame(value)
             chartView.setDataFrame(value)
             interactivePlotStudio.setDataFrame(value)
             profilerView.setDataFrame(value)

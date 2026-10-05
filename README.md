@@ -343,6 +343,27 @@ The flagship DataFrame Studio provides exploratory data analysis, visual vector 
     - Quick-prompt chips: **💬 NL ➔ SQL**, **🐍 NL ➔ Pandas**, **📊 Suggest Visualizations**, and **🧹 Cleaning Strategy**.
     - Markdown extraction with instant syntax-highlighted code cards.
     - Direct **"▶ Run SQL"** button to execute generated queries immediately against the dataset in-memory.
+  - 🤖 **AI/ML Training Studio Tab**: Comprehensive in-IDE machine learning training, visual evaluation, and data profiling studio:
+    - **Interactive Multi-Task Training**:
+      - **Regression**: Ridge Regularization (L2), Ordinary Least Squares (OLS), and Polynomial Regression (Degree 2) with closed-form matrix math $(X^T X + \lambda I)^{-1} X^T y$.
+      - **Classification**: Logistic Regression (One-vs-Rest) with gradient descent optimization, Sigmoid/Softmax probability calibration, and exact Wilcoxon ROC-AUC.
+      - **Clustering**: K-Means clustering with Lloyd's iterative centroid refinement and Inertia (WCSS) tracking.
+      - **Dimensionality Reduction**: Principal Component Analysis (PCA) using Covariance Power Iteration with Deflation.
+      - Features dynamic feature checklist ($X$), target variable dropdown ($y$), train/test split slider (`80% Train / 20% Test`), and built-in benchmark datasets (California Housing, Iris Flowers, Customer Churn, Synthetic 3D Blobs).
+    - **Multi-Dimensional Visualizers**:
+      - **Regression**: *Actual vs. Predicted* scatter plot with ideal $y=x$ reference line, *Residuals vs. Predicted* plot with zero-error line, and *Feature Weights / Importance* bar chart.
+      - **Classification**: *Confusion Matrix Heatmap* ($N \times N$ interactive grid with counts, percentages, and intensity shading), *ROC Curve* with AUC badge and random guessing diagonal, and Precision/Recall/F1 metrics.
+      - **Clustering**: *Cluster Scatter* 2D projection with colored point clusters and prominent centroid badges ($\bigstar$), plus *Elbow Method Curve* ($k$ vs Inertia) highlighting the optimal cluster bend.
+      - **PCA**: *Scree Plot* (explained variance per component and cumulative variance line) and 2D Principal Component Projection.
+    - **Preliminary Data Categorization & Feature Health (No Model Training Required!)**:
+      - Automated feature role classification: `Continuous Numeric`, `Categorical`, `High-Cardinality Key / ID` (flags IDs and UUIDs to prevent overfit memorization), `Constant (Zero Variance)` (identifies dead features), and `High Null Leakage (>40%)`.
+      - Target predictive association ranking: Automatically computes Pearson correlation ($r \in [-1, 1]$) for numeric features, and ANOVA F-statistic for categorical groupings against target $y$, ranking features from strongest to weakest predictor.
+      - Multicollinearity Detection: Scans pairwise correlations among features and flags multicollinear pairs ($|r| > 0.85$) with actionable recommendations.
+      - Natural Language Insights: Automated advisory messages highlighting class distributions, target variance, and feature selection advice.
+    - **Production Training Code & Templates**:
+      - Generates custom, copyable Python scripts for **Scikit-Learn Regression Pipeline**, **Scikit-Learn Classification**, **XGBoost / LightGBM Gradient Boosting**, **PyTorch Deep Learning MLP**, and **K-Means & PCA Clustering Pipeline** pre-populated with active feature names, target column, and test split ratios.
+    - **Seamless ML Experiments Integration**:
+      - Click **"💾 Log to ML Experiments"** to register the trained model, hyperparameters, and evaluation metrics ($R^2$, RMSE, Accuracy, F1, Inertia) directly into Jörmungandr's centralized ML Experiment Tracker!
   - 📈 **Chart View Tab**: Comprehensive 2D vector chart studio supporting **8 distinct visualization types**:
     - **Line Charts**: Multi-series trends with auto-scaling axes.
     - **Bar Charts**: Categorical comparison with distinct series shading.
