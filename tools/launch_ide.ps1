@@ -382,6 +382,8 @@ public class JormNativeLauncher {
 
     public const int SW_RESTORE = 9;
     public const int ASFW_ANY = -1;
+    public const uint CREATE_BREAKAWAY_FROM_JOB = 0x01000000;
+    public const uint CREATE_NEW_PROCESS_GROUP = 0x00000200;
 
     public static int StartOnInteractiveDesktop(string appPath, string cmdLine, string workingDir) {
         STARTUPINFO si = new STARTUPINFO();
@@ -392,7 +394,10 @@ public class JormNativeLauncher {
 
         PROCESS_INFORMATION pi = new PROCESS_INFORMATION();
         string fullCmd = "\"" + appPath + "\" " + cmdLine;
-        bool success = CreateProcess(null, fullCmd, IntPtr.Zero, IntPtr.Zero, false, 0, IntPtr.Zero, workingDir, ref si, out pi);
+        bool success = CreateProcess(null, fullCmd, IntPtr.Zero, IntPtr.Zero, false, CREATE_BREAKAWAY_FROM_JOB | CREATE_NEW_PROCESS_GROUP, IntPtr.Zero, workingDir, ref si, out pi);
+        if (!success) {
+            success = CreateProcess(null, fullCmd, IntPtr.Zero, IntPtr.Zero, false, CREATE_NEW_PROCESS_GROUP, IntPtr.Zero, workingDir, ref si, out pi);
+        }
         if (success) {
             CloseHandle(pi.hProcess);
             CloseHandle(pi.hThread);
