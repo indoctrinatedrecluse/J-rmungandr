@@ -3,18 +3,24 @@ package org.jormungandr.jupyter.ui
 import com.intellij.openapi.application.ApplicationManager
 import com.intellij.openapi.diagnostic.logger
 import com.intellij.openapi.project.Project
+import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBScrollPane
 import kotlinx.coroutines.*
 import org.jormungandr.core.theme.ThemeManager
+import org.jormungandr.jupyter.diff.NotebookDiffDialog
+import org.jormungandr.jupyter.export.NotebookExporter
 import org.jormungandr.jupyter.format.NotebookFormat
 import org.jormungandr.jupyter.kernel.*
 import org.jormungandr.jupyter.model.CellOutput
 import org.jormungandr.jupyter.model.CellType
 import org.jormungandr.jupyter.model.JupyterKernelSpec
 import org.jormungandr.jupyter.model.NotebookModel
+import org.jormungandr.jupyter.ui.outline.NotebookOutlinePanel
 import java.awt.*
+import java.awt.datatransfer.StringSelection
+import java.io.File
 import javax.swing.*
 import javax.swing.border.EmptyBorder
 import javax.swing.border.MatteBorder
@@ -24,6 +30,9 @@ private val LOG = logger<NotebookPanel>()
 /**
  * Main Interactive Jupyter Notebook UI Panel:
  * - Action toolbar with Run, Run All, Interrupt, Restart, Cell Types, Comments, Kernel status.
+ * - Interactive Outline / TOC panel for quick document navigation.
+ * - Multi-format export engine (HTML, Python, Markdown, LaTeX).
+ * - Visual cell-by-cell notebook diff comparison.
  * - Dynamic scrollable cells canvas.
  * - Real-time execution loop with live streaming outputs.
  */
@@ -39,11 +48,13 @@ class NotebookPanel(
     private val kernelService = ApplicationManager.getApplication().getService(JupyterKernelService::class.java)
 
     private val panelScope = CoroutineScope(Dispatchers.Main + SupervisorJob())
-    private var model: NotebookModel = NotebookModel.createDefaultPythonNotebook()
+    private var notebookModel: NotebookModel = NotebookModel.createDefaultPythonNotebook()
     private val cellComponents = mutableListOf<CellComponent>()
 
     private val cellsContainer = JPanel()
     private val scrollPane = JBScrollPane(cellsContainer)
+    private val outlinePanel = NotebookOutlinePanel { cellIndex -> scrollToCell(cellIndex) }
+    private lateinit var mainSplitPane: JSplitPane
 
     private val kernelStatusLabel = JLabel("⚪ Initializing...")
     private val kernelCombo = JComboBox<String>()
@@ -55,7 +66,15 @@ class NotebookPanel(
         buildToolbar()
         buildCellsContainer()
 
-        add(scrollPane, BorderLayout.CENTER)
+        outlinePanel.isVisible = false
+        mainSplitPane = JSplitPane(JSplitPane.HORIZONTAL_SPLIT, scrollPane, outlinePanel).apply {
+            isContinuousLayout = true
+            resizeWeight = 1.0
+            dividerSize = 4
+            border = null
+        }
+
+        add(mainSplitPane, BorderLayout.CENTER)
 
         loadNotebookContent()
         initKernel()
@@ -113,6 +132,35 @@ class NotebookPanel(
             addActionListener { clearAllOutputs() }
         }
 
+        val outlineBtn = JToggleButton("📑 Outline").apply {
+            isFocusPainted = false
+            font = font.deriveFont(Font.PLAIN, 11f)
+            toolTipText = "Toggle Table of Contents Outline panel"
+            addActionListener {
+                outlinePanel.isVisible = isSelected
+                if (isSelected) {
+                    outlinePanel.updateOutline(notebookModel)
+                    mainSplitPane.dividerLocation = (width - 260).coerceAtLeast(100)
+                }
+                revalidate()
+                repaint()
+            }
+        }
+
+        val exportBtn = JButton("💾 Export ▾").apply {
+            isFocusPainted = false
+            font = font.deriveFont(Font.PLAIN, 11f)
+            toolTipText = "Export notebook to HTML, Python, Markdown, or LaTeX"
+            addActionListener { showExportMenu(this) }
+        }
+
+        val diffBtn = JButton("🔀 Diff").apply {
+            isFocusPainted = false
+            font = font.deriveFont(Font.PLAIN, 11f)
+            toolTipText = "Compare modified notebook with disk version"
+            addActionListener { showNotebookDiff() }
+        }
+
         leftTools.add(runBtn)
         leftTools.add(runAllBtn)
         leftTools.add(interruptBtn)
@@ -121,6 +169,10 @@ class NotebookPanel(
         leftTools.add(addCodeBtn)
         leftTools.add(addMdBtn)
         leftTools.add(clearOutputsBtn)
+        leftTools.add(Box.createHorizontalStrut(6))
+        leftTools.add(outlineBtn)
+        leftTools.add(exportBtn)
+        leftTools.add(diffBtn)
 
         toolbar.add(leftTools, BorderLayout.WEST)
 
@@ -135,8 +187,8 @@ class NotebookPanel(
             val selected = kernelCombo.selectedIndex
             if (selected in availableKernelSpecs.indices) {
                 val spec = availableKernelSpecs[selected]
-                model.metadata.kernelspec.name = spec.id
-                model.metadata.kernelspec.displayName = spec.displayName
+                notebookModel.metadata.kernelspec.name = spec.id
+                notebookModel.metadata.kernelspec.displayName = spec.displayName
                 switchKernel(spec)
             }
         }
@@ -159,10 +211,10 @@ class NotebookPanel(
     private fun loadNotebookContent() {
         runCatching {
             val text = String(virtualFile.contentsToByteArray(), Charsets.UTF_8)
-            model = NotebookFormat.readNotebook(text)
+            notebookModel = NotebookFormat.readNotebook(text)
         }.onFailure { err ->
             LOG.warn("Could not read notebook file, creating default: ${err.message}")
-            model = NotebookModel.createDefaultPythonNotebook()
+            notebookModel = NotebookModel.createDefaultPythonNotebook()
         }
 
         rebuildCellComponents()
@@ -173,7 +225,7 @@ class NotebookPanel(
         cellComponents.forEach { it.dispose() }
         cellComponents.clear()
 
-        for (cell in model.cells) {
+        for (cell in notebookModel.cells) {
             val comp = CellComponent(
                 cell = cell,
                 project = project,
@@ -197,6 +249,9 @@ class NotebookPanel(
 
         cellsContainer.revalidate()
         cellsContainer.repaint()
+        if (outlinePanel.isVisible) {
+            outlinePanel.updateOutline(notebookModel)
+        }
     }
 
     private fun initKernel() {
@@ -209,7 +264,7 @@ class NotebookPanel(
                 }
 
                 // Match with model kernelspec if possible
-                val matchIdx = availableKernelSpecs.indexOfFirst { it.id == model.metadata.kernelspec.name }
+                val matchIdx = availableKernelSpecs.indexOfFirst { it.id == notebookModel.metadata.kernelspec.name }
                 if (matchIdx >= 0) {
                     kernelCombo.selectedIndex = matchIdx
                 }
@@ -376,7 +431,7 @@ class NotebookPanel(
     }
 
     fun addCell(type: CellType) {
-        val newCell = model.addCell(type = type, source = "")
+        val newCell = notebookModel.addCell(type = type, source = "")
         val comp = CellComponent(
             cell = newCell,
             project = project,
@@ -405,7 +460,7 @@ class NotebookPanel(
         val idx = cellComponents.indexOf(comp)
         if (idx >= 0) {
             cellComponents.removeAt(idx)
-            model.cells.remove(comp.cell)
+            notebookModel.cells.remove(comp.cell)
             comp.dispose()
             rebuildCellComponents()
             saveNotebook()
@@ -415,7 +470,7 @@ class NotebookPanel(
     fun moveCellUp(comp: CellComponent) {
         val idx = cellComponents.indexOf(comp)
         if (idx > 0) {
-            model.moveCell(idx, idx - 1)
+            notebookModel.moveCell(idx, idx - 1)
             rebuildCellComponents()
             saveNotebook()
         }
@@ -424,14 +479,14 @@ class NotebookPanel(
     fun moveCellDown(comp: CellComponent) {
         val idx = cellComponents.indexOf(comp)
         if (idx >= 0 && idx < cellComponents.size - 1) {
-            model.moveCell(idx, idx + 1)
+            notebookModel.moveCell(idx, idx + 1)
             rebuildCellComponents()
             saveNotebook()
         }
     }
 
     fun clearAllOutputs() {
-        model.clearAllOutputs()
+        notebookModel.clearAllOutputs()
         cellComponents.forEach {
             it.updateExecutionDisplay()
             it.renderOutputs()
@@ -442,7 +497,7 @@ class NotebookPanel(
     fun saveNotebook() {
         panelScope.launch(Dispatchers.IO) {
             runCatching {
-                val json = NotebookFormat.writeNotebook(model)
+                val json = NotebookFormat.writeNotebook(notebookModel)
                 ApplicationManager.getApplication().runWriteAction {
                     virtualFile.setBinaryContent(json.toByteArray(Charsets.UTF_8))
                 }
@@ -459,6 +514,117 @@ class NotebookPanel(
     private fun parseHex(hex: String?, fallback: Color): Color {
         if (hex.isNullOrBlank()) return fallback
         return try { Color.decode(hex) } catch (e: Exception) { fallback }
+    }
+
+    private fun scrollToCell(cellIndex: Int) {
+        if (cellIndex in cellComponents.indices) {
+            val comp = cellComponents[cellIndex]
+            comp.scrollRectToVisible(Rectangle(0, 0, comp.width, comp.height))
+            comp.requestFocusInWindow()
+        }
+    }
+
+    private fun showExportMenu(anchor: Component) {
+        val popup = JPopupMenu()
+
+        val exportHtmlItem = JMenuItem("🌐 Standalone HTML Document (.html)").apply {
+            addActionListener {
+                val chooser = JFileChooser().apply {
+                    dialogTitle = "Export Notebook to HTML"
+                    selectedFile = File("${virtualFile.nameWithoutExtension}.html")
+                }
+                if (chooser.showSaveDialog(this@NotebookPanel) == JFileChooser.APPROVE_OPTION) {
+                    val file = chooser.selectedFile
+                    val html = NotebookExporter.exportToHtml(notebookModel, virtualFile.nameWithoutExtension)
+                    file.writeText(html, Charsets.UTF_8)
+                    Messages.showInfoMessage(project, "Exported successfully to:\n${file.absolutePath}", "HTML Export Complete")
+                }
+            }
+        }
+
+        val exportPyItem = JMenuItem("🐍 Python Script (.py)").apply {
+            addActionListener {
+                val chooser = JFileChooser().apply {
+                    dialogTitle = "Export Notebook to Python Script"
+                    selectedFile = File("${virtualFile.nameWithoutExtension}.py")
+                }
+                if (chooser.showSaveDialog(this@NotebookPanel) == JFileChooser.APPROVE_OPTION) {
+                    val file = chooser.selectedFile
+                    val code = NotebookExporter.exportToPython(notebookModel)
+                    file.writeText(code, Charsets.UTF_8)
+                    Messages.showInfoMessage(project, "Exported successfully to:\n${file.absolutePath}", "Python Export Complete")
+                }
+            }
+        }
+
+        val exportMdItem = JMenuItem("📄 Markdown Document (.md)").apply {
+            addActionListener {
+                val chooser = JFileChooser().apply {
+                    dialogTitle = "Export Notebook to Markdown"
+                    selectedFile = File("${virtualFile.nameWithoutExtension}.md")
+                }
+                if (chooser.showSaveDialog(this@NotebookPanel) == JFileChooser.APPROVE_OPTION) {
+                    val file = chooser.selectedFile
+                    val md = NotebookExporter.exportToMarkdown(notebookModel)
+                    file.writeText(md, Charsets.UTF_8)
+                    Messages.showInfoMessage(project, "Exported successfully to:\n${file.absolutePath}", "Markdown Export Complete")
+                }
+            }
+        }
+
+        val exportTexItem = JMenuItem("📑 LaTeX Document (.tex)").apply {
+            addActionListener {
+                val chooser = JFileChooser().apply {
+                    dialogTitle = "Export Notebook to LaTeX"
+                    selectedFile = File("${virtualFile.nameWithoutExtension}.tex")
+                }
+                if (chooser.showSaveDialog(this@NotebookPanel) == JFileChooser.APPROVE_OPTION) {
+                    val file = chooser.selectedFile
+                    val tex = NotebookExporter.exportToLatex(notebookModel, virtualFile.nameWithoutExtension)
+                    file.writeText(tex, Charsets.UTF_8)
+                    Messages.showInfoMessage(project, "Exported successfully to:\n${file.absolutePath}", "LaTeX Export Complete")
+                }
+            }
+        }
+
+        val copyPyItem = JMenuItem("📋 Copy Python Code to Clipboard").apply {
+            addActionListener {
+                val code = NotebookExporter.exportToPython(notebookModel)
+                val selection = StringSelection(code)
+                Toolkit.getDefaultToolkit().systemClipboard.setContents(selection, selection)
+                Messages.showInfoMessage(project, "Python code copied to system clipboard!", "Copied")
+            }
+        }
+
+        popup.add(exportHtmlItem)
+        popup.add(exportPyItem)
+        popup.add(exportMdItem)
+        popup.add(exportTexItem)
+        popup.addSeparator()
+        popup.add(copyPyItem)
+
+        popup.show(anchor, 0, anchor.height)
+    }
+
+    private fun showNotebookDiff() {
+        panelScope.launch(Dispatchers.IO) {
+            val diskText = runCatching {
+                String(virtualFile.contentsToByteArray(), Charsets.UTF_8)
+            }.getOrDefault("")
+
+            val diskModel = NotebookFormat.readNotebook(diskText)
+
+            withContext(Dispatchers.Main) {
+                val dialog = NotebookDiffDialog(
+                    project = project,
+                    oldModel = diskModel,
+                    newModel = notebookModel,
+                    oldTitle = "${virtualFile.name} (Disk)",
+                    newTitle = "${virtualFile.name} (Active Buffer)"
+                )
+                dialog.show()
+            }
+        }
     }
 
     fun dispose() {

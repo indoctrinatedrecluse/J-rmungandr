@@ -41,7 +41,13 @@
                   fieldName="INSTANCE"
                   extensions="parquet"/>
 
+        <fileType name="Model Checkpoint"
+                  implementationClass="org.jormungandr.dataframe.filetype.ModelCheckpointFileType"
+                  fieldName="INSTANCE"
+                  extensions="safetensors;onnx;pt;pth;h5;hdf5"/>
+
         <fileEditorProvider implementation="org.jormungandr.dataframe.ui.editor.DataFrameEditorProvider"/>
+        <fileEditorProvider implementation="org.jormungandr.dataframe.ui.editor.ModelCheckpointEditorProvider"/>
 
         <toolWindow id="DataFrame Viewer"
                     anchor="bottom"

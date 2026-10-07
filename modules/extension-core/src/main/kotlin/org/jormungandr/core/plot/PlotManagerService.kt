@@ -78,8 +78,12 @@ class PlotManagerService {
     }
 
     companion object {
+        @Volatile
+        private var testFallback: PlotManagerService? = null
+
         fun getInstance(): PlotManagerService {
-            return ApplicationManager.getApplication().getService(PlotManagerService::class.java)
+            return ApplicationManager.getApplication()?.getService(PlotManagerService::class.java)
+                ?: (testFallback ?: PlotManagerService().also { testFallback = it })
         }
     }
 }

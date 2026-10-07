@@ -35,12 +35,30 @@
         <themeProvider id="org.jormungandr.theme.solarized.light" path="/themes/SolarizedLight.theme.json"/>
         <themeProvider id="org.jormungandr.theme.bubblegum.barbie" path="/themes/BubblegumBarbie.theme.json"/>
 
+        <!-- R Language & Statistical REPL Subsystem -->
+        <applicationService serviceImplementation="org.jormungandr.shell.r.RDiscoveryService"/>
+        <toolWindow id="R Console"
+                    anchor="bottom"
+                    canCloseContent="true"
+                    icon="/icons/jormungandr_16.png"
+                    factoryClass="org.jormungandr.shell.r.RReplToolWindowFactory"/>
+
         <!-- Animated Splash Screen & Branding Lifecycle -->
         <applicationInitializedListener implementation="org.jormungandr.shell.splash.JormungandrAppInitializer"/>
         <postStartupActivity implementation="org.jormungandr.shell.splash.JormungandrStartupActivity"/>
     </extensions>
 
     <actions>
+        <!-- Project Creation Action -->
+        <action id="Jormungandr.NewDataScienceProject"
+                class="org.jormungandr.shell.project.NewDataScienceProjectAction"
+                text="New Data Science Workspace..."
+                description="Create a new structured data science, machine learning, or OLAP workspace from curated templates"
+                icon="/icons/jormungandr_16.png">
+            <add-to-group group-id="NewGroup" anchor="first"/>
+            <add-to-group group-id="FileMenu" anchor="first"/>
+        </action>
+
         <group id="Jormungandr.PerspectiveGroup" text="Perspective" popup="true" icon="/icons/jormungandr_16.png">
             <add-to-group group-id="ViewMenu" anchor="first"/>
             <action id="Jormungandr.Perspective.Analysis"
@@ -72,6 +90,15 @@
                 description="View available visual themes and switch active theme in real time"
                 icon="/icons/jormungandr_16.png">
             <add-to-group group-id="ViewMenu" anchor="after" relative-to-action="Jormungandr.View.Extensions"/>
+        </action>
+
+        <!-- Tools Menu Action -->
+        <action id="Jormungandr.Tools.RConsole"
+                class="org.jormungandr.shell.r.NewRReplConsoleAction"
+                text="R Interactive REPL Console..."
+                description="Open the interactive R statistical and graphical REPL console"
+                icon="/icons/jormungandr_16.png">
+            <add-to-group group-id="ToolsMenu" anchor="first"/>
         </action>
 
         <!-- Help Menu Action -->

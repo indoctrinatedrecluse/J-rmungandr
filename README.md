@@ -708,11 +708,56 @@ To safely reset or inspect Jörmungandr registry entries without affecting other
 ### 🐍 White-Label Branding & Identity System
 
 Jörmungandr features a comprehensive runtime white-labeling and branding overhaul engine ([`JormungandrBranding`](file:///D:/Projects/J%C3%B6rmungandr/modules/platform-shell/src/main/kotlin/org/jormungandr/shell/branding/JormungandrBranding.kt)):
+- **High-Definition Custom Splash Screen**: High-Resolution 2X (1280x820) master artwork with bicubic downsampling, crisp Segoe UI typography, anti-aliased subpixel rendering, orbiting Ouroboros energy comet, shimmering progress bar, and cycling subsystem status text with zero thread leaks.
 - **Universal Window & Title Bar Branding**: Automatically applies the Jörmungandr World Serpent emblem (`jormungandr.ico`, multi-resolution rasters 16px–512px, and vector SVGs) beside the application name on native OS title bars, custom frame headers (`CustomHeader`), and taskbars.
 - **Bespoke Subsystem & Extension Branding**: Employs distinct visual emblems for each extension (Jupyter planetary rings, DataFrame analytical grid, Database multi-tier disks with SQL bolt, Platform Shell Ouroboros) across tool window stripes, left UI list panels in the Subsystems Monitor, and the native Plugin Manager.
 - **Identity & Attribution Mutation**: Reflectively mutates `ApplicationNamesInfo` and `ApplicationInfoImpl` to report Jörmungandr product identity, Indoctrinated Recluse vendor attribution, version metadata, and custom issue/support URLs.
 - **Dynamic UI Text & Menu Rebranding**: Recursively intercepts and transforms upstream IntelliJ/JetBrains strings across all frames, dialogs, menus, status bars, and `ActionManager` action presentations into Jörmungandr equivalents.
 - **Resilient GDPR & Telemetry Guard**: Shields `ConsentOptions` using a dynamic `IOBackend` proxy and bundled consent definitions, guaranteeing seamless startup and zero telemetry leaks.
+
+---
+
+## 🚀 10. Advanced Power Tools & Subsystems
+
+### 10.1 📁 Data Science New Project Wizard & Environment Scaffolder
+Accessible via `File -> New -> New Data Science Workspace...`:
+- **5 Curated Blueprints**:
+  1. *Machine Learning & Deep Learning*: PyTorch, scikit-learn, XGBoost, training harness, and model checkpoint structure.
+  2. *Tabular Analytics & OLAP*: DuckDB, Polars, Apache Arrow, Parquet storage, and benchmark scripts.
+  3. *Generative AI & LLM Studio*: Hugging Face Transformers, vLLM, LangChain, prompt engineering starter notebook.
+  4. *Jupyter Exploratory Notebooks*: Interactive notebooks with Matplotlib, Seaborn, and exploratory datasets.
+  5. *Computer Vision & CNNs*: Torchvision, OpenCV, Albumentations, and CNN classifier pipeline.
+- **Environment Managers**: One-click provisioning for `uv`, `venv`, `conda`, `poetry`, and `manual` environments with cross-platform bootstrap scripts (`setup_env.ps1`, `setup_env.sh`, `setup_env.bat`, `environment.yml`).
+
+### 10.2 📓 Advanced Notebook Power Tools
+- **Live Table of Contents (Outline Panel)**: Collapsible sidebar extracting Markdown headings (`#`, `##`, `###`), live regex filtering, and jump-to-cell scrolling.
+- **Multi-Format Exporter**:
+  - *Standalone HTML*: Self-contained HTML with embedded Solarized styles and clean typography.
+  - *Scientific Python (`.py`)*: Clean Python script with `# %%` cell markers for VS Code / Spyder compatibility.
+  - *GitHub-Flavored Markdown (`.md`)*: Clean markdown with fenced Python code blocks.
+  - *LaTeX Document (`.tex`)*: Academic publication format using `listings` and `amsmath`.
+- **Semantic Notebook Visual Diff**: Cell-by-cell semantic comparison with visual status badges (`+ Added`, `- Deleted`, `~ Modified`, `= Unchanged`).
+
+### 10.3 ⚡ Hardware Accelerators & GPU / VRAM Monitor
+Accessible in `View -> Data Science Subsystems -> Hardware Accelerators & GPU / VRAM`:
+- **Real-Time Device Telemetry**: Auto-detects NVIDIA CUDA GPUs via `nvidia-smi` parser, AMD ROCm, Apple Metal, and Host RAM/CPU.
+- **Capacity & Load Gauges**: Visual progress bars tracking dedicated VRAM capacity, compute utilization %, and thermals.
+- **Flush VRAM Cache**: One-click memory recovery invoking PyTorch CUDA cache evacuation (`torch.cuda.empty_cache()`) and JVM Garbage Collection.
+
+### 10.4 🧠 AI/ML Model Checkpoint & Neural Graph Inspector
+Directly open `.safetensors`, `.onnx`, `.pt`, `.pth`, `.h5` files in the editor:
+- **Zero-Copy Safetensors Parsing**: Parses little-endian 8-byte uint64 headers and JSON metadata directly without loading gigabytes of weights into JVM heap.
+- **Layer & Weight Breakdown**: Tabular inspection of tensor parameter names, dimensions/shapes, numerical precision (`F16`, `BF16`, `F32`), byte memory footprint, and categorized layer types (Self-Attention, MLP Feed-Forward, Embedding, Normalization, Convolutional, Prediction Head).
+- **Interactive Neural Architecture DAG**: Canvas rendering of neural layer feed-forward flow.
+- **Copyable Loading Code**: Ready-to-run Python snippets for `safetensors.torch.load_file`, `torch.load`, and `onnx.load`.
+
+### 10.5 🔮 R Language & Statistical REPL Subsystem
+Accessible via `Tools -> R Interactive REPL Console...` or bottom `R Console` ToolWindow:
+- **Local R Runtime Discovery**: Automatically discovers R binaries (`Rscript.exe`, `R.exe`) across `PATH`, `R_HOME`, `Program Files`, and Conda environments, inventorying installed CRAN packages (`ggplot2`, `dplyr`, `arrow`, `tidyr`, `IRkernel`).
+- **Interactive REPL Console**: Multi-line script execution, history recall (`Ctrl+Up` / `Ctrl+Down`), quick template library, and execution metrics.
+- **Automatic ggplot2 & Base-R Graphics Bridge**: Automatically intercepts graphics devices (`png()`) and pushes generated visualizations directly into the centralized **Scientific Plots Panel**.
+- **Tabular Dataframe Bridge**: Intercepts `view()` / `head()` calls to export tabular datasets (`mtcars`, `iris`, etc.) directly into the **DataFrame Viewer Studio**.
+- **Interactive Simulation Mode**: Seamless fallback mode allowing complete workflow demonstrations and testing even when a native R runtime is not yet installed on the host.
 
 ---
 

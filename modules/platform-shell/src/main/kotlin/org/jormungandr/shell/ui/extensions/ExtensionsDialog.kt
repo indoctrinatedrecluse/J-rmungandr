@@ -18,6 +18,7 @@ import javax.swing.border.LineBorder
 
 import com.intellij.openapi.options.ShowSettingsUtil
 import org.jormungandr.core.extension.MemoryPressureLevel
+import org.jormungandr.shell.hardware.HardwareTelemetryPanel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -70,7 +71,7 @@ class ExtensionsDialog(private val currentProject: Project? = null) : DialogWrap
 
     override fun createCenterPanel(): JComponent {
         val root = JPanel(BorderLayout(16, 12)).apply {
-            preferredSize = Dimension(780, 480)
+            preferredSize = Dimension(820, 520)
             border = EmptyBorder(12, 16, 12, 16)
         }
 
@@ -117,7 +118,12 @@ class ExtensionsDialog(private val currentProject: Project? = null) : DialogWrap
             isContinuousLayout = true
             border = null
         }
-        root.add(splitPane, BorderLayout.CENTER)
+
+        val tabbedPane = JTabbedPane().apply {
+            addTab("🧩 Core Subsystems & Quotas", splitPane)
+            addTab("⚡ Hardware Accelerators & GPU / VRAM", HardwareTelemetryPanel())
+        }
+        root.add(tabbedPane, BorderLayout.CENTER)
 
         // Footer Banner (Live Memory + Plugin Manager shortcut)
         val footer = JPanel(BorderLayout(8, 0)).apply {

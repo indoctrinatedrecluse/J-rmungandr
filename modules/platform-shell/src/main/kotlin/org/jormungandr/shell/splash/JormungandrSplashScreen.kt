@@ -53,6 +53,9 @@ object JormungandrSplashScreen {
         private set
 
     @Volatile
+    private var splashIcon: ImageIcon? = null
+
+    @Volatile
     private var autoDismissJob: Job? = null
 
     @Volatile
@@ -107,9 +110,12 @@ object JormungandrSplashScreen {
                 }
 
                 val imageIcon = ImageIcon(splashUrl)
+                splashIcon = imageIcon
+                val splashLabel = HighDefinitionSplashLabel(imageIcon)
+
                 val window = JWindow().apply {
                     contentPane.layout = BorderLayout()
-                    contentPane.add(JLabel(imageIcon), BorderLayout.CENTER)
+                    contentPane.add(splashLabel, BorderLayout.CENTER)
                     background = Color(253, 246, 227) // Solarized Base3
 
                     // Apply Jörmungandr window icons
@@ -227,10 +233,16 @@ object JormungandrSplashScreen {
             try {
                 splashWindow?.let { win ->
                     win.isVisible = false
+                    try {
+                        (win.contentPane.getComponent(0) as? JLabel)?.icon = null
+                        win.contentPane.removeAll()
+                    } catch (_: Exception) {}
                     win.dispose()
                     splashWindow = null
                     LOG.info("Jörmungandr splash screen dismissed.")
                 }
+                splashIcon?.image?.flush()
+                splashIcon = null
             } catch (e: Exception) {
                 LOG.warn("Error disposing splash screen window", e)
             } finally {
@@ -270,14 +282,58 @@ object JormungandrSplashScreen {
 
         val win = splashWindow
         splashWindow = null
+        val icon = splashIcon
+        splashIcon = null
+        icon?.image?.flush()
+
         if (win != null) {
-            if (SwingUtilities.isEventDispatchThread()) {
+            val disposeAction = {
+                try {
+                    (win.contentPane.getComponent(0) as? JLabel)?.icon = null
+                    win.contentPane.removeAll()
+                } catch (_: Exception) {}
                 win.dispose()
+            }
+            if (SwingUtilities.isEventDispatchThread()) {
+                disposeAction()
             } else {
-                SwingUtilities.invokeLater {
-                    win.dispose()
-                }
+                SwingUtilities.invokeLater(disposeAction)
             }
         }
     }
 }
+
+/**
+ * High-definition splash screen canvas component extending JLabel.
+ * Preserves standard Swing image observation and frame lifecycle while rendering master
+ * 2X (1280x820) resolution frames onto a 640x410 logical viewport using Bicubic downsampling
+ * and anti-aliased subpixel rendering for Retina and HiDPI displays.
+ */
+private class HighDefinitionSplashLabel(icon: ImageIcon) : JLabel(icon) {
+    init {
+        preferredSize = Dimension(640, 410)
+        minimumSize = Dimension(640, 410)
+        maximumSize = Dimension(640, 410)
+        isOpaque = true
+        background = Color(253, 246, 227)
+    }
+
+    override fun paintComponent(g: Graphics) {
+        val g2 = g.create() as Graphics2D
+        try {
+            g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
+            g2.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC)
+            g2.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY)
+            g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON)
+            val img = (icon as? ImageIcon)?.image
+            if (img != null) {
+                g2.drawImage(img, 0, 0, width, height, this)
+            } else {
+                super.paintComponent(g)
+            }
+        } finally {
+            g2.dispose()
+        }
+    }
+}
+
