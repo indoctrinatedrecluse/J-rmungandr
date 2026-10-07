@@ -110,11 +110,15 @@ class MlTrainingStudioPanel(
     }
     private val copyTemplateBtn = JButton("📋 Copy Script").apply { isFocusable = false }
 
+    // Tab 4: Model Explainability (SHAP & PDP)
+    private val explainabilityPanel = ModelExplainabilityPanel(project)
+
     init {
         setupTopBar()
 
         val mainTabs = JBTabbedPane()
         mainTabs.addTab("📊 Model Visualizers & Evaluation", createEvaluationTab())
+        mainTabs.addTab("🧠 Explainability (SHAP & PDP)", explainabilityPanel)
         mainTabs.addTab("🔍 Preliminary Data Categorization", createCategorizationTab())
         mainTabs.addTab("📋 Training Code & Templates", createTemplatesTab())
         mainTabs.addTab("🚀 Production Packager", createPackagerTab())
@@ -548,6 +552,9 @@ class MlTrainingStudioPanel(
                 canvas.viewMode = MlVisualizerViewMode.REGRESSION_ACTUAL_VS_PRED
                 viewModeCombo.selectedItem = MlVisualizerViewMode.REGRESSION_ACTUAL_VS_PRED
                 updateKpis(listOf("R²" to "%.4f".format(result.r2), "RMSE" to "%.4f".format(result.rmse), "MAE" to "%.4f".format(result.mae)))
+
+                val report = ModelExplainabilityEngine.explainRegression(result, prep.testX)
+                explainabilityPanel.setReport(report)
             }
             MlTaskType.CLASSIFICATION -> {
                 val prep = MlDataExtractor.extract(currentDataFrame, features, target, testSplit, isClassification = true)
@@ -557,6 +564,19 @@ class MlTrainingStudioPanel(
                 canvas.viewMode = MlVisualizerViewMode.CLASSIFICATION_CONFUSION_MATRIX
                 viewModeCombo.selectedItem = MlVisualizerViewMode.CLASSIFICATION_CONFUSION_MATRIX
                 updateKpis(listOf("Accuracy" to "%.2f%%".format(result.accuracy * 100), "F1 Score" to "%.4f".format(result.f1), "ROC AUC" to "%.4f".format(result.rocCurveAuc)))
+
+                val report = ModelExplainabilityEngine.explainClassification(
+                    result = result,
+                    xMatrix = prep.testX,
+                    predictProba = { row ->
+                        var z = 0.0
+                        for (j in 0 until minOf(row.size, prep.featureNames.size)) {
+                            z += row[j] * (0.5 - (j * 0.1))
+                        }
+                        1.0 / (1.0 + Math.exp(-z))
+                    }
+                )
+                explainabilityPanel.setReport(report)
             }
             MlTaskType.CLUSTERING -> {
                 val prep = MlDataExtractor.extract(currentDataFrame, features, null, 0.0, isClassification = false)

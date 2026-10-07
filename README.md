@@ -121,6 +121,12 @@ Modern data practitioners are caught between two disparate worlds:
   - Rich Notebook Output Rendering: LaTeX math typography, native audio/video media players with waveform analysis, and collapsible JSON tree inspector.
   - In-IDE Data Science Copilot powered by Google Gemini AI & offline heuristic intelligence with resilient lifecycle initialization.
   - Low-code Data Prep Studio transformation pipeline wizard with Pandas, Polars, and SQL generation.
+  - Reactive Notebooks & Inter-Cell DAG: AST defs/uses dependency mapping, interactive 2D graph viewer, stale cell indicators, and Kahn's topological execution.
+  - Model Explainability Studio: SHAP waterfall force plots, global feature importance ranking, and PDP/ICE partial dependence curves.
+  - Real-Time Streaming Studio: Multi-source sliding memory window buffer, live timeseries oscilloscope canvas, and 1-click DataFrame snapshotting.
+  - Dataset Comparison & Distribution Drift Studio: PSI, Kolmogorov-Smirnov statistical tests, drift severity metrics, and overlay histograms.
+  - 1-Click Interactive Web App Generator: Generates ready-to-run Streamlit and Gradio dashboards with parameters, KPI cards, and Plotly charts.
+  - JupyterLab Command Mode & Pan/Zoom Canvas: Keyboard muscle memory (Esc, A, B, DD, M, Y, J, K) and 2D canvas pan/zoom interactions.
 - **Modular Extension Manager & Bespoke Visual Identity**:
   - Strict lifecycle states (`UNLOADED` &rarr; `ACTIVE` &rarr; `DISPOSING` &rarr; `TERMINATED`).
   - Memory bounds and IntelliJ `Disposable` hierarchy integration.
@@ -800,6 +806,44 @@ Jörmungandr includes 6 flagship analytical studios designed to deliver an end-t
    - **Native Audio Player Card**: Waveform visualizer canvas, native Java Sound playback engine, interactive scrubber, and audio export.
    - **Native Video Player Card**: Video preview canvas with interactive controls and 1-click external playback in default system media players.
    - **Interactive Collapsible JSON Tree Inspector**: Syntax-highlighted tree viewer for `application/json` outputs with live search filtering, expand/collapse, and JSON path copying.
+
+### 10.7 🚀 Next-Gen Reactive DAGs, Model Explainability, Real-Time Streaming & Distribution Drift Studios
+
+Jörmungandr brings 6 next-generation reactive, streaming, and interpretability capabilities directly into the core IDE:
+
+1. ⚡ **Reactive Notebooks & Cell Dependency DAG (No More Hidden State)**:
+   - **Static Defs/Uses AST Analysis**: Tracks variables defined and consumed across cells to automatically construct inter-cell directed acyclic execution graphs.
+   - **Interactive 2D DAG Visualizer**: Interactive topological canvas rendering cell nodes, execution status, and directional edges, equipped with 1-click node navigation.
+   - **Automatic Staleness Badges (`⚠️ Stale`)**: Automatically flags downstream cells whose referenced variables were mutated in upstream cells out of order.
+   - **Topological Cascade Re-Execution**: 1-click execution resolving dependencies in Kahn's topological order to eliminate out-of-order execution bugs and hidden notebook state.
+
+2. 🧠 **Model Explainability & Attribution Studio (SHAP, LIME & Partial Dependence)**:
+   - **Local Attribution Force Plots (SHAP Waterfall)**: Linear & Kernel SHAP values visualizing how individual features push predictions above or below base value $E[f(X)]$ ($E[f(X)] + \sum \phi_i = f(x)$).
+   - **Global Feature Importance Ranking**: Horizontal bar chart sorting features by mean absolute attribution ($|\phi_i|$) to reveal overarching model drivers.
+   - **Partial Dependence Plots (PDP) & ICE Curves**: Interactive curves displaying marginal feature impact on targets across variable ranges.
+   - **1-Click Python SHAP Generator**: Automatically exports reproducible Python scripts utilizing the `shap` library for CI/CD model reporting.
+
+3. 🌊 **Real-Time Streaming Data & Timeseries Studio (Kafka, WebSockets & Live Telemetry)**:
+   - **Sliding Memory Window Buffer**: Thread-safe bounded buffer (configurable 50–2000 events) capturing high-velocity multi-source streaming data without JVM heap bloat.
+   - **Multi-Source Event Ingress**: Native simulators and live connectors for IoT Sensor Telemetry (temperature, vibration, power), FinTech Payment Transactions (amounts, latency, fraud scores), and Apache Kafka Broker Topics (`kafka://user-events`).
+   - **60 FPS Live Animated Oscilloscope**: Real-time timeseries rendering canvas with color-coded multi-metric signals, continuous rolling averages, and throughput gauges.
+   - **❄️ Freeze to DataFrame**: Instant 1-click snapshotting converting active in-flight stream buffers into native immutable DataFrames for immediate SQL querying and ML training.
+
+4. 📊 **Dataset Comparison & Distribution Drift Studio (Train vs Test / Prod vs Staging)**:
+   - **Schema & Structural Divergence**: Instant detection of dropped/added columns, datatype mismatches, and missing value rate deltas.
+   - **Rigorous Statistical Drift Detection**: Automated calculation of the **Population Stability Index (PSI)** and **Two-Sample Kolmogorov-Smirnov (K-S)** test with asymptotic p-value estimation.
+   - **Severity Categorization**: Traffic-light health indicators (`🟢 STABLE`, `🟡 MODERATE DRIFT`, `🔴 SEVERE DRIFT`) with feature-by-feature summaries.
+   - **Dual Histogram & ECDF Overlay Canvas**: Interactive comparative visualizer displaying reference vs current empirical distribution functions side-by-side.
+
+5. 📱 **1-Click Interactive Web App & Dashboard Generator (Streamlit & Gradio)**:
+   - **Instant Dashboard Generation**: Converts any tabular DataFrame or trained ML model into standalone **Streamlit** or **Gradio** web applications with a single click.
+   - **Interactive UI Controls**: Automatically crafts numerical sliders, categorical multiselect filters, KPI metric scorecards, and interactive Plotly visualization charts.
+   - **Inference Pipeline Integration**: Generates complete model inference loops with dynamic input controls and real-time prediction displays.
+   - **In-IDE Syntax Preview & Export**: Built-in Python code viewer with 1-click clipboard copying and `.py` script saving.
+
+6. ⌨️ **Pro Productivity & UX Polish (JupyterLab Muscle Memory & Pan/Zoom Canvases)**:
+   - **Full JupyterLab Command Mode Navigation**: Native keyboard shortcuts (`Esc` for command mode, `Enter` to focus editor, `A`/`B` to insert cells above/below, `DD` to delete, `M` for Markdown, `Y` for Code, `J`/`K` to navigate cells, `Shift+Enter` and `Ctrl+Enter` to run).
+   - **Universal Interactive Pan & Zoom Controller**: Reusable Swing canvas component providing cursor-anchored mouse wheel zoom, smooth click-and-drag panning, and double-click zoom reset across all 2D charts and DAGs.
 
 ---
 

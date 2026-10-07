@@ -7,8 +7,11 @@ import com.intellij.openapi.ui.Messages
 import com.intellij.openapi.vfs.VirtualFile
 import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBScrollPane
+import com.intellij.ui.components.JBTabbedPane
 import kotlinx.coroutines.*
 import org.jormungandr.core.theme.ThemeManager
+import org.jormungandr.jupyter.dag.NotebookDependencyGraphPanel
+import org.jormungandr.jupyter.dag.NotebookDependencyGraphService
 import org.jormungandr.jupyter.diff.NotebookDiffDialog
 import org.jormungandr.jupyter.export.NotebookExporter
 import org.jormungandr.jupyter.format.NotebookFormat
@@ -53,7 +56,16 @@ class NotebookPanel(
 
     private val cellsContainer = JPanel()
     private val scrollPane = JBScrollPane(cellsContainer)
+    private val rightTabs = JBTabbedPane()
     private val outlinePanel = NotebookOutlinePanel { cellIndex -> scrollToCell(cellIndex) }
+    private val dagPanel by lazy {
+        NotebookDependencyGraphPanel(
+            notebookModel = notebookModel,
+            onSelectCell = { cellId -> scrollToCellById(cellId) },
+            onRunCascade = { cascadeIds -> runCellsById(cascadeIds) },
+            onRunDagOrder = { topoIds -> runCellsById(topoIds) }
+        )
+    }
     private lateinit var mainSplitPane: JSplitPane
 
     private val kernelStatusLabel = JLabel("⚪ Initializing...")
@@ -66,8 +78,11 @@ class NotebookPanel(
         buildToolbar()
         buildCellsContainer()
 
-        outlinePanel.isVisible = false
-        mainSplitPane = JSplitPane(JSplitPane.HORIZONTAL_SPLIT, scrollPane, outlinePanel).apply {
+        rightTabs.addTab("📑 Outline", outlinePanel)
+        rightTabs.addTab("⚡ Reactive DAG", dagPanel)
+        rightTabs.isVisible = false
+
+        mainSplitPane = JSplitPane(JSplitPane.HORIZONTAL_SPLIT, scrollPane, rightTabs).apply {
             isContinuousLayout = true
             resizeWeight = 1.0
             dividerSize = 4
@@ -137,10 +152,35 @@ class NotebookPanel(
             font = font.deriveFont(Font.PLAIN, 11f)
             toolTipText = "Toggle Table of Contents Outline panel"
             addActionListener {
-                outlinePanel.isVisible = isSelected
                 if (isSelected) {
+                    rightTabs.isVisible = true
+                    rightTabs.selectedIndex = 0
                     outlinePanel.updateOutline(notebookModel)
-                    mainSplitPane.dividerLocation = (width - 260).coerceAtLeast(100)
+                    mainSplitPane.dividerLocation = (width - 320).coerceAtLeast(100)
+                } else {
+                    if (rightTabs.selectedIndex == 0) {
+                        rightTabs.isVisible = false
+                    }
+                }
+                revalidate()
+                repaint()
+            }
+        }
+
+        val dagBtn = JToggleButton("⚡ DAG").apply {
+            isFocusPainted = false
+            font = font.deriveFont(Font.PLAIN, 11f)
+            toolTipText = "Toggle Reactive Notebook DAG & Dependency Graph"
+            addActionListener {
+                if (isSelected) {
+                    rightTabs.isVisible = true
+                    rightTabs.selectedIndex = 1
+                    dagPanel.updateModel(notebookModel)
+                    mainSplitPane.dividerLocation = (width - 360).coerceAtLeast(100)
+                } else {
+                    if (rightTabs.selectedIndex == 1) {
+                        rightTabs.isVisible = false
+                    }
                 }
                 revalidate()
                 repaint()
@@ -171,6 +211,7 @@ class NotebookPanel(
         leftTools.add(clearOutputsBtn)
         leftTools.add(Box.createHorizontalStrut(6))
         leftTools.add(outlineBtn)
+        leftTools.add(dagBtn)
         leftTools.add(exportBtn)
         leftTools.add(diffBtn)
 
@@ -233,7 +274,10 @@ class NotebookPanel(
                 onDeleteRequested = { deleteCell(it) },
                 onMoveUpRequested = { moveCellUp(it) },
                 onMoveDownRequested = { moveCellDown(it) },
-                onModified = { saveNotebook() },
+                onModified = {
+                    saveNotebook()
+                    updateReactiveDagState()
+                },
                 onRunAllAboveRequested = { runAllAbove(it) },
                 onRunAllBelowRequested = { runAllBelow(it) },
                 onClearOutputsRequested = {
@@ -241,7 +285,12 @@ class NotebookPanel(
                     it.renderOutputs()
                     saveNotebook()
                 }
-            )
+            ).apply {
+                onInsertAboveRequested = { insertCellAbove(it) }
+                onInsertBelowRequested = { insertCellBelow(it) }
+                onSelectNextRequested = { selectNextCell(it) }
+                onSelectPreviousRequested = { selectPreviousCell(it) }
+            }
             cellComponents.add(comp)
             cellsContainer.add(comp)
             cellsContainer.add(Box.createVerticalStrut(8))
@@ -252,6 +301,7 @@ class NotebookPanel(
         if (outlinePanel.isVisible) {
             outlinePanel.updateOutline(notebookModel)
         }
+        updateReactiveDagState()
     }
 
     private fun initKernel() {
@@ -350,6 +400,7 @@ class NotebookPanel(
                 comp.updateExecutionDisplay()
                 comp.renderOutputs()
                 saveNotebook()
+                updateReactiveDagState()
             }
 
             // Asynchronously refresh Variable Inspector
@@ -490,6 +541,49 @@ class NotebookPanel(
         }
     }
 
+    fun insertCellAbove(target: CellComponent) {
+        val idx = cellComponents.indexOf(target).coerceAtLeast(0)
+        val newCell = org.jormungandr.jupyter.model.NotebookCell(
+            cellType = org.jormungandr.jupyter.model.CellType.CODE,
+            source = ""
+        )
+        notebookModel.cells.add(idx, newCell)
+        rebuildCellComponents()
+        saveNotebook()
+        scrollToCell(idx)
+    }
+
+    fun insertCellBelow(target: CellComponent) {
+        val idx = cellComponents.indexOf(target)
+        val insertIdx = if (idx >= 0) idx + 1 else cellComponents.size
+        val newCell = org.jormungandr.jupyter.model.NotebookCell(
+            cellType = org.jormungandr.jupyter.model.CellType.CODE,
+            source = ""
+        )
+        if (insertIdx < notebookModel.cells.size) {
+            notebookModel.cells.add(insertIdx, newCell)
+        } else {
+            notebookModel.cells.add(newCell)
+        }
+        rebuildCellComponents()
+        saveNotebook()
+        scrollToCell(insertIdx)
+    }
+
+    fun selectNextCell(target: CellComponent) {
+        val idx = cellComponents.indexOf(target)
+        if (idx in 0 until cellComponents.size - 1) {
+            scrollToCell(idx + 1)
+        }
+    }
+
+    fun selectPreviousCell(target: CellComponent) {
+        val idx = cellComponents.indexOf(target)
+        if (idx > 0) {
+            scrollToCell(idx - 1)
+        }
+    }
+
     fun clearAllOutputs() {
         notebookModel.clearAllOutputs()
         cellComponents.forEach {
@@ -526,6 +620,38 @@ class NotebookPanel(
             val comp = cellComponents[cellIndex]
             comp.scrollRectToVisible(Rectangle(0, 0, comp.width, comp.height))
             comp.requestFocusInWindow()
+        }
+    }
+
+    private fun scrollToCellById(cellId: String) {
+        val idx = cellComponents.indexOfFirst { it.cell.id == cellId }
+        if (idx >= 0) {
+            scrollToCell(idx)
+        }
+    }
+
+    private fun runCellsById(cellIds: List<String>) {
+        panelScope.launch(Dispatchers.IO) {
+            for (id in cellIds) {
+                val comp = cellComponents.firstOrNull { it.cell.id == id } ?: continue
+                if (comp.cell.cellType == CellType.CODE) {
+                    runCell(comp)
+                    while (comp.cell.isExecuting) {
+                        delay(50)
+                    }
+                }
+            }
+        }
+    }
+
+    fun updateReactiveDagState() {
+        val graph = org.jormungandr.jupyter.dag.NotebookDependencyGraphService.buildDependencyGraph(notebookModel)
+        for (comp in cellComponents) {
+            val isStale = comp.cell.id in graph.staleCellIds
+            comp.setStale(isStale)
+        }
+        if (rightTabs.isVisible && rightTabs.selectedIndex == 1) {
+            dagPanel.updateModel(notebookModel)
         }
     }
 

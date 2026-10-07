@@ -82,6 +82,7 @@ class DataFrameGridPanel(
         dataFrame = loadedDf
     })
     private val qualityStudioView = DataQualityStudioPanel(initialDataFrame)
+    private val driftStudioView = org.jormungandr.dataframe.drift.DatasetDriftStudioPanel()
     private val filterBuilder = FilterBuilderPanel(initialDataFrame) { compoundFilter ->
         applyCompoundFilter(compoundFilter)
     }
@@ -118,6 +119,7 @@ class DataFrameGridPanel(
         tabbedPane.addTab("Chart View", chartView)
         tabbedPane.addTab("3D & Web Charts", interactivePlotStudio)
         tabbedPane.addTab("Column Profiler", profilerView)
+        tabbedPane.addTab("Distribution Drift", driftStudioView)
         tabbedPane.addTab("Pivot Studio", pivotView)
         tabbedPane.addTab("In-Memory SQL", sqlView)
 
@@ -130,8 +132,9 @@ class DataFrameGridPanel(
                 5 -> chartView.setDataFrame(dataFrame)
                 6 -> interactivePlotStudio.setDataFrame(dataFrame)
                 7 -> profilerView.setDataFrame(dataFrame)
-                8 -> pivotView.setDataFrame(dataFrame)
-                9 -> sqlView.setDataFrame(dataFrame)
+                8 -> driftStudioView.compare(rawDataFrame, dataFrame)
+                9 -> pivotView.setDataFrame(dataFrame)
+                10 -> sqlView.setDataFrame(dataFrame)
             }
         }
 
@@ -361,9 +364,22 @@ class DataFrameGridPanel(
             }
         }
 
+        val webAppBtn = JButton("📱 Web App").apply {
+            isFocusable = false
+            font = font.deriveFont(Font.BOLD, 11f)
+            foreground = Color(16, 185, 129)
+            toolTipText = "Generate turnkey interactive Streamlit or Gradio Web App / Dashboard"
+            addActionListener {
+                val proj = com.intellij.openapi.project.ProjectManager.getInstance().openProjects.firstOrNull()
+                val dialog = org.jormungandr.dataframe.webapp.WebAppGeneratorDialog(proj, dataFrame)
+                dialog.show()
+            }
+        }
+
         right.add(shapeLabel)
         right.add(inspectorToggleBtn)
         right.add(duckDbBtn)
+        right.add(webAppBtn)
         right.add(codeGenBtn)
         right.add(exportBtn)
         right.add(resetBtn)

@@ -38,6 +38,8 @@ class DatabaseStudioPanel(private val project: Project? = null) : JPanel(BorderL
     private val treeModel = DefaultTreeModel(rootNode)
     private val tree = Tree(treeModel)
 
+    private val tabbedPane = JBTabbedPane()
+
     // Specialized Studio Panels
     private val consolePanel = QueryConsolePanel(project)
     private val visualBuilderPanel = VisualQueryBuilderPanel(project) { sql ->
@@ -52,7 +54,7 @@ class DatabaseStudioPanel(private val project: Project? = null) : JPanel(BorderL
         consolePanel.setQueryText(sql)
         tabbedPane.selectedIndex = 0
     }
-    private val tabbedPane = JBTabbedPane()
+    private val streamingStudioPanel = org.jormungandr.database.streaming.StreamingTimeseriesStudioPanel(project)
 
     private val schemaDiagramPanel = SchemaDiagramPanel(null) { table ->
         consolePanel.setQueryText("SELECT * FROM ${table.name} LIMIT 100;")
@@ -203,6 +205,7 @@ class DatabaseStudioPanel(private val project: Project? = null) : JPanel(BorderL
         tabbedPane.addTab("⚡ Redis Studio", redisStudioPanel)
         tabbedPane.addTab("🪐 Cassandra CQL", cassandraStudioPanel)
         tabbedPane.addTab("📨 Kafka Streams", kafkaStudioPanel)
+        tabbedPane.addTab("📈 Streaming & Timeseries", streamingStudioPanel)
         tabbedPane.addTab("🌊 Remote Data Lakes", dataLakeStudioPanel)
         tabbedPane.addTab("🗺️ Schema Diagram", schemaDiagramPanel)
 

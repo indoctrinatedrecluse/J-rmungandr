@@ -58,12 +58,25 @@ class CellComponent(
     private val onClearOutputsRequested: ((CellComponent) -> Unit)? = null
 ) : JPanel(BorderLayout()) {
 
+    var onInsertAboveRequested: ((CellComponent) -> Unit)? = null
+    var onInsertBelowRequested: ((CellComponent) -> Unit)? = null
+    var onSelectNextRequested: ((CellComponent) -> Unit)? = null
+    var onSelectPreviousRequested: ((CellComponent) -> Unit)? = null
+
+    private var lastDKeyPressTime: Long = 0L
+
     private val themeManager: ThemeManager? = runCatching {
         ApplicationManager.getApplication()?.getService(ThemeManager::class.java)
     }.getOrNull()
 
     private val headerPanel = JPanel(BorderLayout())
     private val execLabel = JLabel()
+    private val staleBadge = JLabel("⚠️ Stale").apply {
+        isVisible = false
+        foreground = Color(220, 38, 38)
+        font = Font("SansSerif", Font.BOLD, 10)
+        toolTipText = "Output is stale because an upstream dependency was modified"
+    }
     private val typeCombo = JComboBox(arrayOf("Code", "Markdown", "Raw"))
     private val commentsToggleBtn = JButton()
 
@@ -86,6 +99,7 @@ class CellComponent(
         buildEditor()
         buildOutputPanel()
         buildCommentsPanel()
+        setupCommandModeKeybindings()
 
         val centerPanel = JPanel()
         centerPanel.layout = BoxLayout(centerPanel, BoxLayout.Y_AXIS)
@@ -112,6 +126,7 @@ class CellComponent(
         execLabel.font = Font("Monospaced", Font.BOLD, 12)
         execLabel.foreground = getAccentColor()
         left.add(execLabel)
+        left.add(staleBadge)
 
         typeCombo.selectedItem = when (cell.cellType) {
             CellType.CODE -> "Code"
@@ -257,7 +272,7 @@ class CellComponent(
                 isIndentGuidesShown = true
             }
 
-            // Keyboard shortcut for Shift+Enter (Run) & Ctrl+Enter (Run in place)
+            // Keyboard shortcut for Shift+Enter (Run), Ctrl+Enter (Run in place), and Escape (Command Mode)
             newEditor.contentComponent.addKeyListener(object : KeyAdapter() {
                 override fun keyPressed(e: KeyEvent) {
                     if (e.keyCode == KeyEvent.VK_ENTER && e.isShiftDown) {
@@ -266,6 +281,9 @@ class CellComponent(
                     } else if (e.keyCode == KeyEvent.VK_ENTER && (e.isControlDown || e.isMetaDown)) {
                         e.consume()
                         onRunRequested(this@CellComponent)
+                    } else if (e.keyCode == KeyEvent.VK_ESCAPE) {
+                        e.consume()
+                        this@CellComponent.requestFocusInWindow()
                     }
                 }
             })
@@ -287,6 +305,12 @@ class CellComponent(
                         if (e.keyCode == KeyEvent.VK_ENTER && e.isShiftDown) {
                             e.consume()
                             onRunRequested(this@CellComponent)
+                        } else if (e.keyCode == KeyEvent.VK_ENTER && (e.isControlDown || e.isMetaDown)) {
+                            e.consume()
+                            onRunRequested(this@CellComponent)
+                        } else if (e.keyCode == KeyEvent.VK_ESCAPE) {
+                            e.consume()
+                            this@CellComponent.requestFocusInWindow()
                         }
                     }
                 })
@@ -295,6 +319,58 @@ class CellComponent(
             val scroll = JBScrollPane(textArea)
             editorContainer.add(scroll, BorderLayout.CENTER)
         }
+    }
+
+    fun focusEditor() {
+        editor?.contentComponent?.requestFocusInWindow() ?: fallbackTextArea?.requestFocusInWindow()
+    }
+
+    private fun setupCommandModeKeybindings() {
+        isFocusable = true
+        addKeyListener(object : KeyAdapter() {
+            override fun keyPressed(e: KeyEvent) {
+                when (e.keyCode) {
+                    KeyEvent.VK_ENTER -> {
+                        focusEditor()
+                        e.consume()
+                    }
+                    KeyEvent.VK_A -> {
+                        onInsertAboveRequested?.invoke(this@CellComponent)
+                        e.consume()
+                    }
+                    KeyEvent.VK_B -> {
+                        onInsertBelowRequested?.invoke(this@CellComponent)
+                        e.consume()
+                    }
+                    KeyEvent.VK_D -> {
+                        val now = System.currentTimeMillis()
+                        if (now - lastDKeyPressTime < 800) {
+                            onDeleteRequested(this@CellComponent)
+                            lastDKeyPressTime = 0L
+                        } else {
+                            lastDKeyPressTime = now
+                        }
+                        e.consume()
+                    }
+                    KeyEvent.VK_M -> {
+                        typeCombo.selectedItem = "Markdown"
+                        e.consume()
+                    }
+                    KeyEvent.VK_Y -> {
+                        typeCombo.selectedItem = "Code"
+                        e.consume()
+                    }
+                    KeyEvent.VK_J, KeyEvent.VK_DOWN -> {
+                        onSelectNextRequested?.invoke(this@CellComponent)
+                        e.consume()
+                    }
+                    KeyEvent.VK_K, KeyEvent.VK_UP -> {
+                        onSelectPreviousRequested?.invoke(this@CellComponent)
+                        e.consume()
+                    }
+                }
+            }
+        })
     }
 
     private fun buildOutputPanel() {
@@ -328,6 +404,14 @@ class CellComponent(
                 execLabel.text = "In [ ]: "
                 execLabel.foreground = Color.GRAY
             }
+        }
+    }
+
+    fun setStale(stale: Boolean) {
+        SwingUtilities.invokeLater {
+            staleBadge.isVisible = stale
+            revalidate()
+            repaint()
         }
     }
 
