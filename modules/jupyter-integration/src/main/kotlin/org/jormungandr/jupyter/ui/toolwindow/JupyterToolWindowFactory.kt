@@ -102,5 +102,9 @@ class JupyterToolWindowFactory : ToolWindowFactory, DumbAware {
         val variablePanel = org.jormungandr.jupyter.ui.VariableInspectorPanel(project)
         val varsContent = ContentFactory.getInstance().createContent(variablePanel, "Variable Inspector", false)
         toolWindow.contentManager.addContent(varsContent)
+
+        val remoteGatewayPanel = org.jormungandr.jupyter.remote.RemoteJupyterGatewayPanel(project)
+        val remoteContent = ContentFactory.getInstance().createContent(remoteGatewayPanel, "🌐 Remote Gateway", false)
+        toolWindow.contentManager.addContent(remoteContent)
     }
 }

@@ -113,6 +113,12 @@ Modern data practitioners are caught between two disparate worlds:
   - Interactive Web & 3D Visualizations: Plotly, Altair, Vega-Lite, Folium, ECharts via embedded Chromium.
   - In-IDE Machine Learning Experiment Tracker & Metric Studio (MLflow-style leaderboards and step-series convergence curves).
   - In-IDE AI/ML Training Studio (Interactive Ridge/OLS regression, Logistic classification with ROC/AUC and confusion matrices, K-Means clustering, PCA scree plots, preliminary feature categorization/health profiling without training, and Scikit-Learn/PyTorch/XGBoost templates).
+  - In-Memory DuckDB SQL Lakehouse: Zero-copy SQL execution directly over active live DataFrames and Parquet files without database servers.
+  - Automated Data Quality & Correlation Studio: Pearson, Spearman, Kendall Tau correlation heatmaps, Pandera schema rule checks, and IQR/Z-score outlier detection.
+  - Remote Jupyter Gateway: REST and WebSocket connection manager for remote JupyterHub servers, cloud GPU instances, and SSH tunnels.
+  - Agentic "Talk to Your Data" Studio: Autonomous Semantic Data Dictionary generation and natural language query translation.
+  - 1-Click Production Model Deployment Packager: Generates production FastAPI microservices, containerized Dockerfiles, and client SDKs.
+  - Rich Notebook Output Rendering: LaTeX math typography, native audio/video media players with waveform analysis, and collapsible JSON tree inspector.
   - In-IDE Data Science Copilot powered by Google Gemini AI & offline heuristic intelligence with resilient lifecycle initialization.
   - Low-code Data Prep Studio transformation pipeline wizard with Pandas, Polars, and SQL generation.
 - **Modular Extension Manager & Bespoke Visual Identity**:
@@ -758,6 +764,42 @@ Accessible via `Tools -> R Interactive REPL Console...` or bottom `R Console` To
 - **Automatic ggplot2 & Base-R Graphics Bridge**: Automatically intercepts graphics devices (`png()`) and pushes generated visualizations directly into the centralized **Scientific Plots Panel**.
 - **Tabular Dataframe Bridge**: Intercepts `view()` / `head()` calls to export tabular datasets (`mtcars`, `iris`, etc.) directly into the **DataFrame Viewer Studio**.
 - **Interactive Simulation Mode**: Seamless fallback mode allowing complete workflow demonstrations and testing even when a native R runtime is not yet installed on the host.
+
+### 10.6 🏆 Flagship Analytics, Machine Learning & Lakehouse Studios
+
+Jörmungandr includes 6 flagship analytical studios designed to deliver an end-to-end data science, lakehouse, and machine learning workflow directly within the IDE:
+
+1. 🦆 **In-Memory DuckDB SQL Lakehouse on Live Dataframes & Parquet Files**:
+   - Executes analytical SQL directly over in-memory DataFrames and local Parquet datasets with zero-copy JVM-to-engine bridging.
+   - Built-in SQL editor with query execution timers, result schema introspection, and 1-click Parquet catalog export.
+   - Ready-to-use Python and DuckDB query code generation for script automation.
+
+2. 🔍 **Automated Data Quality, Profiler & Correlation Studio**:
+   - Multi-metric correlation engine supporting **Pearson**, **Spearman Rank**, and **Kendall Tau** association coefficients.
+   - Interactive 2D Color Heatmap Canvas with numerical annotations and tooltip inspection.
+   - Comprehensive Data Quality Scorecard tracking completeness, sparsity %, uniqueness, and column health metrics.
+   - Automated IQR and Z-score outlier detection with Pandera-compatible data validation rule checks.
+
+3. 🌐 **Remote Jupyter Gateway & Cloud/SSH Kernel Client**:
+   - Connects to remote Jupyter Servers and JupyterHub clusters via token or password authentication over HTTP/REST and WebSocket protocols.
+   - Complete remote kernel lifecycle management: launch, list, interrupt, restart, and terminate remote sessions.
+   - Enables seamless GPU-accelerated computing on remote instances directly from the local Jörmungandr editor.
+
+4. 🤖 **Agentic "Talk to Your Data" & SQL/Python Code Generator**:
+   - Heuristic and Gemini AI-powered Semantic Data Dictionary categorizing columns into business roles (*Primary Key*, *Metric*, *Dimension*, *Datetime*, *Identifier*).
+   - Natural language to DuckDB SQL & Pandas transformation engine (*"Show top 5 customers by sales"*, *"Group by region and calculate average revenue"*).
+   - Automated visualization recommender suggesting optimal chart architectures (Bar, Line, Scatter, Histogram, Box).
+
+5. 🧪 **Local MLflow-Style Experiment Tracker & Model Deployment Packager**:
+   - In-IDE experiment tracker recording hyperparameters, training runs, step-wise loss/metric convergence curves, and artifact metadata.
+   - **Checkpoint Vault** for inventorying and linking trained model weights (`.safetensors`, `.onnx`, `.pt`, `.h5`).
+   - **1-Click Production Model Deployment Packager**: Instantly transforms models into deployable microservices with production FastAPI code (`app.py`), Pydantic request/response schemas, multi-stage `Dockerfile`, `requirements.txt`, launch scripts (`run_service.sh`, `run_service.ps1`), and client test harnesses.
+
+6. 📐 **Rich Notebook Output Rendering (LaTeX Math, Audio/Video & Interactive Widgets)**:
+   - **LaTeX Math Formula Typography**: High-fidelity mathematical expression rendering for inline `$ ... $`, display `$$ ... $$`, and `text/latex` MIME outputs, with balanced brace parsing and MathJax/KaTeX compatibility.
+   - **Native Audio Player Card**: Waveform visualizer canvas, native Java Sound playback engine, interactive scrubber, and audio export.
+   - **Native Video Player Card**: Video preview canvas with interactive controls and 1-click external playback in default system media players.
+   - **Interactive Collapsible JSON Tree Inspector**: Syntax-highlighted tree viewer for `application/json` outputs with live search filtering, expand/collapse, and JSON path copying.
 
 ---
 

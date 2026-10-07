@@ -32,5 +32,11 @@
                     canCloseContent="true"
                     icon="/icons/database_16.png"
                     factoryClass="org.jormungandr.database.ui.toolwindow.DatabaseToolWindowFactory"/>
+
+        <toolWindow id="DuckDB Lakehouse"
+                    anchor="bottom"
+                    canCloseContent="true"
+                    icon="/icons/database_16.png"
+                    factoryClass="org.jormungandr.database.lakehouse.DuckDbLakehouseToolWindowFactory"/>
     </extensions>
 </idea-plugin>

@@ -81,6 +81,7 @@ class DataFrameGridPanel(
     private val mlStudioView = org.jormungandr.dataframe.ml.MlTrainingStudioPanel(onDatasetLoaded = { loadedDf ->
         dataFrame = loadedDf
     })
+    private val qualityStudioView = DataQualityStudioPanel(initialDataFrame)
     private val filterBuilder = FilterBuilderPanel(initialDataFrame) { compoundFilter ->
         applyCompoundFilter(compoundFilter)
     }
@@ -113,6 +114,7 @@ class DataFrameGridPanel(
         tabbedPane.addTab("Data Prep Studio", prepStudioView)
         tabbedPane.addTab("✨ Data Copilot", copilotView)
         tabbedPane.addTab("🤖 ML Studio", mlStudioView)
+        tabbedPane.addTab("🔍 Quality & Profiler", qualityStudioView)
         tabbedPane.addTab("Chart View", chartView)
         tabbedPane.addTab("3D & Web Charts", interactivePlotStudio)
         tabbedPane.addTab("Column Profiler", profilerView)
@@ -124,11 +126,12 @@ class DataFrameGridPanel(
                 1 -> prepStudioView.setDataFrame(dataFrame)
                 2 -> copilotView.updateDataFrame(dataFrame)
                 3 -> mlStudioView.setDataFrame(dataFrame)
-                4 -> chartView.setDataFrame(dataFrame)
-                5 -> interactivePlotStudio.setDataFrame(dataFrame)
-                6 -> profilerView.setDataFrame(dataFrame)
-                7 -> pivotView.setDataFrame(dataFrame)
-                8 -> sqlView.setDataFrame(dataFrame)
+                4 -> qualityStudioView.setDataFrame(dataFrame)
+                5 -> chartView.setDataFrame(dataFrame)
+                6 -> interactivePlotStudio.setDataFrame(dataFrame)
+                7 -> profilerView.setDataFrame(dataFrame)
+                8 -> pivotView.setDataFrame(dataFrame)
+                9 -> sqlView.setDataFrame(dataFrame)
             }
         }
 
@@ -285,10 +288,28 @@ class DataFrameGridPanel(
             }
         }
 
+        val duckDbBtn = JButton("🦆 DuckDB").apply {
+            isFocusable = false
+            toolTipText = "Open DuckDB Lakehouse SQL Studio for this dataset"
+            addActionListener {
+                val project = com.intellij.openapi.project.ProjectManager.getInstance().openProjects.firstOrNull()
+                if (project != null) {
+                    com.intellij.openapi.wm.ToolWindowManager.getInstance(project).getToolWindow("DuckDB Lakehouse")?.activate(null)
+                }
+            }
+        }
+
         val codeGenBtn = JButton("⚡ Code ▾").apply {
             isFocusable = false
             addActionListener {
                 val menu = JBPopupMenu()
+                menu.add(JMenuItem("Copy as DuckDB SQL Query").apply {
+                    addActionListener {
+                        val sanitized = dataFrame.name.replace(Regex("""[^a-zA-Z0-9_]"""), "_").trim('_')
+                        val tbl = if (sanitized.isEmpty() || sanitized.first().isDigit()) "tbl_$sanitized" else sanitized
+                        copyToClipboard("SELECT * FROM \"$tbl\" LIMIT 100;")
+                    }
+                })
                 menu.add(JMenuItem("Copy as Pandas Code").apply {
                     addActionListener { copyToClipboard(DataFrameCodeGenerator.toPandasCode(dataFrame)) }
                 })
@@ -342,6 +363,7 @@ class DataFrameGridPanel(
 
         right.add(shapeLabel)
         right.add(inspectorToggleBtn)
+        right.add(duckDbBtn)
         right.add(codeGenBtn)
         right.add(exportBtn)
         right.add(resetBtn)

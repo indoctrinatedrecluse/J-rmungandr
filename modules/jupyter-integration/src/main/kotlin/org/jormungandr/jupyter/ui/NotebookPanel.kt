@@ -317,6 +317,11 @@ class NotebookPanel(
 
     fun runCell(comp: CellComponent) {
         val cell = comp.cell
+        if (cell.cellType == CellType.MARKDOWN) {
+            comp.renderMarkdown()
+            saveNotebook()
+            return
+        }
         if (cell.cellType != CellType.CODE) return
 
         cell.isExecuting = true

@@ -194,6 +194,20 @@ class DataScienceCopilotPanel(
             panel.add(pill)
         }
 
+        val dictBtn = JButton("📚 Data Dictionary").apply {
+            isFocusable = false
+            font = font.deriveFont(Font.BOLD, 10.5f)
+            margin = Insets(1, 6, 1, 6)
+            addActionListener {
+                val dict = org.jormungandr.dataframe.agent.AgenticDataStudioService.generateDataDictionary(dataFrame)
+                val md = org.jormungandr.dataframe.agent.AgenticDataStudioService.formatDictionaryAsMarkdown(dict)
+                val msg = CopilotMessage("model", md)
+                conversationHistory.add(msg)
+                addCopilotMessageBubble(msg)
+            }
+        }
+        panel.add(dictBtn)
+
         val numCol = dataFrame.columns.firstOrNull { it.isNumeric }?.name ?: "value"
         val catCol = dataFrame.columns.firstOrNull { !it.isNumeric }?.name ?: "category"
 
@@ -216,7 +230,7 @@ class DataScienceCopilotPanel(
             apiKeyStatusLabel.text = "🟢 Gemini Connected"
             apiKeyStatusLabel.foreground = Color(30, 140, 30)
         } else {
-            apiKeyStatusLabel.text = "⚡ Offline Smart Engine"
+            apiKeyStatusLabel.text = "⚡ Agentic Intelligence"
             apiKeyStatusLabel.foreground = Color(200, 120, 20)
         }
     }
@@ -257,11 +271,29 @@ class DataScienceCopilotPanel(
         val context = buildDataContext()
 
         Thread {
-            val response = GeminiCopilotService.askCopilot(
-                userPrompt = text,
-                context = context,
-                conversationHistory = conversationHistory
-            )
+            val response = if (GeminiCopilotSettings.hasApiKey) {
+                GeminiCopilotService.askCopilot(
+                    userPrompt = text,
+                    context = context,
+                    conversationHistory = conversationHistory
+                )
+            } else {
+                val agentic = org.jormungandr.dataframe.agent.AgenticDataStudioService.translateNaturalLanguageQuery(dataFrame, text)
+                val body = StringBuilder()
+                body.append("🤖 **Agentic Data Intelligence:**\n\n")
+                body.append("${agentic.explanation}\n\n")
+                body.append("```sql\n${agentic.duckDbSql}\n```\n\n")
+                body.append("```python\n${agentic.pandasCode}\n```\n")
+                if (agentic.suggestedChartType != null) {
+                    body.append("\n📈 *Suggested Chart:* `${agentic.suggestedChartType}` along X: `${agentic.suggestedXCol}`, Y: `${agentic.suggestedYCol}`")
+                }
+                CopilotMessage(
+                    role = "model",
+                    content = body.toString(),
+                    extractedCode = agentic.duckDbSql,
+                    codeLanguage = "sql"
+                )
+            }
             conversationHistory.add(response)
 
             SwingUtilities.invokeLater {
@@ -391,6 +423,49 @@ class DataScienceCopilotPanel(
                 }
             }
             actionToolbar.add(copyBtn)
+
+            val plotBtn = JButton("📈 Render Plot").apply {
+                isFocusable = false
+                font = font.deriveFont(Font.PLAIN, 10.5f)
+                toolTipText = "Pipes visual chart of this dataset to Scientific Plots"
+                addActionListener {
+                    val img = java.awt.image.BufferedImage(900, 550, java.awt.image.BufferedImage.TYPE_INT_RGB)
+                    val g = img.createGraphics()
+                    g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON)
+                    g.color = Color(253, 246, 227)
+                    g.fillRect(0, 0, 900, 550)
+                    g.color = Color(38, 139, 210)
+                    g.font = Font("Segoe UI", Font.BOLD, 18)
+                    g.drawString("📊 AI Agent Plot: ${dataFrame.name}", 50, 45)
+                    g.color = Color(100, 110, 120)
+                    g.font = Font("Segoe UI", Font.PLAIN, 12)
+                    g.drawString("Piped from Data Science Copilot", 50, 70)
+                    val numCols = dataFrame.columns.filter { it.isNumeric }
+                    if (numCols.isNotEmpty()) {
+                        val numColIdx = dataFrame.getColumnIndex(numCols.first().name)
+                        val vals = dataFrame.rows.take(20).mapNotNull {
+                            val v = it.getOrNull(numColIdx)
+                            (v as? Number)?.toDouble() ?: v?.toString()?.toDoubleOrNull()
+                        }
+                        val maxV = vals.maxOrNull()?.coerceAtLeast(1.0) ?: 1.0
+                        g.color = Color(42, 161, 152)
+                        for ((idx, v) in vals.withIndex()) {
+                            val h = ((v / maxV) * 320).toInt()
+                            g.fillRect(60 + idx * 40, 480 - h, 30, h)
+                        }
+                    }
+                    g.dispose()
+                    val item = org.jormungandr.core.plot.PlotItem(
+                        id = java.util.UUID.randomUUID().toString(),
+                        title = "📊 Agentic Chart: ${dataFrame.name}",
+                        source = "Data Copilot",
+                        timestamp = System.currentTimeMillis(),
+                        image = img
+                    )
+                    org.jormungandr.core.plot.PlotManagerService.getInstance().addPlot(item)
+                }
+            }
+            actionToolbar.add(plotBtn)
 
             if (onInsertNotebook != null) {
                 val insertBtn = JButton("➕ Insert in Notebook").apply {

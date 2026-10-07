@@ -109,6 +109,8 @@ class MlExperimentStudioPanel(
 
         bottomTabs.addTab("📈 Metric Convergence Curves", curvesPanel)
         bottomTabs.addTab("⚙️ Run Parameters & Metrics", JBScrollPane(detailsTable))
+        bottomTabs.addTab("📦 Checkpoint Vault", createCheckpointVaultTab())
+        bottomTabs.addTab("🚀 Production Packager", createDeploymentPackagerTab())
         bottomTabs.addTab("🐍 Python Logger Snippet", JBScrollPane(pythonSnippetArea))
 
         mainSplit.topComponent = topPanel
@@ -351,6 +353,128 @@ class MlExperimentStudioPanel(
             refreshRuns()
             statusLabel.text = "Started run '${run.runName}' (${run.runId})"
         }
+    }
+
+    private fun createCheckpointVaultTab(): JPanel {
+        val panel = JPanel(BorderLayout(0, 6)).apply {
+            border = EmptyBorder(6, 6, 6, 6)
+        }
+        val top = JPanel(BorderLayout())
+        val title = JBLabel("📦 Linked Model Checkpoints (.safetensors, .onnx, .pt, .h5)").apply {
+            font = font.deriveFont(Font.BOLD, 12f)
+        }
+        val actionBox = JPanel(FlowLayout(FlowLayout.RIGHT, 4, 0))
+        val registerBtn = JButton("➕ Register Checkpoint").apply {
+            isFocusable = false
+            addActionListener {
+                val fChooser = JFileChooser()
+                if (fChooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
+                    val sel = fChooser.selectedFile
+                    val ext = sel.extension.uppercase()
+                    statusLabel.text = "Linked checkpoint: ${sel.name} ($ext, ${sel.length() / 1024} KB)"
+                }
+            }
+        }
+        actionBox.add(registerBtn)
+        top.add(title, BorderLayout.WEST)
+        top.add(actionBox, BorderLayout.EAST)
+        panel.add(top, BorderLayout.NORTH)
+
+        val vaultModel = DefaultTableModel(arrayOf("Model Name", "Format", "Size", "Linked Run ID", "Input Signature", "Output Signature"), 0)
+        vaultModel.addRow(arrayOf("qwen2.5_lora_rank16.safetensors", "SAFETENSORS", "1.2 GB", "r-lora16", "input_ids [1, 2048]", "logits [1, 2048, 151936]"))
+        vaultModel.addRow(arrayOf("xgboost_churn_v2.onnx", "ONNX", "4.8 MB", "r-xgb150", "features [1, 14] (float32)", "probabilities [1, 2]"))
+        vaultModel.addRow(arrayOf("random_forest_baseline.joblib", "JOBLIB", "12.3 MB", "r-rf100", "X [n, 14]", "prediction [n, 1]"))
+
+        val vaultTable = JTable(vaultModel).apply { rowHeight = 24 }
+        panel.add(JBScrollPane(vaultTable), BorderLayout.CENTER)
+        return panel
+    }
+
+    private fun createDeploymentPackagerTab(): JPanel {
+        val panel = JPanel(BorderLayout(0, 6)).apply {
+            border = EmptyBorder(6, 6, 6, 6)
+        }
+
+        val topForm = JPanel(FlowLayout(FlowLayout.LEFT, 8, 2))
+        val modelNameField = JTextField("churn_predictor", 12)
+        val frameworkCombo = JComboBox(arrayOf("ONNX", "PyTorch", "Safetensors", "Scikit-Learn", "XGBoost"))
+        val featuresField = JTextField("age, balance, tenure, num_products, credit_score", 20)
+        val generateBtn = JButton("⚡ Generate Microservice").apply {
+            isFocusable = false
+            font = font.deriveFont(Font.BOLD, 11f)
+            background = Color(16, 185, 129)
+            foreground = Color.WHITE
+        }
+        val exportBtn = JButton("💾 Export Bundle to Folder...").apply {
+            isFocusable = false
+        }
+
+        topForm.add(JBLabel("Model Name:"))
+        topForm.add(modelNameField)
+        topForm.add(JBLabel("Framework:"))
+        topForm.add(frameworkCombo)
+        topForm.add(JBLabel("Features:"))
+        topForm.add(featuresField)
+        topForm.add(generateBtn)
+        topForm.add(exportBtn)
+
+        val codeTabs = JBTabbedPane()
+        val appPyArea = JBTextArea().apply { font = Font("Monospaced", Font.PLAIN, 12); isEditable = false }
+        val dockerArea = JBTextArea().apply { font = Font("Monospaced", Font.PLAIN, 12); isEditable = false }
+        val reqsArea = JBTextArea().apply { font = Font("Monospaced", Font.PLAIN, 12); isEditable = false }
+        val clientArea = JBTextArea().apply { font = Font("Monospaced", Font.PLAIN, 12); isEditable = false }
+        val scriptArea = JBTextArea().apply { font = Font("Monospaced", Font.PLAIN, 12); isEditable = false }
+
+        codeTabs.addTab("app.py (FastAPI)", JBScrollPane(appPyArea))
+        codeTabs.addTab("Dockerfile", JBScrollPane(dockerArea))
+        codeTabs.addTab("requirements.txt", JBScrollPane(reqsArea))
+        codeTabs.addTab("client_test.py", JBScrollPane(clientArea))
+        codeTabs.addTab("run_service.sh", JBScrollPane(scriptArea))
+
+        var currentBundle = ModelDeploymentPackager.generateBundle(
+            modelName = "churn_predictor",
+            framework = "ONNX",
+            inputFeatures = listOf("age", "balance", "tenure", "num_products", "credit_score")
+        )
+
+        fun updateCodeAreas(bundle: DeploymentBundle) {
+            currentBundle = bundle
+            appPyArea.text = bundle.appPy
+            dockerArea.text = bundle.dockerfile
+            reqsArea.text = bundle.requirementsTxt
+            clientArea.text = bundle.clientTestPy
+            scriptArea.text = bundle.launchScriptSh
+        }
+
+        updateCodeAreas(currentBundle)
+
+        generateBtn.addActionListener {
+            val feats = featuresField.text.split(",").map { it.trim() }.filter { it.isNotBlank() }
+            val b = ModelDeploymentPackager.generateBundle(
+                modelName = modelNameField.text.trim(),
+                framework = frameworkCombo.selectedItem?.toString() ?: "ONNX",
+                inputFeatures = if (feats.isNotEmpty()) feats else listOf("f1", "f2", "f3")
+            )
+            updateCodeAreas(b)
+            statusLabel.text = "Generated production deployment service for ${b.modelName} (${b.framework})."
+        }
+
+        exportBtn.addActionListener {
+            val chooser = JFileChooser().apply {
+                fileSelectionMode = JFileChooser.DIRECTORIES_ONLY
+                dialogTitle = "Select Target Directory for Deployment Bundle"
+            }
+            if (chooser.showOpenDialog(panel) == JFileChooser.APPROVE_OPTION) {
+                val targetDir = chooser.selectedFile
+                val files = currentBundle.exportToDirectory(targetDir)
+                JOptionPane.showMessageDialog(panel, "Exported ${files.size} microservice files to ${targetDir.absolutePath}", "Deployment Packager", JOptionPane.INFORMATION_MESSAGE)
+                statusLabel.text = "Exported microservice bundle to ${targetDir.name}"
+            }
+        }
+
+        panel.add(topForm, BorderLayout.NORTH)
+        panel.add(codeTabs, BorderLayout.CENTER)
+        return panel
     }
 
     /**

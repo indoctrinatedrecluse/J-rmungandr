@@ -21,7 +21,9 @@ import com.intellij.ui.components.JBLabel
 import com.intellij.ui.components.JBScrollPane
 import com.intellij.ui.components.JBTabbedPane
 import com.intellij.ui.components.JBTextArea
+import org.jormungandr.core.ml.DeploymentBundle
 import org.jormungandr.core.ml.MlExperimentTrackerService
+import org.jormungandr.core.ml.ModelDeploymentPackager
 import org.jormungandr.core.ml.RunStatus
 import org.jormungandr.dataframe.model.DataFrame
 import java.awt.*
@@ -115,6 +117,7 @@ class MlTrainingStudioPanel(
         mainTabs.addTab("📊 Model Visualizers & Evaluation", createEvaluationTab())
         mainTabs.addTab("🔍 Preliminary Data Categorization", createCategorizationTab())
         mainTabs.addTab("📋 Training Code & Templates", createTemplatesTab())
+        mainTabs.addTab("🚀 Production Packager", createPackagerTab())
 
         add(mainTabs, BorderLayout.CENTER)
 
@@ -223,6 +226,119 @@ class MlTrainingStudioPanel(
 
         panel.add(toolbar, BorderLayout.NORTH)
         panel.add(JBScrollPane(templateCodeArea), BorderLayout.CENTER)
+        return panel
+    }
+
+    private fun createPackagerTab(): JPanel {
+        val panel = JPanel(BorderLayout(0, 6)).apply {
+            border = EmptyBorder(6, 6, 6, 6)
+        }
+
+        val topForm = JPanel(FlowLayout(FlowLayout.LEFT, 8, 2))
+        val modelNameField = JTextField("production_model", 12)
+        val frameworkCombo = JComboBox(arrayOf("Scikit-Learn", "ONNX", "PyTorch", "XGBoost", "Safetensors"))
+        val generateBtn = JButton("⚡ Generate Microservice").apply {
+            isFocusable = false
+            font = font.deriveFont(Font.BOLD, 11f)
+            background = Color(16, 185, 129)
+            foreground = Color.WHITE
+        }
+        val exportBtn = JButton("💾 Export Bundle to Folder...").apply {
+            isFocusable = false
+        }
+        val copyBtn = JButton("📋 Copy Active File").apply {
+            isFocusable = false
+        }
+
+        topForm.add(JBLabel("Model Name:"))
+        topForm.add(modelNameField)
+        topForm.add(JBLabel("Framework:"))
+        topForm.add(frameworkCombo)
+        topForm.add(generateBtn)
+        topForm.add(exportBtn)
+        topForm.add(copyBtn)
+
+        val codeTabs = JBTabbedPane()
+        val appPyArea = JBTextArea().apply { font = Font("Monospaced", Font.PLAIN, 12); isEditable = false }
+        val dockerArea = JBTextArea().apply { font = Font("Monospaced", Font.PLAIN, 12); isEditable = false }
+        val reqsArea = JBTextArea().apply { font = Font("Monospaced", Font.PLAIN, 12); isEditable = false }
+        val clientArea = JBTextArea().apply { font = Font("Monospaced", Font.PLAIN, 12); isEditable = false }
+        val scriptArea = JBTextArea().apply { font = Font("Monospaced", Font.PLAIN, 12); isEditable = false }
+
+        codeTabs.addTab("app.py (FastAPI)", JBScrollPane(appPyArea))
+        codeTabs.addTab("Dockerfile", JBScrollPane(dockerArea))
+        codeTabs.addTab("requirements.txt", JBScrollPane(reqsArea))
+        codeTabs.addTab("client_test.py", JBScrollPane(clientArea))
+        codeTabs.addTab("run_service.sh", JBScrollPane(scriptArea))
+
+        var currentBundle = ModelDeploymentPackager.generateBundle(
+            modelName = "production_model",
+            framework = "Scikit-Learn",
+            inputFeatures = selectedFeatures.toList().ifEmpty { listOf("feature_1", "feature_2", "feature_3", "feature_4") }
+        )
+
+        fun updateCodeAreas(bundle: DeploymentBundle) {
+            currentBundle = bundle
+            appPyArea.text = bundle.appPy
+            appPyArea.caretPosition = 0
+            dockerArea.text = bundle.dockerfile
+            dockerArea.caretPosition = 0
+            reqsArea.text = bundle.requirementsTxt
+            reqsArea.caretPosition = 0
+            clientArea.text = bundle.clientTestPy
+            clientArea.caretPosition = 0
+            scriptArea.text = bundle.launchScriptSh
+            scriptArea.caretPosition = 0
+        }
+
+        updateCodeAreas(currentBundle)
+
+        generateBtn.addActionListener {
+            val name = modelNameField.text.trim().ifEmpty { "production_model" }
+            val fw = frameworkCombo.selectedItem as? String ?: "Scikit-Learn"
+            val feats = selectedFeatures.toList().ifEmpty { listOf("feature_1", "feature_2", "feature_3") }
+            val bundle = ModelDeploymentPackager.generateBundle(
+                modelName = name,
+                framework = fw,
+                inputFeatures = feats
+            )
+            updateCodeAreas(bundle)
+            JOptionPane.showMessageDialog(this, "Production microservice generated successfully!", "Deployment Packager", JOptionPane.INFORMATION_MESSAGE)
+        }
+
+        exportBtn.addActionListener {
+            val chooser = JFileChooser().apply {
+                fileSelectionMode = JFileChooser.DIRECTORIES_ONLY
+                dialogTitle = "Select Target Directory for Deployment Bundle"
+            }
+            if (chooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+                val dir = chooser.selectedFile
+                val exported = currentBundle.exportToDirectory(dir)
+                JOptionPane.showMessageDialog(
+                    this,
+                    "Successfully exported ${exported.size} production microservice files to:\n${dir.absolutePath}",
+                    "Bundle Exported",
+                    JOptionPane.INFORMATION_MESSAGE
+                )
+            }
+        }
+
+        copyBtn.addActionListener {
+            val activeText = when (codeTabs.selectedIndex) {
+                0 -> appPyArea.text
+                1 -> dockerArea.text
+                2 -> reqsArea.text
+                3 -> clientArea.text
+                4 -> scriptArea.text
+                else -> appPyArea.text
+            }
+            val sel = StringSelection(activeText)
+            Toolkit.getDefaultToolkit().systemClipboard.setContents(sel, sel)
+            JOptionPane.showMessageDialog(this, "File contents copied to clipboard!", "Copied", JOptionPane.INFORMATION_MESSAGE)
+        }
+
+        panel.add(topForm, BorderLayout.NORTH)
+        panel.add(codeTabs, BorderLayout.CENTER)
         return panel
     }
 

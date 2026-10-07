@@ -22,6 +22,7 @@ import org.jormungandr.core.plot.WebPlotType
 import org.jormungandr.core.theme.ThemeManager
 import org.jormungandr.jupyter.model.*
 import org.jormungandr.jupyter.ui.plot.WebPlotViewComponent
+import org.jormungandr.jupyter.ui.render.*
 import java.awt.*
 import java.awt.datatransfer.StringSelection
 import java.awt.event.KeyAdapter
@@ -343,9 +344,67 @@ class CellComponent(
         }
     }
 
+    fun renderMarkdown() {
+        SwingUtilities.invokeLater {
+            renderMarkdownInternal()
+            outputPanel.revalidate()
+            outputPanel.repaint()
+        }
+    }
+
+    private fun renderMarkdownInternal() {
+        outputPanel.removeAll()
+        val md = cell.source.trim()
+        if (md.isEmpty()) return
+
+        // If markdown contains LaTeX block or inline
+        if (md.contains("$$") || md.contains("\\[") || md.contains("\\begin{") || (md.contains("$") && (md.contains("\\") || md.contains("=")))) {
+            outputPanel.add(NotebookMathRenderer.createLatexCard(md))
+        } else {
+            val formattedHtml = formatMarkdownToHtml(md)
+            val editorPane = JEditorPane("text/html", formattedHtml).apply {
+                isEditable = false
+                background = getSurfaceColor()
+                border = EmptyBorder(4, 6, 4, 6)
+            }
+            outputPanel.add(editorPane)
+        }
+    }
+
+    private fun formatMarkdownToHtml(md: String): String {
+        var html = md
+            .replace("&", "&amp;")
+            .replace("<", "&lt;")
+            .replace(">", "&gt;")
+
+        // Headings
+        html = html.replace(Regex("""^### (.*)$""", RegexOption.MULTILINE), "<h3 style=\"margin:4px 0; color:#1e293b;\">$1</h3>")
+        html = html.replace(Regex("""^## (.*)$""", RegexOption.MULTILINE), "<h2 style=\"margin:6px 0; color:#1e293b;\">$1</h2>")
+        html = html.replace(Regex("""^# (.*)$""", RegexOption.MULTILINE), "<h1 style=\"margin:8px 0; color:#1e293b;\">$1</h1>")
+
+        // Bold & Italic
+        html = html.replace(Regex("""\*\*(.*?)\*\*"""), "<b>$1</b>")
+        html = html.replace(Regex("""\*(.*?)\*"""), "<i>$1</i>")
+
+        // Inline code
+        html = html.replace(Regex("""`([^`]+)`"""), "<code style=\"background:#f1f5f9; padding:1px 4px; border-radius:3px;\">$1</code>")
+
+        // Lists
+        html = html.replace(Regex("""^- (.*)$""", RegexOption.MULTILINE), "<li>$1</li>")
+
+        return "<html><body style=\"font-family:sans-serif; font-size:12px; color:#1e293b; padding:4px;\">$html</body></html>"
+    }
+
     fun renderOutputs() {
         SwingUtilities.invokeLater {
             outputPanel.removeAll()
+            if (cell.cellType == CellType.MARKDOWN && cell.source.isNotBlank()) {
+                renderMarkdownInternal()
+                outputPanel.revalidate()
+                outputPanel.repaint()
+                return@invokeLater
+            }
+
             if (cell.outputs.isEmpty()) {
                 outputPanel.revalidate()
                 outputPanel.repaint()
@@ -465,7 +524,39 @@ class CellComponent(
             }
         }
 
-        // 2. Check for Plotly JSON MIME
+        // 2. Check for LaTeX math MIME
+        val latexContent = data["text/latex"]?.toString()
+        if (latexContent != null) {
+            outputPanel.add(NotebookMathRenderer.createLatexCard(latexContent, execCount))
+            return
+        }
+
+        // 3. Check for Audio MIME
+        val audioMime = listOf("audio/wav", "audio/mp3", "audio/mpeg", "audio/ogg").firstOrNull { data.containsKey(it) }
+        if (audioMime != null) {
+            val audioData = data[audioMime]?.toString() ?: ""
+            outputPanel.add(NotebookAudioPlayerCard(audioData, audioMime, execCount))
+            return
+        }
+
+        // 4. Check for Video MIME
+        val videoMime = listOf("video/mp4", "video/webm", "video/ogg").firstOrNull { data.containsKey(it) }
+        if (videoMime != null) {
+            val videoData = data[videoMime]?.toString() ?: ""
+            outputPanel.add(NotebookVideoPlayerCard(videoData, videoMime, execCount))
+            return
+        }
+
+        // 5. Check for JSON MIME
+        val jsonMime = listOf("application/json", "application/geo+json").firstOrNull { data.containsKey(it) }
+        if (jsonMime != null) {
+            val jsonVal = data[jsonMime]
+            val jsonStr = if (jsonVal is String) jsonVal else Gson().toJson(jsonVal)
+            outputPanel.add(NotebookJsonTreeCard(jsonStr, execCount))
+            return
+        }
+
+        // 6. Check for Plotly JSON MIME
         val plotlyJson = data["application/vnd.plotly.v1+json"]
         if (plotlyJson != null) {
             val jsonString = if (plotlyJson is String) plotlyJson else Gson().toJson(plotlyJson)
@@ -485,9 +576,22 @@ class CellComponent(
             return
         }
 
-        // 4. Check for HTML
+        // 8. Check for HTML
         val htmlContent = data["text/html"]?.toString()
         if (htmlContent != null) {
+            if (htmlContent.contains("<audio")) {
+                outputPanel.add(NotebookAudioPlayerCard(htmlContent, "audio/wav", execCount))
+                return
+            }
+            if (htmlContent.contains("<video")) {
+                outputPanel.add(NotebookVideoPlayerCard(htmlContent, "video/mp4", execCount))
+                return
+            }
+            if (htmlContent.contains("$$") || htmlContent.contains("\\[") || (htmlContent.contains("$") && htmlContent.contains("\\frac"))) {
+                outputPanel.add(NotebookMathRenderer.createLatexCard(htmlContent, execCount))
+                return
+            }
+
             val parsedTable = HtmlTableParser.parse(htmlContent)
             if (parsedTable != null) {
                 // Rich DataFrame Card
@@ -571,8 +675,21 @@ class CellComponent(
             }
         }
 
-        // 3. Fallback to Plain Text
+        // 9. Fallback to Plain Text
         val plainText = data["text/plain"]?.toString() ?: data.values.firstOrNull()?.toString() ?: ""
+        val trimmedPlain = plainText.trim()
+        if (trimmedPlain.startsWith("$$") && trimmedPlain.endsWith("$$")) {
+            outputPanel.add(NotebookMathRenderer.createLatexCard(trimmedPlain, execCount))
+            return
+        }
+        if ((trimmedPlain.startsWith("{") && trimmedPlain.endsWith("}")) || (trimmedPlain.startsWith("[") && trimmedPlain.endsWith("]"))) {
+            val isJson = runCatching { com.google.gson.JsonParser.parseString(trimmedPlain); true }.getOrDefault(false)
+            if (isJson && trimmedPlain.lines().size > 2) {
+                outputPanel.add(NotebookJsonTreeCard(trimmedPlain, execCount))
+                return
+            }
+        }
+
         val resultRow = JPanel(BorderLayout(6, 0)).apply { isOpaque = false }
         if (execCount != null) {
             val outLabel = JLabel("Out [$execCount]: ").apply {
