@@ -132,7 +132,10 @@ Modern data practitioners are caught between two disparate worlds:
   - Memory bounds and IntelliJ `Disposable` hierarchy integration.
   - Bespoke extension iconography across tool window stripes, left UI list panes, and native Plugin Manager (`pluginIcon.svg` & Retina rasters).
 
-### 3.3 🔮 Follow-Up Scope (Future Horizons)
+### 3.3 🔮 Follow-Up Scope & Roadmap
+- **🔒 Extension Licensing & Commercial Gating (TODO - Next Update)**:
+  - Introduction of a dedicated licensing verification engine and cryptographic license key management.
+  - Commercial gating of advanced pro extensions (e.g. Enterprise Streaming Ingress, Advanced Explainability, and Production Packaging) while keeping core notebook and dataframe features free.
 - **R Language Integration (TBD)**: R kernel integration, R REPL, package viewer, and graphics device window.
 - **Hardware-Accelerated Visualization**: WebGL/Skiko canvas for 10M+ datapoint scatterplots.
 - **Remote Compute**: Remote Docker & SSH Jupyter kernel runners.
@@ -614,9 +617,78 @@ A centralized, high-fidelity gallery and canvas for all figures, charts, and vis
 
 ---
 
-## 🚀 10. Getting Started & Development
+## 🚀 10. Installation & Getting Started
 
-### 📋 Prerequisites
+### 📦 10.1 Downloading Releases & Installation Guide
+
+Official binaries and extension packages are published on [GitHub Releases](https://github.com/indoctrinatedrecluse/Jormungandr/releases/latest). Choose the distribution format that fits your workflow:
+
+```
+┌────────────────────────────────────────────────────────────────────────┐
+│                        JÖRMUNGANDR RELEASES                            │
+│                                                                        │
+│   🧰 Standalone Portable IDE          🧩 Modular Extension Bundle       │
+│   • Ready-to-run desktop IDE          • For existing IntelliJ / PyCharm│
+│   • Bundled JBR 21 LTS runtime        • Installs via Settings -> Plugins│
+│   • All 4 extensions pre-installed    • ~77 MB lightweight download    │
+│   • Double-click Jormungandr.bat      • Zero external IDE changes      │
+└────────────────────────────────────────────────────────────────────────┘
+```
+
+#### Option A: Standalone Portable IDE (`Jormungandr-v1.0.0-windows-x64.zip`)
+*Best for users who want an instant, dedicated data science and machine learning IDE without needing an existing IntelliJ, PyCharm, or Java installation.*
+
+1. **Download**: Download `Jormungandr-v1.0.0-windows-x64.zip` from the [Latest Release](https://github.com/indoctrinatedrecluse/Jormungandr/releases/latest).
+2. **Extract**: Unzip the archive to any directory on your filesystem (e.g. `C:\Tools\Jormungandr` or `D:\Jormungandr`).
+3. **Launch**: Double-click **`Jormungandr.bat`** (or execute `bin\idea64.exe`).
+   - The standalone portable IDE comes completely self-contained with the transformed IntelliJ Platform CE base, bundled Java 21 LTS JetBrains Runtime (JBR), and all Jörmungandr core extensions pre-configured.
+
+---
+
+#### Option B: Modular Extension Bundle (`Jormungandr-Plugin-v1.0.0.zip`)
+*Best for users who already have an existing IntelliJ Platform IDE installed (such as IntelliJ IDEA Community/Ultimate, PyCharm Community/Professional, or DataGrip) and want to integrate Jörmungandr's full analytics, notebook, and machine learning capabilities into their current environment.*
+
+##### ⚙️ Method 1: Graphical Install via IDE UI (Recommended & Easiest)
+> [!TIP]
+> **Do NOT unzip the archive.** The IntelliJ Platform installer reads the `.zip` package directly.
+
+1. **Download**: Download `Jormungandr-Plugin-v1.0.0.zip` from [GitHub Releases](https://github.com/indoctrinatedrecluse/Jormungandr/releases/latest).
+2. **Open Settings**: In your existing IDE, open the Settings / Preferences dialog:
+   - **Windows / Linux**: `File` &rarr; `Settings...` (Shortcut: `Ctrl + Alt + S`)
+   - **macOS**: `IntelliJ IDEA` / `PyCharm` &rarr; `Settings...` (Shortcut: `Cmd + ,`)
+3. **Navigate to Plugins**: Select **Plugins** in the left-hand category tree.
+4. **Install from Disk**: Click the **⚙️ (Gear Icon)** located at the top-right of the Plugins panel, and click **`Install Plugin from Disk...`**.
+5. **Select Archive**: Navigate to where you downloaded `Jormungandr-Plugin-v1.0.0.zip`, select it, and click **OK**.
+6. **Restart IDE**: Click **Restart IDE** when prompted. Upon restart, the Jörmungandr subsystems (`Platform Shell`, `Jupyter Integration`, `DataFrame Viewer`, and `Database Suite`) will be activated and accessible in your activity bar and tool window stripes.
+
+##### 📂 Method 2: Manual Directory Extraction & Placement
+If you are operating in an offline/air-gapped environment or provisioning developer workstations via automation scripts:
+
+1. **Extract**: Unzip `Jormungandr-Plugin-v1.0.0.zip`. The archive contains the 4 modular subsystem directories:
+   - `platform-shell/` (Core perspective engine, branding, registry, and memory monitor)
+   - `jupyter-integration/` (Reactive notebook editor, ZeroMQ client, and 2D AST DAG canvas)
+   - `dataframe-viewer/` (Tabular grid, ML training studio, SHAP/PDP explainability, and drift studio)
+   - `database-suite/` (SQL/NoSQL consoles, streaming timeseries oscilloscope, and data lakes)
+2. **Copy to Plugins Directory**: Copy all 4 folders into your IDE's active user plugins directory:
+   - **Windows**:
+     ```
+     %APPDATA%\JetBrains\<IDE_VERSION>\plugins\
+     ```
+     *(Example: `C:\Users\<YourUsername>\AppData\Roaming\JetBrains\IdeaIC2024.3\plugins\` or `PyCharmCE2024.3\plugins\`)*
+   - **macOS**:
+     ```
+     ~/Library/Application Support/JetBrains/<IDE_VERSION>/plugins/
+     ```
+   - **Linux**:
+     ```
+     ~/.local/share/JetBrains/<IDE_VERSION>/plugins/
+     ```
+   - *Alternative (IDE Installation Directory)*: You can also copy them directly into the `plugins\` folder inside your main IDE installation root (e.g., `C:\Program Files\JetBrains\PyCharm Community Edition\plugins\`).
+3. **Restart**: Launch your IDE. The subsystems will automatically mount into the IntelliJ extension registry.
+
+---
+
+### 📋 10.2 Developer Prerequisites & Building from Source
 - **JDK**: Java Development Kit 21 LTS (Temurin, Microsoft, Oracle, or JetBrains Runtime).
 - **Python**: Python 3.10+ installed and on `PATH`.
 - **Git**: 2.30+.
@@ -624,7 +696,7 @@ A centralized, high-fidelity gallery and canvas for all figures, charts, and vis
 
 ---
 
-### 🛠️ Execution & Launch Options
+### 🛠️ 10.3 Execution & Launch Options (Developer / Sandbox Mode)
 
 Jörmungandr provides automated, self-healing runner scripts for Windows (`tools/run.ps1`) and Linux/macOS (`tools/run.sh`) that verify prerequisites, configure isolated registry nodes, and orchestrate the IDE sandbox.
 
@@ -729,9 +801,9 @@ Jörmungandr features a comprehensive runtime white-labeling and branding overha
 
 ---
 
-## 🚀 10. Advanced Power Tools & Subsystems
+## 🚀 11. Advanced Power Tools & Subsystems
 
-### 10.1 📁 Data Science New Project Wizard & Environment Scaffolder
+### 11.1 📁 Data Science New Project Wizard & Environment Scaffolder
 Accessible via `File -> New -> New Data Science Workspace...`:
 - **5 Curated Blueprints**:
   1. *Machine Learning & Deep Learning*: PyTorch, scikit-learn, XGBoost, training harness, and model checkpoint structure.
@@ -741,7 +813,7 @@ Accessible via `File -> New -> New Data Science Workspace...`:
   5. *Computer Vision & CNNs*: Torchvision, OpenCV, Albumentations, and CNN classifier pipeline.
 - **Environment Managers**: One-click provisioning for `uv`, `venv`, `conda`, `poetry`, and `manual` environments with cross-platform bootstrap scripts (`setup_env.ps1`, `setup_env.sh`, `setup_env.bat`, `environment.yml`).
 
-### 10.2 📓 Advanced Notebook Power Tools
+### 11.2 📓 Advanced Notebook Power Tools
 - **Live Table of Contents (Outline Panel)**: Collapsible sidebar extracting Markdown headings (`#`, `##`, `###`), live regex filtering, and jump-to-cell scrolling.
 - **Multi-Format Exporter**:
   - *Standalone HTML*: Self-contained HTML with embedded Solarized styles and clean typography.
@@ -750,20 +822,20 @@ Accessible via `File -> New -> New Data Science Workspace...`:
   - *LaTeX Document (`.tex`)*: Academic publication format using `listings` and `amsmath`.
 - **Semantic Notebook Visual Diff**: Cell-by-cell semantic comparison with visual status badges (`+ Added`, `- Deleted`, `~ Modified`, `= Unchanged`).
 
-### 10.3 ⚡ Hardware Accelerators & GPU / VRAM Monitor
+### 11.3 ⚡ Hardware Accelerators & GPU / VRAM Monitor
 Accessible in `View -> Data Science Subsystems -> Hardware Accelerators & GPU / VRAM`:
 - **Real-Time Device Telemetry**: Auto-detects NVIDIA CUDA GPUs via `nvidia-smi` parser, AMD ROCm, Apple Metal, and Host RAM/CPU.
 - **Capacity & Load Gauges**: Visual progress bars tracking dedicated VRAM capacity, compute utilization %, and thermals.
 - **Flush VRAM Cache**: One-click memory recovery invoking PyTorch CUDA cache evacuation (`torch.cuda.empty_cache()`) and JVM Garbage Collection.
 
-### 10.4 🧠 AI/ML Model Checkpoint & Neural Graph Inspector
+### 11.4 🧠 AI/ML Model Checkpoint & Neural Graph Inspector
 Directly open `.safetensors`, `.onnx`, `.pt`, `.pth`, `.h5` files in the editor:
 - **Zero-Copy Safetensors Parsing**: Parses little-endian 8-byte uint64 headers and JSON metadata directly without loading gigabytes of weights into JVM heap.
 - **Layer & Weight Breakdown**: Tabular inspection of tensor parameter names, dimensions/shapes, numerical precision (`F16`, `BF16`, `F32`), byte memory footprint, and categorized layer types (Self-Attention, MLP Feed-Forward, Embedding, Normalization, Convolutional, Prediction Head).
 - **Interactive Neural Architecture DAG**: Canvas rendering of neural layer feed-forward flow.
 - **Copyable Loading Code**: Ready-to-run Python snippets for `safetensors.torch.load_file`, `torch.load`, and `onnx.load`.
 
-### 10.5 🔮 R Language & Statistical REPL Subsystem
+### 11.5 🔮 R Language & Statistical REPL Subsystem
 Accessible via `Tools -> R Interactive REPL Console...` or bottom `R Console` ToolWindow:
 - **Local R Runtime Discovery**: Automatically discovers R binaries (`Rscript.exe`, `R.exe`) across `PATH`, `R_HOME`, `Program Files`, and Conda environments, inventorying installed CRAN packages (`ggplot2`, `dplyr`, `arrow`, `tidyr`, `IRkernel`).
 - **Interactive REPL Console**: Multi-line script execution, history recall (`Ctrl+Up` / `Ctrl+Down`), quick template library, and execution metrics.
@@ -771,7 +843,7 @@ Accessible via `Tools -> R Interactive REPL Console...` or bottom `R Console` To
 - **Tabular Dataframe Bridge**: Intercepts `view()` / `head()` calls to export tabular datasets (`mtcars`, `iris`, etc.) directly into the **DataFrame Viewer Studio**.
 - **Interactive Simulation Mode**: Seamless fallback mode allowing complete workflow demonstrations and testing even when a native R runtime is not yet installed on the host.
 
-### 10.6 🏆 Flagship Analytics, Machine Learning & Lakehouse Studios
+### 11.6 🏆 Flagship Analytics, Machine Learning & Lakehouse Studios
 
 Jörmungandr includes 6 flagship analytical studios designed to deliver an end-to-end data science, lakehouse, and machine learning workflow directly within the IDE:
 
@@ -807,7 +879,7 @@ Jörmungandr includes 6 flagship analytical studios designed to deliver an end-t
    - **Native Video Player Card**: Video preview canvas with interactive controls and 1-click external playback in default system media players.
    - **Interactive Collapsible JSON Tree Inspector**: Syntax-highlighted tree viewer for `application/json` outputs with live search filtering, expand/collapse, and JSON path copying.
 
-### 10.7 🚀 Next-Gen Reactive DAGs, Model Explainability, Real-Time Streaming & Distribution Drift Studios
+### 11.7 🚀 Next-Gen Reactive DAGs, Model Explainability, Real-Time Streaming & Distribution Drift Studios
 
 Jörmungandr brings 6 next-generation reactive, streaming, and interpretability capabilities directly into the core IDE:
 
@@ -845,9 +917,18 @@ Jörmungandr brings 6 next-generation reactive, streaming, and interpretability 
    - **Full JupyterLab Command Mode Navigation**: Native keyboard shortcuts (`Esc` for command mode, `Enter` to focus editor, `A`/`B` to insert cells above/below, `DD` to delete, `M` for Markdown, `Y` for Code, `J`/`K` to navigate cells, `Shift+Enter` and `Ctrl+Enter` to run).
    - **Universal Interactive Pan & Zoom Controller**: Reusable Swing canvas component providing cursor-anchored mouse wheel zoom, smooth click-and-drag panning, and double-click zoom reset across all 2D charts and DAGs.
 
+### 🔒 11.8 🛣️ TODO / Upcoming Roadmap: Extension Licensing & Commercial Gating
+
+> [!IMPORTANT]
+> **Roadmap Notice (Next Update)**:  
+> In the upcoming update, Jörmungandr will introduce an in-IDE commercial licensing system and extension gating mechanism.  
+> - **Community Tier (Free & Open Source)**: Core exploratory Jupyter notebooks, AST-based reactive DAGs, and baseline tabular DataFrame viewers will remain completely free and open.
+> - **Commercial Pro Tier (License Required)**: Advanced enterprise capabilities — including Real-Time Streaming Ingress, Automated Distribution Drift Alerting, Enterprise Lakehouse connectors, and 1-Click Production Model Deployment Packaging — will be gated behind a commercial license key.
+> - An in-IDE License Management dialog (`Help -> Register Jörmungandr License...`) and cryptographic key verification engine will be introduced to handle tier activation seamlessly.
+
 ---
 
-## 📄 11. License & Open Source Attribution
+## 📄 12. License & Open Source Attribution
 
 Jörmungandr is free, open-source software licensed under the [Apache License 2.0](LICENSE).  
 Copyright © 2025–2026 **indoctrinatedrecluse**.
