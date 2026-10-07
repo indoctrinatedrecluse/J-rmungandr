@@ -14,7 +14,7 @@ class JormungandrRegistryTest {
         val jormNode = root.node(JormungandrRegistry.ROOT_NODE)
         assertNotNull(jormNode)
         assertEquals("indoctrinatedrecluse", jormNode.get(JormungandrRegistry.KEY_VENDOR, ""))
-        assertEquals("0.1.0-SNAPSHOT", jormNode.get(JormungandrRegistry.KEY_APP_VERSION, ""))
+        assertEquals("1.0.0", jormNode.get(JormungandrRegistry.KEY_APP_VERSION, ""))
         assertEquals("2.0", jormNode.get(JormungandrRegistry.KEY_EUA_ACCEPTED_VERSION, ""))
         assertEquals("2.0", jormNode.get(JormungandrRegistry.KEY_PRIVACY_POLICY_ACCEPTED_VERSION, ""))
         assertTrue(jormNode.getBoolean(JormungandrRegistry.KEY_FIRST_RUN_COMPLETED, false))

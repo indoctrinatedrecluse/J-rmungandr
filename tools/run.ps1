@@ -454,7 +454,7 @@ function Initialize-SandboxEula {
             Set-ItemProperty -Path $path -Name "eua_accepted_version" -Value "2.0" -Force
             Set-ItemProperty -Path $path -Name "privacy_policy_accepted_version" -Value "2.0" -Force
             Set-ItemProperty -Path $path -Name "vendor" -Value "indoctrinatedrecluse" -Force
-            Set-ItemProperty -Path $path -Name "version" -Value "0.1.0-SNAPSHOT" -Force
+            Set-ItemProperty -Path $path -Name "version" -Value "1.0.0" -Force
         } catch {
             Write-Warn "Could not write Jörmungandr registry key $path (non-fatal): $_"
         }

@@ -1,0 +1,96 @@
+name: Release Jörmungandr
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build & Release Jörmungandr
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '21'
+          cache: 'gradle'
+
+      - name: Build Plugins and Sandbox
+        shell: pwsh
+        run: |
+          .\gradlew.bat :modules:platform-shell:buildPlugin :modules:platform-shell:prepareSandbox --no-daemon
+
+      - name: Package Release Assets
+        id: package
+        shell: pwsh
+        run: |
+          $tag = if ($env:GITHUB_REF_NAME) { $env:GITHUB_REF_NAME } else { "v1.0.0" }
+          Write-Host "Packaging release for tag: $tag"
+          
+          $distDir = New-Item -ItemType Directory -Path "release-dist" -Force
+          
+          # 1. Modular Plugin Package
+          $pluginZip = Get-ChildItem -Path "modules/platform-shell/build/distributions/*.zip" | Select-Object -First 1
+          if ($pluginZip) {
+              $destPlugin = Join-Path $distDir.FullName "Jormungandr-Plugin-$tag.zip"
+              Copy-Item -Path $pluginZip.FullName -Destination $destPlugin -Force
+              Write-Host "Packaged plugin: $destPlugin ($([math]::Round((Get-Item $destPlugin).Length / 1MB, 2)) MB)"
+          } else {
+              Write-Error "Plugin zip distribution not found!"
+          }
+
+          # 2. Standalone Portable Distribution
+          $ideaHome = Get-ChildItem -Path "$env:USERPROFILE\.gradle\caches\*\transforms\*\transformed\ideaIC-*-win" -Directory -ErrorAction SilentlyContinue | Select-Object -First 1
+          $sandboxPlugins = Get-ChildItem -Path "modules\platform-shell\build\idea-sandbox\IC-*\plugins" -Directory -ErrorAction SilentlyContinue | Select-Object -First 1
+
+          if ($ideaHome -and $sandboxPlugins) {
+              Write-Host "Found IntelliJ Base: $($ideaHome.FullName)"
+              Write-Host "Found Sandbox Plugins: $($sandboxPlugins.FullName)"
+
+              $stagingDir = New-Item -ItemType Directory -Path "staging\Jormungandr-$tag" -Force
+              
+              # Copy IntelliJ base platform
+              Copy-Item -Path "$($ideaHome.FullName)\*" -Destination $stagingDir.FullName -Recurse -Force
+              
+              # Copy Jörmungandr plugins into the platform plugins directory
+              $targetPluginsDir = Join-Path $stagingDir.FullName "plugins"
+              if (-not (Test-Path $targetPluginsDir)) { New-Item -ItemType Directory -Path $targetPluginsDir -Force }
+              Copy-Item -Path "$($sandboxPlugins.FullName)\*" -Destination $targetPluginsDir -Recurse -Force
+
+              # Add launcher script
+              $launcherBat = Join-Path $stagingDir.FullName "Jormungandr.bat"
+              "@echo off`r`nstart """" ""%~dp0bin\idea64.exe"" %*" | Out-File -FilePath $launcherBat -Encoding ascii
+
+              # Compress using 7-Zip
+              $portableZip = Join-Path $distDir.FullName "Jormungandr-$tag-windows-x64.zip"
+              Write-Host "Compressing standalone portable package to $portableZip..."
+              & 7z a -tzip -mx=5 $portableZip "$($stagingDir.FullName)"
+              Write-Host "Created portable archive: $([math]::Round((Get-Item $portableZip).Length / 1MB, 2)) MB"
+          } else {
+              Write-Warning "Could not find ideaIC base or sandbox plugins; skipping standalone package bundle."
+          }
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "Jörmungandr ${{ github.ref_name }}"
+          tag_name: ${{ github.ref_name }}
+          body_path: CHANGELOG.md
+          draft: false
+          prerelease: false
+          files: |
+            release-dist/*
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

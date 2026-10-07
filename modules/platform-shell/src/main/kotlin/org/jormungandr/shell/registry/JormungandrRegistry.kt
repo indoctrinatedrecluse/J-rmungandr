@@ -28,7 +28,7 @@ object JormungandrRegistry {
     const val KEY_INSTALL_TIMESTAMP = "install_timestamp"
 
     const val CURRENT_EUA_VERSION = "2.0"
-    const val CURRENT_APP_VERSION = "0.1.0-SNAPSHOT"
+    const val CURRENT_APP_VERSION = "1.0.0"
     const val VENDOR_NAME = "indoctrinatedrecluse"
 
     /**
