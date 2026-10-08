@@ -917,7 +917,40 @@ Jörmungandr brings 6 next-generation reactive, streaming, and interpretability 
    - **Full JupyterLab Command Mode Navigation**: Native keyboard shortcuts (`Esc` for command mode, `Enter` to focus editor, `A`/`B` to insert cells above/below, `DD` to delete, `M` for Markdown, `Y` for Code, `J`/`K` to navigate cells, `Shift+Enter` and `Ctrl+Enter` to run).
    - **Universal Interactive Pan & Zoom Controller**: Reusable Swing canvas component providing cursor-anchored mouse wheel zoom, smooth click-and-drag panning, and double-click zoom reset across all 2D charts and DAGs.
 
-### 🔒 11.8 🛣️ TODO / Upcoming Roadmap: Extension Licensing & Commercial Gating
+### 🚀 11.8 Flagship Suites: Hardware Telemetry, Local AI Copilot, Lakehouse & Pipeline Lineage
+
+Jörmungandr expands its data platform capabilities with 4 production-grade feature suites and turnkey packaging:
+
+1. 🎮 **Hardware Telemetry & GPU Monitor Status Bar**:
+   - **Cross-Platform Sensor Polling**: Real-time GPU compute utilization, VRAM allocation (used / total MB), and core temperatures via non-blocking `nvidia-smi` daemon with graceful Host RAM and CPU fallback.
+   - **Proactive OOM Prevention Watchdog**: Evaluates memory pressure across `STABLE`, `ELEVATED`, and `CRITICAL_OOM_RISK` thresholds to prevent PyTorch/TensorFlow kernel crashes.
+   - **Real-Time Status Bar Widget**: Compact, live-updating status bar gauge (`🎮 GPU: 42% | VRAM: 3.2 GB`) opening an interactive telemetry popup.
+   - **1-Click Memory Trim**: Instantly purges JVM garbage collection roots, off-heap caches, and native allocations with a single click.
+
+2. 🤖 **Local AI & LLM Engine (Offline Copilot & Prompt Studio)**:
+   - **Local Daemon Integration**: Native zero-latency client for local LLM daemons (**Ollama** and **vLLM** at `localhost:11434`) ensuring 100% offline privacy for proprietary code and datasets.
+   - **Automatic Model Discovery**: Introspects installed local models (`llama3`, `deepseek-coder`, `mistral`, `codellama`, `qwen`) with automated fallback heuristics when offline.
+   - **Interactive Prompt Studio Tool Window**: Right-docked AI console featuring system prompt customization, temperature tuning slider, token throughput telemetry (tokens/sec), and 1-click code insertion into the active editor.
+   - **Context-Menu AI Code Actions**: Right-click editor actions to automatically generate typed **Google/NumPy Docstrings** and robust **PyTest Mock Fixtures** for functions and classes.
+
+3. 🏛️ **Modern Lakehouse & Deep Parquet Inspector**:
+   - **Binary Parquet Metadata Dissector (`PAR1`)**: Parses header and footer metadata, row group chunk layouts, compression codec efficiency ratios (Snappy, ZSTD, GZIP, LZ4), dictionary encodings, bloom filter presence, and per-column min/max statistics.
+   - **Delta Lake & Apache Iceberg ACID Timeline**: Dissects `_delta_log/*.json` and `metadata/*.metadata.json` catalogs to surface historical commits, snapshot IDs, operation types (`WRITE`, `OPTIMIZE`, `MERGE`), and affected data files.
+   - **Interactive Multi-Tab Lakehouse Studio**: Features storage KPI metric cards, detailed column encoding tables, and full commit histories.
+   - **1-Click Time-Travel SQL Generator**: Automatically produces point-in-time SQL queries for DuckDB and Spark (`VERSION AS OF` / `TIMESTAMP AS OF`).
+
+4. 🔄 **Data Orchestration & Pipeline Visualizers (dbt & Airflow DAGs)**:
+   - **AST & Regex Project Scanner**: Automatically scans projects for dbt models (`dbt_project.yml`, `{{ ref(...) }}`, `{{ source(...) }}`, `config(...)`) and Apache Airflow DAGs (`DAG(...)`, `@task`, `task_id`, `>>`, `<<`).
+   - **Interactive 2D Lineage DAG Canvas**: High-performance Swing canvas rendering anti-aliased cubic bezier dependency arrows, color-coded node type badges (dbt Model, Source, Seed, Snapshot, Airflow Task), and topological layer columns.
+   - **Interactive Graph Features**: Cursor-anchored mouse wheel zoom, click-and-drag canvas panning, upstream and downstream dependency highlighting, and double-click navigation to the source definition.
+   - **1-Click Execution & CLI Generator**: Simulates model execution in real-time and exports CLI execution commands (`dbt run --select <model>`, `airflow tasks test <dag> <task>`).
+
+5. 📦 **Windows Single-File Installer & Turnkey Packaging Polish**:
+   - **Inno Setup Architecture**: Production installer script (`installer/jormungandr_setup.iss`) and build script (`tools/build_installer.ps1`) to compile `Jormungandr-Setup-v1.0.0-x64.exe`.
+   - **Native Windows File Associations**: One-click file association for Jupyter Notebooks (`.ipynb`), Apache Parquet Datasets (`.parquet`), and Apache Arrow/Feather Tables (`.arrow`, `.feather`).
+   - **Desktop & System Integration**: High-resolution Jörmungandr desktop and Start Menu shortcuts with optional CLI PATH environment variable registration.
+
+### 🔒 11.9 🛣️ TODO / Upcoming Roadmap: Extension Licensing & Commercial Gating
 
 > [!IMPORTANT]
 > **Roadmap Notice (Next Update)**:  

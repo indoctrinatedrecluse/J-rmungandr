@@ -43,6 +43,19 @@
                     icon="/icons/jormungandr_16.png"
                     factoryClass="org.jormungandr.shell.r.RReplToolWindowFactory"/>
 
+        <!-- Hardware Telemetry & GPU Monitor Subsystem -->
+        <applicationService serviceImplementation="org.jormungandr.shell.telemetry.HardwareTelemetryService"/>
+        <statusBarWidgetFactory id="org.jormungandr.shell.telemetry.GpuStatusBarWidget"
+                                implementation="org.jormungandr.shell.telemetry.GpuStatusBarWidgetFactory"/>
+
+        <!-- Local AI, LLM & Prompt Engineering Studio -->
+        <applicationService serviceImplementation="org.jormungandr.shell.copilot.local.OllamaService"/>
+        <toolWindow id="Prompt Studio"
+                    anchor="right"
+                    canCloseContent="true"
+                    icon="/icons/jormungandr_16.png"
+                    factoryClass="org.jormungandr.shell.copilot.local.PromptStudioToolWindowFactory"/>
+
         <!-- Animated Splash Screen & Branding Lifecycle -->
         <applicationInitializedListener implementation="org.jormungandr.shell.splash.JormungandrAppInitializer"/>
         <postStartupActivity implementation="org.jormungandr.shell.splash.JormungandrStartupActivity"/>
@@ -100,6 +113,34 @@
                 icon="/icons/jormungandr_16.png">
             <add-to-group group-id="ToolsMenu" anchor="first"/>
         </action>
+
+        <action id="Jormungandr.Tools.GpuMonitor"
+                class="org.jormungandr.shell.telemetry.ShowGpuMonitorAction"
+                text="GPU &amp; Hardware Compute Monitor..."
+                description="Inspect real-time GPU compute, VRAM allocation, and thermal status"
+                icon="/icons/jormungandr_16.png">
+            <add-to-group group-id="ToolsMenu" anchor="after" relative-to-action="Jormungandr.Tools.RConsole"/>
+        </action>
+
+        <action id="Jormungandr.Tools.PromptStudio"
+                class="org.jormungandr.shell.copilot.local.OpenPromptStudioAction"
+                text="Local AI &amp; Prompt Studio..."
+                description="Open Prompt Studio for local Ollama LLM inference and prompt engineering"
+                icon="/icons/jormungandr_16.png">
+            <add-to-group group-id="ToolsMenu" anchor="after" relative-to-action="Jormungandr.Tools.GpuMonitor"/>
+        </action>
+
+        <group id="Jormungandr.EditorAiActions" text="Jörmungandr AI Actions" popup="true" icon="/icons/jormungandr_16.png">
+            <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+            <action id="Jormungandr.Editor.GenerateDocstring"
+                    class="org.jormungandr.shell.copilot.local.GenerateDocstringAction"
+                    text="Generate Data Pipeline Docstring"
+                    description="Auto-generate Google-style docstrings with parameter and return types"/>
+            <action id="Jormungandr.Editor.GeneratePytest"
+                    class="org.jormungandr.shell.copilot.local.GeneratePytestAction"
+                    text="Generate PyTest Suite &amp; DataFrame Fixtures"
+                    description="Auto-generate pytest unit tests with mock DataFrame fixtures"/>
+        </group>
 
         <!-- Help Menu Action -->
         <action id="Jormungandr.Help.About"

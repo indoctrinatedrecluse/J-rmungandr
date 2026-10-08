@@ -55,4 +55,15 @@
                     icon="/icons/dataframe_16.png"
                     factoryClass="org.jormungandr.dataframe.ui.toolwindow.DataFrameToolWindowFactory"/>
     </extensions>
+
+    <actions>
+        <action id="Jormungandr.Lakehouse.Inspector"
+                class="org.jormungandr.dataframe.lakehouse.LakehouseInspectorAction"
+                text="Inspect Lakehouse &amp; Parquet Deep Chunks..."
+                description="Inspect Parquet binary chunk encodings, compression ratios, and Delta/Iceberg time-travel"
+                icon="/icons/dataframe_16.png">
+            <add-to-group group-id="ProjectViewPopupMenu" anchor="last"/>
+            <add-to-group group-id="ToolsMenu" anchor="last"/>
+        </action>
+    </actions>
 </idea-plugin>

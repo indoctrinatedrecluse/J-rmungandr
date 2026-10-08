@@ -93,6 +93,34 @@ Welcome to the inaugural release of **Jörmungandr** — the modular, open-sourc
 - Universal interactive 2D pan/zoom controller with mouse-wheel zoom and smooth canvas dragging across all charts and DAGs.
 - Deterministic extension lifecycle management with memory limits and zero resource leakage.
 
+#### 🎮 7. Hardware Telemetry & GPU Monitor Status Bar
+- **Non-blocking Telemetry Daemon**: Real-time polling of GPU compute utilization, VRAM allocation (used / total MB), and thermals via `nvidia-smi` with automatic Host RAM and CPU fallback.
+- **Proactive OOM Prevention Watchdog**: Live status monitoring across `STABLE`, `ELEVATED`, and `CRITICAL_OOM_RISK` tiers to safeguard long-running PyTorch/TensorFlow trainings.
+- **Status Bar Widget & Interactive Telemetry Popup**: Click-to-open GPU status bar meter with color-coded gauge bars and thermal readout.
+- **1-Click Memory Cache Purge**: Instantly trims JVM off-heap allocations, garbage collection roots, and native cache buffers.
+
+#### 🤖 8. Local AI & LLM Engine (Offline Copilot & Prompt Studio)
+- **Local Daemon Integration**: Zero-latency, 100% offline client for local LLM servers (**Ollama** and **vLLM** at `localhost:11434`) ensuring code and data privacy.
+- **Model Discovery & Latency Telemetry**: Automatic detection of downloaded weights (`llama3`, `deepseek-coder`, `mistral`, `codellama`, `qwen`) with tokens/second throughput benchmarking.
+- **Interactive Prompt Studio Tool Window**: Docked workspace with system prompt customization, temperature tuning slider, and 1-click active editor code insertion.
+- **Context-Menu AI Code Actions**: Right-click actions generating Google/NumPy format docstrings and robust PyTest mock fixtures.
+
+#### 🏛️ 9. Modern Lakehouse & Deep Parquet Inspector
+- **Binary Parquet Metadata Inspector (`PAR1`)**: Header/footer inspection, row group chunk layouts, compression codec efficiency ratios (Snappy, ZSTD, GZIP, LZ4), dictionary encodings, and column min/max stats.
+- **Delta Lake & Apache Iceberg ACID Timeline**: Parses `_delta_log/*.json` and `metadata/*.metadata.json` catalogs to surface snapshot history, commit operations (`WRITE`, `OPTIMIZE`, `MERGE`), and changed file manifests.
+- **1-Click Time-Travel SQL Generator**: Produces ready-to-run point-in-time SQL queries for DuckDB and Apache Spark (`VERSION AS OF` / `TIMESTAMP AS OF`).
+
+#### 🔄 10. Data Orchestration & Pipeline Lineage Visualizer (dbt & Airflow)
+- **Project AST & Lineage Parser**: Scans projects for dbt SQL models (`ref`, `source`, `config`) and Apache Airflow DAGs (`DAG`, `>>`, `<<`, `task_id`).
+- **Interactive 2D DAG Lineage Canvas**: High-performance Swing canvas with anti-aliased cubic bezier connecting arrows, color-coded node badges, and topological layer columns.
+- **Graph Interactions**: Cursor-anchored mouse wheel zoom, pan, upstream/downstream dependency highlighting, and double-click jump to source code.
+- **Lineage Actions**: 1-click execution simulation and CLI command generator (`dbt run --select`, `airflow tasks test`).
+
+#### 📦 11. Windows Single-File Installer & System Integration
+- **Inno Setup Script**: `installer/jormungandr_setup.iss` and `tools/build_installer.ps1` for generating `Jormungandr-Setup-v1.0.0-x64.exe`.
+- **System File Associations**: Windows shell registration for `.ipynb` (Jupyter), `.parquet` (Parquet), and `.arrow` / `.feather` (Arrow).
+- **Desktop & PATH Integration**: Start Menu and Desktop shortcuts with high-resolution Jörmungandr branding and optional CLI PATH addition.
+
 ---
 
 ### 🛠️ Build & Verification Infrastructure

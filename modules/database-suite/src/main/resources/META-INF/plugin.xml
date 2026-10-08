@@ -38,5 +38,20 @@
                     canCloseContent="true"
                     icon="/icons/database_16.png"
                     factoryClass="org.jormungandr.database.lakehouse.DuckDbLakehouseToolWindowFactory"/>
+
+        <toolWindow id="Data Pipelines"
+                    anchor="bottom"
+                    canCloseContent="true"
+                    icon="/icons/database_16.png"
+                    factoryClass="org.jormungandr.database.orchestration.PipelineStudioToolWindowFactory"/>
     </extensions>
+
+    <actions>
+        <action id="org.jormungandr.database.orchestration.ShowPipelineLineageAction"
+                class="org.jormungandr.database.orchestration.ShowPipelineLineageAction"
+                text="Data Pipelines &amp; Lineage DAG"
+                description="Open visual data pipeline and DAG lineage canvas (dbt, Airflow)">
+            <add-to-group group-id="ToolsMenu" anchor="last"/>
+        </action>
+    </actions>
 </idea-plugin>
