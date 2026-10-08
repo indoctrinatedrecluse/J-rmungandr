@@ -1,0 +1,1652 @@
+[
+  {
+    "timestamp": "2026-10-01T08:00:00Z",
+    "device_id": "PUMP-NORTH",
+    "metrics": {
+      "temperature_celsius": 74.08,
+      "vibration_frequency_hz": 42.55,
+      "pressure_kpa": 318.3,
+      "battery_percentage": 100.0
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:00:10Z",
+    "device_id": "TURBINE-01",
+    "metrics": {
+      "temperature_celsius": 64.04,
+      "vibration_frequency_hz": 44.44,
+      "pressure_kpa": 309.91,
+      "battery_percentage": 99.8
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:00:20Z",
+    "device_id": "TURBINE-02",
+    "metrics": {
+      "temperature_celsius": 73.13,
+      "vibration_frequency_hz": 55.75,
+      "pressure_kpa": 308.35,
+      "battery_percentage": 99.7
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:00:30Z",
+    "device_id": "TURBINE-02",
+    "metrics": {
+      "temperature_celsius": 74.85,
+      "vibration_frequency_hz": 41.3,
+      "pressure_kpa": 328.16,
+      "battery_percentage": 99.5
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:00:40Z",
+    "device_id": "TURBINE-01",
+    "metrics": {
+      "temperature_celsius": 70.2,
+      "vibration_frequency_hz": 42.3,
+      "pressure_kpa": 306.45,
+      "battery_percentage": 99.4
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:00:50Z",
+    "device_id": "COMPRESSOR-04",
+    "metrics": {
+      "temperature_celsius": 74.3,
+      "vibration_frequency_hz": 39.39,
+      "pressure_kpa": 312.64,
+      "battery_percentage": 99.2
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:01:00Z",
+    "device_id": "COMPRESSOR-04",
+    "metrics": {
+      "temperature_celsius": 73.73,
+      "vibration_frequency_hz": 48.27,
+      "pressure_kpa": 302.04,
+      "battery_percentage": 99.1
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:01:10Z",
+    "device_id": "GENERATOR-PRIMARY",
+    "metrics": {
+      "temperature_celsius": 71.39,
+      "vibration_frequency_hz": 56.22,
+      "pressure_kpa": 314.77,
+      "battery_percentage": 99.0
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:01:20Z",
+    "device_id": "TURBINE-01",
+    "metrics": {
+      "temperature_celsius": 77.27,
+      "vibration_frequency_hz": 60.71,
+      "pressure_kpa": 294.79,
+      "battery_percentage": 98.8
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:01:30Z",
+    "device_id": "GENERATOR-PRIMARY",
+    "metrics": {
+      "temperature_celsius": 72.05,
+      "vibration_frequency_hz": 39.34,
+      "pressure_kpa": 286.57,
+      "battery_percentage": 98.7
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:01:40Z",
+    "device_id": "PUMP-NORTH",
+    "metrics": {
+      "temperature_celsius": 75.27,
+      "vibration_frequency_hz": 46.52,
+      "pressure_kpa": 296.72,
+      "battery_percentage": 98.5
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:01:50Z",
+    "device_id": "COMPRESSOR-04",
+    "metrics": {
+      "temperature_celsius": 69.56,
+      "vibration_frequency_hz": 53.86,
+      "pressure_kpa": 334.81,
+      "battery_percentage": 98.3
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:02:00Z",
+    "device_id": "GENERATOR-PRIMARY",
+    "metrics": {
+      "temperature_celsius": 75.97,
+      "vibration_frequency_hz": 54.71,
+      "pressure_kpa": 312.3,
+      "battery_percentage": 98.2
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:02:10Z",
+    "device_id": "GENERATOR-PRIMARY",
+    "metrics": {
+      "temperature_celsius": 66.67,
+      "vibration_frequency_hz": 47.05,
+      "pressure_kpa": 333.98,
+      "battery_percentage": 98.0
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:02:20Z",
+    "device_id": "PUMP-NORTH",
+    "metrics": {
+      "temperature_celsius": 77.5,
+      "vibration_frequency_hz": 43.89,
+      "pressure_kpa": 323.28,
+      "battery_percentage": 97.9
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:02:30Z",
+    "device_id": "TURBINE-02",
+    "metrics": {
+      "temperature_celsius": 74.22,
+      "vibration_frequency_hz": 51.39,
+      "pressure_kpa": 316.36,
+      "battery_percentage": 97.8
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:02:40Z",
+    "device_id": "GENERATOR-PRIMARY",
+    "metrics": {
+      "temperature_celsius": 69.35,
+      "vibration_frequency_hz": 36.85,
+      "pressure_kpa": 302.61,
+      "battery_percentage": 97.6
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:02:50Z",
+    "device_id": "GENERATOR-PRIMARY",
+    "metrics": {
+      "temperature_celsius": 70.88,
+      "vibration_frequency_hz": 37.21,
+      "pressure_kpa": 291.95,
+      "battery_percentage": 97.5
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:03:00Z",
+    "device_id": "GENERATOR-PRIMARY",
+    "metrics": {
+      "temperature_celsius": 70.4,
+      "vibration_frequency_hz": 47.93,
+      "pressure_kpa": 302.12,
+      "battery_percentage": 97.3
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:03:10Z",
+    "device_id": "GENERATOR-PRIMARY",
+    "metrics": {
+      "temperature_celsius": 72.75,
+      "vibration_frequency_hz": 47.69,
+      "pressure_kpa": 309.82,
+      "battery_percentage": 97.2
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:03:20Z",
+    "device_id": "COMPRESSOR-04",
+    "metrics": {
+      "temperature_celsius": 68.5,
+      "vibration_frequency_hz": 47.14,
+      "pressure_kpa": 327.75,
+      "battery_percentage": 97.0
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:03:30Z",
+    "device_id": "TURBINE-02",
+    "metrics": {
+      "temperature_celsius": 73.89,
+      "vibration_frequency_hz": 54.91,
+      "pressure_kpa": 303.51,
+      "battery_percentage": 96.8
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:03:40Z",
+    "device_id": "COMPRESSOR-04",
+    "metrics": {
+      "temperature_celsius": 68.02,
+      "vibration_frequency_hz": 57.48,
+      "pressure_kpa": 333.92,
+      "battery_percentage": 96.7
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:03:50Z",
+    "device_id": "GENERATOR-PRIMARY",
+    "metrics": {
+      "temperature_celsius": 68.12,
+      "vibration_frequency_hz": 50.85,
+      "pressure_kpa": 314.63,
+      "battery_percentage": 96.5
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:04:00Z",
+    "device_id": "COMPRESSOR-04",
+    "metrics": {
+      "temperature_celsius": 73.42,
+      "vibration_frequency_hz": 33.8,
+      "pressure_kpa": 327.51,
+      "battery_percentage": 96.4
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:04:10Z",
+    "device_id": "GENERATOR-PRIMARY",
+    "metrics": {
+      "temperature_celsius": 75.35,
+      "vibration_frequency_hz": 44.47,
+      "pressure_kpa": 315.27,
+      "battery_percentage": 96.2
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:04:20Z",
+    "device_id": "TURBINE-01",
+    "metrics": {
+      "temperature_celsius": 70.64,
+      "vibration_frequency_hz": 46.47,
+      "pressure_kpa": 331.85,
+      "battery_percentage": 96.1
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:04:30Z",
+    "device_id": "PUMP-NORTH",
+    "metrics": {
+      "temperature_celsius": 72.78,
+      "vibration_frequency_hz": 45.41,
+      "pressure_kpa": 313.86,
+      "battery_percentage": 96.0
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:04:40Z",
+    "device_id": "COMPRESSOR-04",
+    "metrics": {
+      "temperature_celsius": 70.64,
+      "vibration_frequency_hz": 43.95,
+      "pressure_kpa": 319.65,
+      "battery_percentage": 95.8
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:04:50Z",
+    "device_id": "PUMP-NORTH",
+    "metrics": {
+      "temperature_celsius": 69.02,
+      "vibration_frequency_hz": 32.63,
+      "pressure_kpa": 279.94,
+      "battery_percentage": 95.7
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:05:00Z",
+    "device_id": "COMPRESSOR-04",
+    "metrics": {
+      "temperature_celsius": 72.64,
+      "vibration_frequency_hz": 41.29,
+      "pressure_kpa": 313.63,
+      "battery_percentage": 95.5
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:05:10Z",
+    "device_id": "PUMP-NORTH",
+    "metrics": {
+      "temperature_celsius": 67.79,
+      "vibration_frequency_hz": 41.03,
+      "pressure_kpa": 303.74,
+      "battery_percentage": 95.3
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:05:20Z",
+    "device_id": "PUMP-NORTH",
+    "metrics": {
+      "temperature_celsius": 66.1,
+      "vibration_frequency_hz": 42.74,
+      "pressure_kpa": 303.44,
+      "battery_percentage": 95.2
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:05:30Z",
+    "device_id": "TURBINE-01",
+    "metrics": {
+      "temperature_celsius": 73.87,
+      "vibration_frequency_hz": 47.9,
+      "pressure_kpa": 293.68,
+      "battery_percentage": 95.0
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:05:40Z",
+    "device_id": "TURBINE-02",
+    "metrics": {
+      "temperature_celsius": 76.54,
+      "vibration_frequency_hz": 52.56,
+      "pressure_kpa": 316.06,
+      "battery_percentage": 94.9
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:05:50Z",
+    "device_id": "GENERATOR-PRIMARY",
+    "metrics": {
+      "temperature_celsius": 65.15,
+      "vibration_frequency_hz": 44.68,
+      "pressure_kpa": 287.79,
+      "battery_percentage": 94.8
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:06:00Z",
+    "device_id": "TURBINE-02",
+    "metrics": {
+      "temperature_celsius": 67.92,
+      "vibration_frequency_hz": 53.93,
+      "pressure_kpa": 319.36,
+      "battery_percentage": 94.6
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:06:10Z",
+    "device_id": "COMPRESSOR-04",
+    "metrics": {
+      "temperature_celsius": 65.13,
+      "vibration_frequency_hz": 54.21,
+      "pressure_kpa": 302.8,
+      "battery_percentage": 94.5
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:06:20Z",
+    "device_id": "TURBINE-01",
+    "metrics": {
+      "temperature_celsius": 72.17,
+      "vibration_frequency_hz": 54.24,
+      "pressure_kpa": 291.35,
+      "battery_percentage": 94.3
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:06:30Z",
+    "device_id": "COMPRESSOR-04",
+    "metrics": {
+      "temperature_celsius": 68.23,
+      "vibration_frequency_hz": 42.05,
+      "pressure_kpa": 298.05,
+      "battery_percentage": 94.2
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:06:40Z",
+    "device_id": "GENERATOR-PRIMARY",
+    "metrics": {
+      "temperature_celsius": 79.27,
+      "vibration_frequency_hz": 51.96,
+      "pressure_kpa": 317.93,
+      "battery_percentage": 94.0
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:06:50Z",
+    "device_id": "TURBINE-01",
+    "metrics": {
+      "temperature_celsius": 76.87,
+      "vibration_frequency_hz": 50.84,
+      "pressure_kpa": 330.94,
+      "battery_percentage": 93.8
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:07:00Z",
+    "device_id": "GENERATOR-PRIMARY",
+    "metrics": {
+      "temperature_celsius": 72.25,
+      "vibration_frequency_hz": 49.66,
+      "pressure_kpa": 295.35,
+      "battery_percentage": 93.7
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:07:10Z",
+    "device_id": "TURBINE-02",
+    "metrics": {
+      "temperature_celsius": 69.54,
+      "vibration_frequency_hz": 40.71,
+      "pressure_kpa": 295.13,
+      "battery_percentage": 93.5
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:07:20Z",
+    "device_id": "PUMP-NORTH",
+    "metrics": {
+      "temperature_celsius": 72.51,
+      "vibration_frequency_hz": 48.16,
+      "pressure_kpa": 337.94,
+      "battery_percentage": 93.4
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:07:30Z",
+    "device_id": "COMPRESSOR-04",
+    "metrics": {
+      "temperature_celsius": 84.4,
+      "vibration_frequency_hz": 44.07,
+      "pressure_kpa": 321.99,
+      "battery_percentage": 93.2
+    },
+    "status": "CRITICAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:07:40Z",
+    "device_id": "GENERATOR-PRIMARY",
+    "metrics": {
+      "temperature_celsius": 72.73,
+      "vibration_frequency_hz": 49.09,
+      "pressure_kpa": 300.33,
+      "battery_percentage": 93.1
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:07:50Z",
+    "device_id": "GENERATOR-PRIMARY",
+    "metrics": {
+      "temperature_celsius": 63.48,
+      "vibration_frequency_hz": 45.37,
+      "pressure_kpa": 337.57,
+      "battery_percentage": 93.0
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:08:00Z",
+    "device_id": "GENERATOR-PRIMARY",
+    "metrics": {
+      "temperature_celsius": 66.26,
+      "vibration_frequency_hz": 61.64,
+      "pressure_kpa": 306.6,
+      "battery_percentage": 92.8
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:08:10Z",
+    "device_id": "TURBINE-02",
+    "metrics": {
+      "temperature_celsius": 78.16,
+      "vibration_frequency_hz": 41.65,
+      "pressure_kpa": 314.28,
+      "battery_percentage": 92.7
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:08:20Z",
+    "device_id": "TURBINE-01",
+    "metrics": {
+      "temperature_celsius": 72.2,
+      "vibration_frequency_hz": 54.63,
+      "pressure_kpa": 314.56,
+      "battery_percentage": 92.5
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:08:30Z",
+    "device_id": "PUMP-NORTH",
+    "metrics": {
+      "temperature_celsius": 73.51,
+      "vibration_frequency_hz": 46.26,
+      "pressure_kpa": 316.32,
+      "battery_percentage": 92.3
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:08:40Z",
+    "device_id": "GENERATOR-PRIMARY",
+    "metrics": {
+      "temperature_celsius": 80.77,
+      "vibration_frequency_hz": 44.43,
+      "pressure_kpa": 317.58,
+      "battery_percentage": 92.2
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:08:50Z",
+    "device_id": "COMPRESSOR-04",
+    "metrics": {
+      "temperature_celsius": 67.43,
+      "vibration_frequency_hz": 56.18,
+      "pressure_kpa": 305.91,
+      "battery_percentage": 92.0
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:09:00Z",
+    "device_id": "TURBINE-02",
+    "metrics": {
+      "temperature_celsius": 73.0,
+      "vibration_frequency_hz": 31.45,
+      "pressure_kpa": 293.88,
+      "battery_percentage": 91.9
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:09:10Z",
+    "device_id": "GENERATOR-PRIMARY",
+    "metrics": {
+      "temperature_celsius": 73.69,
+      "vibration_frequency_hz": 52.82,
+      "pressure_kpa": 296.88,
+      "battery_percentage": 91.8
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:09:20Z",
+    "device_id": "PUMP-NORTH",
+    "metrics": {
+      "temperature_celsius": 77.92,
+      "vibration_frequency_hz": 51.79,
+      "pressure_kpa": 332.53,
+      "battery_percentage": 91.6
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:09:30Z",
+    "device_id": "TURBINE-02",
+    "metrics": {
+      "temperature_celsius": 72.27,
+      "vibration_frequency_hz": 50.08,
+      "pressure_kpa": 295.29,
+      "battery_percentage": 91.5
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:09:40Z",
+    "device_id": "PUMP-NORTH",
+    "metrics": {
+      "temperature_celsius": 71.92,
+      "vibration_frequency_hz": 47.91,
+      "pressure_kpa": 315.59,
+      "battery_percentage": 91.3
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:09:50Z",
+    "device_id": "TURBINE-01",
+    "metrics": {
+      "temperature_celsius": 69.74,
+      "vibration_frequency_hz": 39.3,
+      "pressure_kpa": 324.79,
+      "battery_percentage": 91.2
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:10:00Z",
+    "device_id": "PUMP-NORTH",
+    "metrics": {
+      "temperature_celsius": 81.13,
+      "vibration_frequency_hz": 54.92,
+      "pressure_kpa": 296.14,
+      "battery_percentage": 91.0
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:10:10Z",
+    "device_id": "GENERATOR-PRIMARY",
+    "metrics": {
+      "temperature_celsius": 73.08,
+      "vibration_frequency_hz": 46.12,
+      "pressure_kpa": 346.11,
+      "battery_percentage": 90.8
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:10:20Z",
+    "device_id": "TURBINE-02",
+    "metrics": {
+      "temperature_celsius": 69.7,
+      "vibration_frequency_hz": 48.03,
+      "pressure_kpa": 307.22,
+      "battery_percentage": 90.7
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:10:30Z",
+    "device_id": "TURBINE-02",
+    "metrics": {
+      "temperature_celsius": 64.01,
+      "vibration_frequency_hz": 49.61,
+      "pressure_kpa": 338.23,
+      "battery_percentage": 90.5
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:10:40Z",
+    "device_id": "GENERATOR-PRIMARY",
+    "metrics": {
+      "temperature_celsius": 67.99,
+      "vibration_frequency_hz": 56.88,
+      "pressure_kpa": 314.42,
+      "battery_percentage": 90.4
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:10:50Z",
+    "device_id": "COMPRESSOR-04",
+    "metrics": {
+      "temperature_celsius": 73.66,
+      "vibration_frequency_hz": 39.66,
+      "pressure_kpa": 293.28,
+      "battery_percentage": 90.2
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:11:00Z",
+    "device_id": "GENERATOR-PRIMARY",
+    "metrics": {
+      "temperature_celsius": 80.37,
+      "vibration_frequency_hz": 44.71,
+      "pressure_kpa": 300.99,
+      "battery_percentage": 90.1
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:11:10Z",
+    "device_id": "GENERATOR-PRIMARY",
+    "metrics": {
+      "temperature_celsius": 75.15,
+      "vibration_frequency_hz": 53.13,
+      "pressure_kpa": 297.2,
+      "battery_percentage": 90.0
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:11:20Z",
+    "device_id": "GENERATOR-PRIMARY",
+    "metrics": {
+      "temperature_celsius": 71.94,
+      "vibration_frequency_hz": 52.52,
+      "pressure_kpa": 305.56,
+      "battery_percentage": 89.8
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:11:30Z",
+    "device_id": "COMPRESSOR-04",
+    "metrics": {
+      "temperature_celsius": 71.85,
+      "vibration_frequency_hz": 39.97,
+      "pressure_kpa": 312.54,
+      "battery_percentage": 89.7
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:11:40Z",
+    "device_id": "GENERATOR-PRIMARY",
+    "metrics": {
+      "temperature_celsius": 67.72,
+      "vibration_frequency_hz": 58.56,
+      "pressure_kpa": 312.69,
+      "battery_percentage": 89.5
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:11:50Z",
+    "device_id": "TURBINE-01",
+    "metrics": {
+      "temperature_celsius": 67.92,
+      "vibration_frequency_hz": 45.69,
+      "pressure_kpa": 294.22,
+      "battery_percentage": 89.3
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:12:00Z",
+    "device_id": "TURBINE-01",
+    "metrics": {
+      "temperature_celsius": 75.38,
+      "vibration_frequency_hz": 48.33,
+      "pressure_kpa": 298.38,
+      "battery_percentage": 89.2
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:12:10Z",
+    "device_id": "GENERATOR-PRIMARY",
+    "metrics": {
+      "temperature_celsius": 70.68,
+      "vibration_frequency_hz": 50.7,
+      "pressure_kpa": 302.63,
+      "battery_percentage": 89.0
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:12:20Z",
+    "device_id": "PUMP-NORTH",
+    "metrics": {
+      "temperature_celsius": 72.88,
+      "vibration_frequency_hz": 55.32,
+      "pressure_kpa": 299.15,
+      "battery_percentage": 88.9
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:12:30Z",
+    "device_id": "COMPRESSOR-04",
+    "metrics": {
+      "temperature_celsius": 69.89,
+      "vibration_frequency_hz": 41.98,
+      "pressure_kpa": 317.19,
+      "battery_percentage": 88.8
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:12:40Z",
+    "device_id": "PUMP-NORTH",
+    "metrics": {
+      "temperature_celsius": 69.69,
+      "vibration_frequency_hz": 52.93,
+      "pressure_kpa": 291.4,
+      "battery_percentage": 88.6
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:12:50Z",
+    "device_id": "GENERATOR-PRIMARY",
+    "metrics": {
+      "temperature_celsius": 74.17,
+      "vibration_frequency_hz": 43.33,
+      "pressure_kpa": 284.67,
+      "battery_percentage": 88.5
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:13:00Z",
+    "device_id": "PUMP-NORTH",
+    "metrics": {
+      "temperature_celsius": 74.28,
+      "vibration_frequency_hz": 40.2,
+      "pressure_kpa": 316.14,
+      "battery_percentage": 88.3
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:13:10Z",
+    "device_id": "TURBINE-02",
+    "metrics": {
+      "temperature_celsius": 70.32,
+      "vibration_frequency_hz": 47.1,
+      "pressure_kpa": 310.35,
+      "battery_percentage": 88.2
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:13:20Z",
+    "device_id": "COMPRESSOR-04",
+    "metrics": {
+      "temperature_celsius": 58.68,
+      "vibration_frequency_hz": 48.05,
+      "pressure_kpa": 320.58,
+      "battery_percentage": 88.0
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:13:30Z",
+    "device_id": "PUMP-NORTH",
+    "metrics": {
+      "temperature_celsius": 68.39,
+      "vibration_frequency_hz": 49.21,
+      "pressure_kpa": 297.64,
+      "battery_percentage": 87.8
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:13:40Z",
+    "device_id": "GENERATOR-PRIMARY",
+    "metrics": {
+      "temperature_celsius": 73.33,
+      "vibration_frequency_hz": 46.42,
+      "pressure_kpa": 317.28,
+      "battery_percentage": 87.7
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:13:50Z",
+    "device_id": "TURBINE-02",
+    "metrics": {
+      "temperature_celsius": 73.96,
+      "vibration_frequency_hz": 50.89,
+      "pressure_kpa": 294.29,
+      "battery_percentage": 87.5
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:14:00Z",
+    "device_id": "TURBINE-01",
+    "metrics": {
+      "temperature_celsius": 68.9,
+      "vibration_frequency_hz": 49.82,
+      "pressure_kpa": 297.65,
+      "battery_percentage": 87.4
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:14:10Z",
+    "device_id": "PUMP-NORTH",
+    "metrics": {
+      "temperature_celsius": 76.63,
+      "vibration_frequency_hz": 44.27,
+      "pressure_kpa": 322.83,
+      "battery_percentage": 87.2
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:14:20Z",
+    "device_id": "PUMP-NORTH",
+    "metrics": {
+      "temperature_celsius": 79.76,
+      "vibration_frequency_hz": 35.64,
+      "pressure_kpa": 316.19,
+      "battery_percentage": 87.1
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:14:30Z",
+    "device_id": "GENERATOR-PRIMARY",
+    "metrics": {
+      "temperature_celsius": 77.72,
+      "vibration_frequency_hz": 53.17,
+      "pressure_kpa": 333.23,
+      "battery_percentage": 87.0
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:14:40Z",
+    "device_id": "PUMP-NORTH",
+    "metrics": {
+      "temperature_celsius": 70.22,
+      "vibration_frequency_hz": 54.92,
+      "pressure_kpa": 312.53,
+      "battery_percentage": 86.8
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:14:50Z",
+    "device_id": "TURBINE-01",
+    "metrics": {
+      "temperature_celsius": 67.98,
+      "vibration_frequency_hz": 44.08,
+      "pressure_kpa": 318.38,
+      "battery_percentage": 86.7
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:15:00Z",
+    "device_id": "TURBINE-02",
+    "metrics": {
+      "temperature_celsius": 76.56,
+      "vibration_frequency_hz": 41.15,
+      "pressure_kpa": 324.15,
+      "battery_percentage": 86.5
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:15:10Z",
+    "device_id": "GENERATOR-PRIMARY",
+    "metrics": {
+      "temperature_celsius": 70.59,
+      "vibration_frequency_hz": 36.62,
+      "pressure_kpa": 297.31,
+      "battery_percentage": 86.3
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:15:20Z",
+    "device_id": "TURBINE-01",
+    "metrics": {
+      "temperature_celsius": 75.89,
+      "vibration_frequency_hz": 50.84,
+      "pressure_kpa": 301.52,
+      "battery_percentage": 86.2
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:15:30Z",
+    "device_id": "PUMP-NORTH",
+    "metrics": {
+      "temperature_celsius": 78.13,
+      "vibration_frequency_hz": 42.86,
+      "pressure_kpa": 300.75,
+      "battery_percentage": 86.0
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:15:40Z",
+    "device_id": "COMPRESSOR-04",
+    "metrics": {
+      "temperature_celsius": 74.42,
+      "vibration_frequency_hz": 32.93,
+      "pressure_kpa": 309.76,
+      "battery_percentage": 85.9
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:15:50Z",
+    "device_id": "COMPRESSOR-04",
+    "metrics": {
+      "temperature_celsius": 67.41,
+      "vibration_frequency_hz": 44.45,
+      "pressure_kpa": 314.92,
+      "battery_percentage": 85.8
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:16:00Z",
+    "device_id": "TURBINE-01",
+    "metrics": {
+      "temperature_celsius": 74.67,
+      "vibration_frequency_hz": 51.36,
+      "pressure_kpa": 309.74,
+      "battery_percentage": 85.6
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:16:10Z",
+    "device_id": "TURBINE-01",
+    "metrics": {
+      "temperature_celsius": 79.43,
+      "vibration_frequency_hz": 49.6,
+      "pressure_kpa": 324.63,
+      "battery_percentage": 85.5
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:16:20Z",
+    "device_id": "TURBINE-01",
+    "metrics": {
+      "temperature_celsius": 80.44,
+      "vibration_frequency_hz": 53.21,
+      "pressure_kpa": 306.69,
+      "battery_percentage": 85.3
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:16:30Z",
+    "device_id": "COMPRESSOR-04",
+    "metrics": {
+      "temperature_celsius": 72.21,
+      "vibration_frequency_hz": 26.64,
+      "pressure_kpa": 302.51,
+      "battery_percentage": 85.2
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:16:40Z",
+    "device_id": "TURBINE-01",
+    "metrics": {
+      "temperature_celsius": 72.31,
+      "vibration_frequency_hz": 51.76,
+      "pressure_kpa": 292.42,
+      "battery_percentage": 85.0
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:16:50Z",
+    "device_id": "PUMP-NORTH",
+    "metrics": {
+      "temperature_celsius": 65.27,
+      "vibration_frequency_hz": 49.38,
+      "pressure_kpa": 334.33,
+      "battery_percentage": 84.8
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:17:00Z",
+    "device_id": "COMPRESSOR-04",
+    "metrics": {
+      "temperature_celsius": 70.94,
+      "vibration_frequency_hz": 45.54,
+      "pressure_kpa": 311.91,
+      "battery_percentage": 84.7
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:17:10Z",
+    "device_id": "PUMP-NORTH",
+    "metrics": {
+      "temperature_celsius": 71.64,
+      "vibration_frequency_hz": 51.69,
+      "pressure_kpa": 299.77,
+      "battery_percentage": 84.5
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:17:20Z",
+    "device_id": "COMPRESSOR-04",
+    "metrics": {
+      "temperature_celsius": 64.18,
+      "vibration_frequency_hz": 50.69,
+      "pressure_kpa": 327.35,
+      "battery_percentage": 84.4
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:17:30Z",
+    "device_id": "TURBINE-02",
+    "metrics": {
+      "temperature_celsius": 70.39,
+      "vibration_frequency_hz": 57.87,
+      "pressure_kpa": 305.59,
+      "battery_percentage": 84.2
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:17:40Z",
+    "device_id": "TURBINE-02",
+    "metrics": {
+      "temperature_celsius": 68.6,
+      "vibration_frequency_hz": 44.12,
+      "pressure_kpa": 309.79,
+      "battery_percentage": 84.1
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:17:50Z",
+    "device_id": "COMPRESSOR-04",
+    "metrics": {
+      "temperature_celsius": 63.9,
+      "vibration_frequency_hz": 38.82,
+      "pressure_kpa": 306.85,
+      "battery_percentage": 84.0
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:18:00Z",
+    "device_id": "PUMP-NORTH",
+    "metrics": {
+      "temperature_celsius": 76.55,
+      "vibration_frequency_hz": 43.96,
+      "pressure_kpa": 310.93,
+      "battery_percentage": 83.8
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:18:10Z",
+    "device_id": "PUMP-NORTH",
+    "metrics": {
+      "temperature_celsius": 74.3,
+      "vibration_frequency_hz": 44.65,
+      "pressure_kpa": 318.69,
+      "battery_percentage": 83.7
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:18:20Z",
+    "device_id": "PUMP-NORTH",
+    "metrics": {
+      "temperature_celsius": 77.6,
+      "vibration_frequency_hz": 48.52,
+      "pressure_kpa": 310.42,
+      "battery_percentage": 83.5
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:18:30Z",
+    "device_id": "PUMP-NORTH",
+    "metrics": {
+      "temperature_celsius": 70.23,
+      "vibration_frequency_hz": 47.18,
+      "pressure_kpa": 310.37,
+      "battery_percentage": 83.3
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:18:40Z",
+    "device_id": "COMPRESSOR-04",
+    "metrics": {
+      "temperature_celsius": 77.02,
+      "vibration_frequency_hz": 45.58,
+      "pressure_kpa": 325.89,
+      "battery_percentage": 83.2
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:18:50Z",
+    "device_id": "PUMP-NORTH",
+    "metrics": {
+      "temperature_celsius": 72.76,
+      "vibration_frequency_hz": 38.49,
+      "pressure_kpa": 294.67,
+      "battery_percentage": 83.0
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:19:00Z",
+    "device_id": "GENERATOR-PRIMARY",
+    "metrics": {
+      "temperature_celsius": 69.47,
+      "vibration_frequency_hz": 52.77,
+      "pressure_kpa": 296.04,
+      "battery_percentage": 82.9
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:19:10Z",
+    "device_id": "TURBINE-02",
+    "metrics": {
+      "temperature_celsius": 70.94,
+      "vibration_frequency_hz": 45.95,
+      "pressure_kpa": 288.91,
+      "battery_percentage": 82.8
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:19:20Z",
+    "device_id": "COMPRESSOR-04",
+    "metrics": {
+      "temperature_celsius": 72.81,
+      "vibration_frequency_hz": 50.6,
+      "pressure_kpa": 297.24,
+      "battery_percentage": 82.6
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:19:30Z",
+    "device_id": "GENERATOR-PRIMARY",
+    "metrics": {
+      "temperature_celsius": 68.91,
+      "vibration_frequency_hz": 51.49,
+      "pressure_kpa": 288.69,
+      "battery_percentage": 82.5
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:19:40Z",
+    "device_id": "PUMP-NORTH",
+    "metrics": {
+      "temperature_celsius": 69.42,
+      "vibration_frequency_hz": 41.57,
+      "pressure_kpa": 308.86,
+      "battery_percentage": 82.3
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:19:50Z",
+    "device_id": "TURBINE-01",
+    "metrics": {
+      "temperature_celsius": 75.19,
+      "vibration_frequency_hz": 50.21,
+      "pressure_kpa": 321.3,
+      "battery_percentage": 82.2
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:20:00Z",
+    "device_id": "COMPRESSOR-04",
+    "metrics": {
+      "temperature_celsius": 70.03,
+      "vibration_frequency_hz": 44.51,
+      "pressure_kpa": 303.06,
+      "battery_percentage": 82.0
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:20:10Z",
+    "device_id": "TURBINE-01",
+    "metrics": {
+      "temperature_celsius": 70.61,
+      "vibration_frequency_hz": 57.92,
+      "pressure_kpa": 342.41,
+      "battery_percentage": 81.8
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:20:20Z",
+    "device_id": "TURBINE-01",
+    "metrics": {
+      "temperature_celsius": 73.26,
+      "vibration_frequency_hz": 50.78,
+      "pressure_kpa": 307.14,
+      "battery_percentage": 81.7
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:20:30Z",
+    "device_id": "TURBINE-01",
+    "metrics": {
+      "temperature_celsius": 79.11,
+      "vibration_frequency_hz": 48.4,
+      "pressure_kpa": 318.52,
+      "battery_percentage": 81.5
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:20:40Z",
+    "device_id": "COMPRESSOR-04",
+    "metrics": {
+      "temperature_celsius": 73.4,
+      "vibration_frequency_hz": 54.64,
+      "pressure_kpa": 313.92,
+      "battery_percentage": 81.4
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:20:50Z",
+    "device_id": "PUMP-NORTH",
+    "metrics": {
+      "temperature_celsius": 67.69,
+      "vibration_frequency_hz": 36.79,
+      "pressure_kpa": 316.01,
+      "battery_percentage": 81.2
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:21:00Z",
+    "device_id": "PUMP-NORTH",
+    "metrics": {
+      "temperature_celsius": 78.63,
+      "vibration_frequency_hz": 53.23,
+      "pressure_kpa": 317.17,
+      "battery_percentage": 81.1
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:21:10Z",
+    "device_id": "COMPRESSOR-04",
+    "metrics": {
+      "temperature_celsius": 75.13,
+      "vibration_frequency_hz": 54.6,
+      "pressure_kpa": 317.33,
+      "battery_percentage": 81.0
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:21:20Z",
+    "device_id": "TURBINE-02",
+    "metrics": {
+      "temperature_celsius": 75.03,
+      "vibration_frequency_hz": 44.99,
+      "pressure_kpa": 308.24,
+      "battery_percentage": 80.8
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:21:30Z",
+    "device_id": "TURBINE-02",
+    "metrics": {
+      "temperature_celsius": 72.95,
+      "vibration_frequency_hz": 34.77,
+      "pressure_kpa": 336.98,
+      "battery_percentage": 80.7
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:21:40Z",
+    "device_id": "TURBINE-02",
+    "metrics": {
+      "temperature_celsius": 72.41,
+      "vibration_frequency_hz": 46.31,
+      "pressure_kpa": 285.02,
+      "battery_percentage": 80.5
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:21:50Z",
+    "device_id": "GENERATOR-PRIMARY",
+    "metrics": {
+      "temperature_celsius": 74.26,
+      "vibration_frequency_hz": 45.76,
+      "pressure_kpa": 301.14,
+      "battery_percentage": 80.3
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:22:00Z",
+    "device_id": "COMPRESSOR-04",
+    "metrics": {
+      "temperature_celsius": 70.98,
+      "vibration_frequency_hz": 42.89,
+      "pressure_kpa": 300.64,
+      "battery_percentage": 80.2
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:22:10Z",
+    "device_id": "TURBINE-01",
+    "metrics": {
+      "temperature_celsius": 77.8,
+      "vibration_frequency_hz": 47.73,
+      "pressure_kpa": 291.07,
+      "battery_percentage": 80.0
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:22:20Z",
+    "device_id": "TURBINE-01",
+    "metrics": {
+      "temperature_celsius": 72.38,
+      "vibration_frequency_hz": 57.27,
+      "pressure_kpa": 319.93,
+      "battery_percentage": 79.9
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:22:30Z",
+    "device_id": "TURBINE-02",
+    "metrics": {
+      "temperature_celsius": 80.83,
+      "vibration_frequency_hz": 52.7,
+      "pressure_kpa": 308.16,
+      "battery_percentage": 79.8
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:22:40Z",
+    "device_id": "COMPRESSOR-04",
+    "metrics": {
+      "temperature_celsius": 71.35,
+      "vibration_frequency_hz": 51.51,
+      "pressure_kpa": 308.76,
+      "battery_percentage": 79.6
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:22:50Z",
+    "device_id": "TURBINE-02",
+    "metrics": {
+      "temperature_celsius": 74.59,
+      "vibration_frequency_hz": 49.9,
+      "pressure_kpa": 310.25,
+      "battery_percentage": 79.5
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:23:00Z",
+    "device_id": "COMPRESSOR-04",
+    "metrics": {
+      "temperature_celsius": 71.58,
+      "vibration_frequency_hz": 44.51,
+      "pressure_kpa": 311.48,
+      "battery_percentage": 79.3
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:23:10Z",
+    "device_id": "COMPRESSOR-04",
+    "metrics": {
+      "temperature_celsius": 69.35,
+      "vibration_frequency_hz": 55.58,
+      "pressure_kpa": 321.31,
+      "battery_percentage": 79.2
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:23:20Z",
+    "device_id": "TURBINE-01",
+    "metrics": {
+      "temperature_celsius": 78.12,
+      "vibration_frequency_hz": 51.43,
+      "pressure_kpa": 302.0,
+      "battery_percentage": 79.0
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:23:30Z",
+    "device_id": "TURBINE-02",
+    "metrics": {
+      "temperature_celsius": 65.41,
+      "vibration_frequency_hz": 42.34,
+      "pressure_kpa": 311.0,
+      "battery_percentage": 78.8
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:23:40Z",
+    "device_id": "GENERATOR-PRIMARY",
+    "metrics": {
+      "temperature_celsius": 74.19,
+      "vibration_frequency_hz": 37.39,
+      "pressure_kpa": 315.51,
+      "battery_percentage": 78.7
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:23:50Z",
+    "device_id": "TURBINE-02",
+    "metrics": {
+      "temperature_celsius": 68.26,
+      "vibration_frequency_hz": 54.27,
+      "pressure_kpa": 311.95,
+      "battery_percentage": 78.5
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:24:00Z",
+    "device_id": "TURBINE-02",
+    "metrics": {
+      "temperature_celsius": 72.49,
+      "vibration_frequency_hz": 49.85,
+      "pressure_kpa": 304.83,
+      "battery_percentage": 78.4
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:24:10Z",
+    "device_id": "GENERATOR-PRIMARY",
+    "metrics": {
+      "temperature_celsius": 67.32,
+      "vibration_frequency_hz": 46.62,
+      "pressure_kpa": 300.8,
+      "battery_percentage": 78.2
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:24:20Z",
+    "device_id": "TURBINE-02",
+    "metrics": {
+      "temperature_celsius": 68.92,
+      "vibration_frequency_hz": 46.44,
+      "pressure_kpa": 280.43,
+      "battery_percentage": 78.1
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:24:30Z",
+    "device_id": "GENERATOR-PRIMARY",
+    "metrics": {
+      "temperature_celsius": 74.17,
+      "vibration_frequency_hz": 55.1,
+      "pressure_kpa": 300.24,
+      "battery_percentage": 78.0
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:24:40Z",
+    "device_id": "TURBINE-01",
+    "metrics": {
+      "temperature_celsius": 68.0,
+      "vibration_frequency_hz": 46.62,
+      "pressure_kpa": 317.92,
+      "battery_percentage": 77.8
+    },
+    "status": "NOMINAL"
+  },
+  {
+    "timestamp": "2026-10-01T08:24:50Z",
+    "device_id": "COMPRESSOR-04",
+    "metrics": {
+      "temperature_celsius": 67.75,
+      "vibration_frequency_hz": 57.27,
+      "pressure_kpa": 310.1,
+      "battery_percentage": 77.7
+    },
+    "status": "NOMINAL"
+  }
+]

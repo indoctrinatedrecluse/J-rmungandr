@@ -131,14 +131,15 @@ Modern data practitioners are caught between two disparate worlds:
   - Strict lifecycle states (`UNLOADED` &rarr; `ACTIVE` &rarr; `DISPOSING` &rarr; `TERMINATED`).
   - Memory bounds and IntelliJ `Disposable` hierarchy integration.
   - Bespoke extension iconography across tool window stripes, left UI list panes, and native Plugin Manager (`pluginIcon.svg` & Retina rasters).
+- **R Language Engine & Statistical REPL**:
+  - Native R executable discovery (`Rscript.exe`, `R.exe`), CRAN package manager inspection, interactive REPL console, and automatic `ggplot2` plot interception.
+- **Enterprise Commercial Licensing & Licensor Cloud Integration**:
+  - 3-tier commercial licensing architecture (`USER-`, `DEV-`, `ADM-`), anti-tamper Windows Registry 60-day trial persistence, tiered UI badging, and selective proprietary extension gating.
 
-### 3.3 🔮 Follow-Up Scope & Roadmap
-- **🔒 Extension Licensing & Commercial Gating (TODO - Next Update)**:
-  - Introduction of a dedicated licensing verification engine and cryptographic license key management.
-  - Commercial gating of advanced pro extensions (e.g. Enterprise Streaming Ingress, Advanced Explainability, and Production Packaging) while keeping core notebook and dataframe features free.
-- **R Language Integration (TBD)**: R kernel integration, R REPL, package viewer, and graphics device window.
-- **Hardware-Accelerated Visualization**: WebGL/Skiko canvas for 10M+ datapoint scatterplots.
-- **Remote Compute**: Remote Docker & SSH Jupyter kernel runners.
+### 3.3 🔮 Follow-Up Scope & Future Roadmap
+- **Cloud Team Seat Allocation & Webhooks**: Real-time license seat deallocation hooks and enterprise SSO/LDAP team license leasing.
+- **Hardware-Accelerated Mega-Scatterplots**: WebGL/Skiko canvas rendering for 10M+ datapoint interactive scatterplots.
+- **Remote Slurm & Kubernetes Cluster Gateway**: Direct cluster job submission and remote headless notebook kernel spawning over SSH.
 
 ---
 
@@ -983,6 +984,21 @@ Jörmungandr includes an enterprise-grade commercial licensing and extension gat
    - Online Activation form supporting License Key, Username, and Password.
    - **🔄 Check & Validate** online heartbeat verification.
    - **🗑️ Remove License** button to cleanly deactivate and return to trial mode.
+
+### 🧪 11.10 Ready-Made Testing & Evaluation Suite (`samples/`)
+
+To facilitate thorough manual testing and feature verification across all modular extensions and flagship studios, the project includes a dedicated `samples/` directory with ready-to-run test artifacts:
+
+| Category | Location | Featured Capabilities & Verification Targets |
+| :--- | :--- | :--- |
+| **🪐 Reactive Notebooks** | `samples/01_notebooks/` | • `01_reactive_dag_demo.ipynb`: Inter-cell defs/uses dependency mapping, `⚠️ Stale` badges, and Kahn's topological re-execution.<br>• `02_rich_outputs_and_math.ipynb`: LaTeX formula typography ($E=mc^2$), interactive collapsible JSON trees, and styled HTML tables.<br>• `03_audio_video_multimedia.ipynb`: Native Java Sound audio waveform player cards and video player launcher.<br>• `04_data_science_workflow.ipynb`: End-to-end Pandas, DuckDB in-memory SQL execution, and statistical outlier telemetry. |
+| **📊 Datasets & Drift** | `samples/02_datasets/` | • `customers.csv`: 250-row dataset for Data Quality Scorecards and Pearson/Spearman/Kendall correlation matrices.<br>• `financial_transactions.csv`: 500 rows for high-frequency window function analytics.<br>• `sensor_telemetry.json`: 150 streaming IoT packets for real-time Oscilloscope and memory buffer testing.<br>• `reference_train.csv` & `current_production.csv`: Two-dataset statistical drift pair for testing the **Population Stability Index (PSI)** and **Kolmogorov-Smirnov (K-S)** drift engine. |
+| **🗄️ Lakehouse & SQL** | `samples/03_lakehouse_and_sql/` | • `duckdb_lakehouse_queries.sql`: Zero-copy analytical SQL queries over local CSV/Parquet files without external servers.<br>• `postgres_mysql_schema.sql`: Cross-dialect relational schemas and seed data.<br>• `mock_delta_table/`: Authentic Delta Lake ACID table with multi-commit `_delta_log/` transaction logs (`CREATE`, `OPTIMIZE`, `MERGE`) testing the Lakehouse Studio ACID timeline and 1-Click Time-Travel SQL Generator. |
+| **🔄 Pipelines & DAGs** | `samples/04_pipeline_orchestration/` | • `dbt_analytics_project/`: Full dbt project (`dbt_project.yml`, staging views, marts tables) with `{{ ref(...) }}` and `{{ source(...) }}` lineage.<br>• `airflow_dags/customer_etl_dag.py`: Apache Airflow DAG testing cubic-bezier 2D dependency rendering and task execution simulation. |
+| **🧠 AI/ML & Models** | `samples/05_machine_learning/` | • `train_model_and_shap.py`: Model evaluation script calculating SHAP waterfall force attributions, confusion matrices, and ROC metrics.<br>• `resnet50_sample.safetensors`: Binary `.safetensors` model checkpoint testing the Model Checkpoint & Neural Graph Inspector.<br>• `sample_model_metadata.json`: Model configuration for testing 1-Click FastAPI and Dockerfile generation. |
+| **🔮 R Statistical REPL** | `samples/06_r_statistical/` | • `ggplot2_statistical_analysis.R`: Cohort observational analysis testing R REPL console interaction, CRAN package discovery, and automated `ggplot2` plot interception into the Scientific Plot Viewer. |
+
+> Detailed instructions on exercising each sample are documented in [`samples/README.md`](file:///D:/Projects/Jörmungandr/samples/README.md).
 
 ---
 

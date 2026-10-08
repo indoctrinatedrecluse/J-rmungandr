@@ -1,0 +1,48 @@
+{
+  "model_name": "customer_churn_classifier",
+  "version": "1.0.0",
+  "framework": "scikit-learn",
+  "target_column": "is_churned",
+  "features": [
+    {
+      "name": "tenure_months",
+      "type": "integer",
+      "description": "Number of active months customer has subscribed",
+      "example": 24
+    },
+    {
+      "name": "credit_score",
+      "type": "integer",
+      "description": "Customer credit bureau score between 350 and 850",
+      "example": 720
+    },
+    {
+      "name": "annual_spend_usd",
+      "type": "float",
+      "description": "Total historical gross merchandise value in USD",
+      "example": 4500.50
+    },
+    {
+      "name": "churn_risk_score",
+      "type": "float",
+      "description": "Baseline statistical churn heuristic score [0.0 - 1.0]",
+      "example": 0.25
+    }
+  ],
+  "runtime_environment": {
+    "python_version": "3.11",
+    "pip_dependencies": [
+      "fastapi>=0.110.0",
+      "uvicorn>=0.28.0",
+      "pydantic>=2.6.0",
+      "scikit-learn>=1.4.0",
+      "numpy>=1.26.0"
+    ]
+  },
+  "deployment": {
+    "port": 8000,
+    "docker_base_image": "python:3.11-slim",
+    "metrics_endpoint": "/metrics",
+    "health_endpoint": "/healthz"
+  }
+}
