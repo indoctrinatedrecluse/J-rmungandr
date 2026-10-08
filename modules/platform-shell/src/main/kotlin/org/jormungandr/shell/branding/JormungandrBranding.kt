@@ -261,11 +261,21 @@ object JormungandrBranding {
                     win.iconImages = icons
                 }
 
-                // 2. Rebrand title
+                // 2. Rebrand title and decorate with license badge
                 if (win is Frame) {
                     val currentTitle = win.title
                     if (currentTitle != null) {
-                        val rebranded = rebrandText(currentTitle)
+                        var rebranded = rebrandText(currentTitle)
+                        val license = org.jormungandr.core.license.LicenseService.getInstance().currentLicense.value
+                        val tag = when (license.licenseType) {
+                            org.jormungandr.core.license.LicenseType.ADMIN -> " [👑 ADMIN PRIVILEGED]"
+                            org.jormungandr.core.license.LicenseType.DEVELOPER -> " [⚡ DEV EDITION]"
+                            org.jormungandr.core.license.LicenseType.USER -> " [👤 USER LICENSE]"
+                            org.jormungandr.core.license.LicenseType.TRIAL -> " [⏳ TRIAL (${license.trialDaysRemaining}d)]"
+                        }
+                        if (!rebranded.contains("ADMIN") && !rebranded.contains("DEV") && !rebranded.contains("USER") && !rebranded.contains("TRIAL")) {
+                            rebranded += tag
+                        }
                         if (rebranded != currentTitle) {
                             win.title = rebranded
                         }

@@ -56,6 +56,11 @@
                     icon="/icons/jormungandr_16.png"
                     factoryClass="org.jormungandr.shell.copilot.local.PromptStudioToolWindowFactory"/>
 
+        <!-- Commercial Licensing & Extension Gating Subsystem -->
+        <applicationService serviceImplementation="org.jormungandr.core.license.LicenseService"/>
+        <statusBarWidgetFactory id="org.jormungandr.shell.license.LicenseStatusBarWidget"
+                                implementation="org.jormungandr.shell.license.LicenseStatusBarWidgetFactory"/>
+
         <!-- Animated Splash Screen & Branding Lifecycle -->
         <applicationInitializedListener implementation="org.jormungandr.shell.splash.JormungandrAppInitializer"/>
         <postStartupActivity implementation="org.jormungandr.shell.splash.JormungandrStartupActivity"/>
@@ -143,6 +148,15 @@
         </group>
 
         <!-- Help Menu Action -->
+        <action id="Jormungandr.Tools.ManageLicense"
+                class="org.jormungandr.shell.license.ManageLicenseAction"
+                text="Manage Jörmungandr License..."
+                description="View, activate, or manage Jörmungandr commercial license"
+                icon="/icons/jormungandr_16.png">
+            <add-to-group group-id="ToolsMenu" anchor="after" relative-to-action="Jormungandr.Tools.PromptStudio"/>
+            <add-to-group group-id="HelpMenu" anchor="before" relative-to-action="Jormungandr.Help.About"/>
+        </action>
+
         <action id="Jormungandr.Help.About"
                 class="org.jormungandr.shell.ui.about.AboutAction"
                 text="About Jörmungandr"

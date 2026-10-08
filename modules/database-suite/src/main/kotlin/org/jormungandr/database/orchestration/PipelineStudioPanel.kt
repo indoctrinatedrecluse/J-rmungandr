@@ -100,6 +100,17 @@ class PipelineStudioPanel(private val project: Project) : JPanel(BorderLayout())
         leftControls.add(searchField)
 
         val rightControls = JPanel(FlowLayout(FlowLayout.RIGHT, 6, 0)).apply { isOpaque = false }
+        val license = org.jormungandr.core.license.LicenseService.getInstance().currentLicense.value
+        val licenseBadge = JBLabel(" [${license.licenseType.name}] ").apply {
+            font = font.deriveFont(Font.BOLD, 10.5f)
+            foreground = when (license.licenseType) {
+                org.jormungandr.core.license.LicenseType.ADMIN -> Color(245, 158, 11)
+                org.jormungandr.core.license.LicenseType.DEVELOPER -> Color(168, 85, 247)
+                org.jormungandr.core.license.LicenseType.USER -> Color(16, 185, 129)
+                org.jormungandr.core.license.LicenseType.TRIAL -> Color(100, 116, 139)
+            }
+        }
+        rightControls.add(licenseBadge)
         val zoomInBtn = JButton("+").apply { addActionListener { canvas.zoomIn() } }
         val zoomOutBtn = JButton("-").apply { addActionListener { canvas.zoomOut() } }
         val resetBtn = JButton("⛶ Fit").apply { addActionListener { canvas.resetView() } }
@@ -237,6 +248,16 @@ class PipelineStudioPanel(private val project: Project) : JPanel(BorderLayout())
 
     private fun simulateRunTask() {
         val node = selectedNode ?: return
+        if (!org.jormungandr.core.license.LicenseService.getInstance().isLicensed()) {
+            JOptionPane.showMessageDialog(
+                this,
+                "Pipeline Execution is locked in Trial Mode.\nA valid User, Developer, or Admin license is required to execute tasks.",
+                "Commercial License Required",
+                JOptionPane.WARNING_MESSAGE
+            )
+            return
+        }
+
         node.status = PipelineExecutionStatus.RUNNING
         updateInspector(node)
         canvas.repaint()

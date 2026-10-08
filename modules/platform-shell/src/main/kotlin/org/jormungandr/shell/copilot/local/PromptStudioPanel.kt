@@ -76,6 +76,11 @@ class PromptStudioPanel(private val project: Project) : JPanel(BorderLayout(0, 1
                 add(modelComboBox)
                 add(refreshModelsBtn)
                 add(serverStatusLabel)
+                val badge = org.jormungandr.shell.license.LicenseBadgeFactory.createBadgeComponent(
+                    org.jormungandr.core.license.LicenseService.getInstance().currentLicense.value,
+                    large = false
+                )
+                add(badge)
             }
 
             val presetsRow = JPanel(FlowLayout(FlowLayout.LEFT, 8, 4)).apply {
@@ -196,6 +201,20 @@ class PromptStudioPanel(private val project: Project) : JPanel(BorderLayout(0, 1
         val prompt = userPromptArea.text.trim()
         val system = systemPromptArea.text.trim()
         val temp = tempSlider.value / 100.0
+
+        if (!org.jormungandr.core.license.LicenseService.getInstance().isLicensed()) {
+            val choice = JOptionPane.showConfirmDialog(
+                this,
+                "Prompt Studio is locked in Trial Mode.\nA valid User, Developer, or Admin commercial license is required to execute AI completions.\n\nWould you like to open the License Manager to activate now?",
+                "Commercial License Required",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.WARNING_MESSAGE
+            )
+            if (choice == JOptionPane.YES_OPTION) {
+                org.jormungandr.shell.license.LicenseDialog(project).show()
+            }
+            return
+        }
 
         if (prompt.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Please enter a user prompt.", "Empty Prompt", JOptionPane.WARNING_MESSAGE)

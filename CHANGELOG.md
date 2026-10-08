@@ -121,6 +121,25 @@ Welcome to the inaugural release of **Jörmungandr** — the modular, open-sourc
 - **System File Associations**: Windows shell registration for `.ipynb` (Jupyter), `.parquet` (Parquet), and `.arrow` / `.feather` (Arrow).
 - **Desktop & PATH Integration**: Start Menu and Desktop shortcuts with high-resolution Jörmungandr branding and optional CLI PATH addition.
 
+#### 🔐 12. Commercial Licensing, Anti-Tamper Trial & Licensor Cloud Integration
+- **3-Tier Commercial License Model**:
+  - `ADM-xxxx-xxxx-xxxx`: Admin Tier (bypasses username/password, collects HWID on launch).
+  - `DEV-xxxx-xxxx-xxxx`: Developer Tier (validates credentials and HWID against Licensor cloud).
+  - `USER-xxxx-xxxx-xxxx`: User Tier (validates credentials and HWID with concurrency limits).
+- **Online Licensor Cloud Backend Integration**:
+  - Live API integration with `https://licensor-h5zdysrkqa-uc.a.run.app` for license activation, background heartbeat validation, and deactivation.
+- **Bespoke Extension Gating Engine**:
+  - Proprietary data platform extensions (Jupyter, DataFrame Viewer, Database Suite, AI Prompt Studio) require a commercial license.
+  - Standard IntelliJ Community Edition plugins and external JetBrains Marketplace plugins remain 100% free and open.
+- **Persistent Anti-Tamper 60-Day Trial**:
+  - Stored in native Windows Registry (`HKCU\Software\Jormungandr\Licensing`) and Java Preferences.
+  - Cryptographic HMAC-SHA256 checksums bound to machine HWID prevent trial resetting on uninstall/reinstall.
+- **Tiered Visual Badges Across IDE UI**:
+  - `USER` (cyan-emerald gradient), `DEV` (electric violet-fuchsia cyberpunk gradient), and `ADMIN` (holographic gold royal gradient with outer glow bloom).
+  - Embedded in Window Title Bar, Status Bar, About Dialog, Extensions Manager, and tool window headers.
+- **Interactive License Management Modal**:
+  - Key masking (`USER-••••-••••-••••`) with Reveal/Hide toggle, 1-click machine HWID copy, online activation form, heartbeat validator, and safe license deactivation.
+
 ---
 
 ### 🛠️ Build & Verification Infrastructure

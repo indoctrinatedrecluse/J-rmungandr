@@ -80,23 +80,41 @@ class AboutDialog(project: Project? = null) : DialogWrapper(project, true) {
             isOpaque = false
         }
 
+        val titleRow = JPanel(FlowLayout(FlowLayout.LEFT, 8, 0)).apply { isOpaque = false }
         val titleLabel = JBLabel("Jörmungandr").apply {
             font = font.deriveFont(Font.BOLD, 22f)
         }
+        val licenseBadge = org.jormungandr.shell.license.LicenseBadgeFactory.createBadgeComponent(
+            org.jormungandr.core.license.LicenseService.getInstance().currentLicense.value,
+            large = true
+        )
+        titleRow.add(titleLabel)
+        titleRow.add(licenseBadge)
+
         val taglineLabel = JBLabel("The Modular Python, Data Science & Analytics IDE").apply {
             font = font.deriveFont(Font.BOLD, 12f)
             foreground = Color(42, 161, 152) // Solarized Cyan
         }
-        val versionLabel = JBLabel("Version 0.1.0-alpha · Built on IntelliJ Platform 2024.3").apply {
+        val versionRow = JPanel(FlowLayout(FlowLayout.LEFT, 8, 0)).apply { isOpaque = false }
+        val versionLabel = JBLabel("Version 1.0.0 · Built on IntelliJ Platform 2024.3").apply {
             font = font.deriveFont(Font.PLAIN, 11f)
             foreground = Color(120, 120, 120)
         }
+        val manageLicenseLink = JButton("🔑 Manage License...").apply {
+            font = font.deriveFont(Font.PLAIN, 10.5f)
+            isFocusable = false
+            addActionListener {
+                org.jormungandr.shell.license.LicenseDialog(null).show()
+            }
+        }
+        versionRow.add(versionLabel)
+        versionRow.add(manageLicenseLink)
 
-        textPanel.add(titleLabel)
+        textPanel.add(titleRow)
         textPanel.add(Box.createVerticalStrut(4))
         textPanel.add(taglineLabel)
         textPanel.add(Box.createVerticalStrut(2))
-        textPanel.add(versionLabel)
+        textPanel.add(versionRow)
         headerPanel.add(textPanel, BorderLayout.CENTER)
 
         rootPanel.add(headerPanel)

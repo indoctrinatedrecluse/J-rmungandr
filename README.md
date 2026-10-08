@@ -950,14 +950,39 @@ Jörmungandr expands its data platform capabilities with 4 production-grade feat
    - **Native Windows File Associations**: One-click file association for Jupyter Notebooks (`.ipynb`), Apache Parquet Datasets (`.parquet`), and Apache Arrow/Feather Tables (`.arrow`, `.feather`).
    - **Desktop & System Integration**: High-resolution Jörmungandr desktop and Start Menu shortcuts with optional CLI PATH environment variable registration.
 
-### 🔒 11.9 🛣️ TODO / Upcoming Roadmap: Extension Licensing & Commercial Gating
+### 🔐 11.9 Commercial Licensing, Tiered UI Badges & Licensor Cloud Integration
 
-> [!IMPORTANT]
-> **Roadmap Notice (Next Update)**:  
-> In the upcoming update, Jörmungandr will introduce an in-IDE commercial licensing system and extension gating mechanism.  
-> - **Community Tier (Free & Open Source)**: Core exploratory Jupyter notebooks, AST-based reactive DAGs, and baseline tabular DataFrame viewers will remain completely free and open.
-> - **Commercial Pro Tier (License Required)**: Advanced enterprise capabilities — including Real-Time Streaming Ingress, Automated Distribution Drift Alerting, Enterprise Lakehouse connectors, and 1-Click Production Model Deployment Packaging — will be gated behind a commercial license key.
-> - An in-IDE License Management dialog (`Help -> Register Jörmungandr License...`) and cryptographic key verification engine will be introduced to handle tier activation seamlessly.
+Jörmungandr includes an enterprise-grade commercial licensing and extension gating subsystem backed by the cloud Licensor service (`https://licensor-h5zdysrkqa-uc.a.run.app`) and local Windows Registry persistence:
+
+1. **3-Tier Commercial License Architecture**:
+   - 👑 **ADMIN Tier (`ADM-xxxx-xxxx-xxxx`)**: Maximum administrative privilege. Bypasses username and password credentials; binds directly to deterministic machine Hardware ID (HWID).
+   - ⚡ **DEVELOPER Tier (`DEV-xxxx-xxxx-xxxx`)**: Developer edition. Validates username and password credentials against the Licensor backend, registers machine HWID on first activation, and verifies on launch.
+   - 👤 **USER Tier (`USER-xxxx-xxxx-xxxx`)**: Standard commercial user license. Validates account credentials, enforces machine concurrency limits, and tracks HWID verification.
+   - ⏳ **60-Day Evaluation Trial**: Automatic evaluation mode for unlicensed installations, active for 60 calendar days from first IDE launch.
+
+2. **Proprietary Extension Gating**:
+   - **Bespoke Jörmungandr Extensions**: Advanced data science and analytical engines (Reactive Jupyter Subsystem, In-Memory DuckDB Lakehouse, AI Prompt Studio, Distribution Drift Inspector, Real-Time Streaming Oscilloscope, Pipeline DAG Visualizer, and Model Packager) require an active commercial license (`ADM`, `DEV`, or `USER`).
+   - **Locked in Trial Mode**: Proprietary extensions remain gated during trial mode, displaying an in-context activation card or dialog trigger.
+   - **Open & Unrestricted Ecosystem**: All standard IntelliJ Community Edition features, built-in CE plugins, and external JetBrains Marketplace plugins remain 100% free, unlocked, and completely uninhibited.
+
+3. **Anti-Tamper Windows Registry Persistence**:
+   - Primary persistence tree: `HKCU\Software\Jormungandr\Licensing` with fallback across Java Preferences (`jormungandr/licensing`).
+   - Cryptographic tamper protection: The initial trial activation timestamp is bound to the machine HWID using an HMAC-SHA256 signature (`TrialChecksum`), ensuring the 60-day trial clock cannot be reset by deleting registry keys, reinstalling, or rolling back files.
+   - Safe Deactivation: Reverting or removing a license preserves the original trial anchor without providing an infinite trial loop.
+
+4. **Tiered Visual Badging & Opulent UI Indicators**:
+   - **USER Badge**: Clean cyan-to-emerald gradient (`#06b6d4` → `#10b981`) with user icon.
+   - **DEV Badge**: High-contrast electric violet-to-fuchsia cyberpunk gradient (`#7c3aed` → `#d946ef`) with lightning icon.
+   - **ADMIN Badge**: Maximum opulence royal gold holographic gradient (`#f59e0b` → `#b45309`) with outer bloom glow, dual metallic border, and crown icon.
+   - Integrated across the IDE: Main OS Window Title Bar (`JormungandrBranding`), Status Bar Widget (`LicenseStatusBarWidget`), About Dialog (`AboutDialog`), Extensions Manager (`ExtensionsDialog`), and Feature Tool Windows (`PromptStudio`, `LakehouseStudio`, `PipelineStudio`).
+
+5. **Interactive License Management Modal**:
+   - Access via `Help -> Manage Jörmungandr License...` or `Tools -> License Management...` or by clicking the status bar badge.
+   - Displays real-time license tier badge, masked license key (`USER-••••-••••-••••`) with an **👁️ Reveal / 🔒 Hide** toggle button.
+   - Deterministic Machine Hardware ID (`HWID-XXXX-XXXX-XXXX`) with a 1-click **📋 Copy HWID** button.
+   - Online Activation form supporting License Key, Username, and Password.
+   - **🔄 Check & Validate** online heartbeat verification.
+   - **🗑️ Remove License** button to cleanly deactivate and return to trial mode.
 
 ---
 

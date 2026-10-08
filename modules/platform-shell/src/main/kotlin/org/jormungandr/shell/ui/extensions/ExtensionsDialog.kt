@@ -93,8 +93,25 @@ class ExtensionsDialog(private val currentProject: Project? = null) : DialogWrap
             add(Box.createVerticalStrut(2))
             add(subLabel)
         }
+        val licensePanel = JPanel(FlowLayout(FlowLayout.RIGHT, 6, 0)).apply {
+            isOpaque = false
+            val badge = org.jormungandr.shell.license.LicenseBadgeFactory.createBadgeComponent(
+                org.jormungandr.core.license.LicenseService.getInstance().currentLicense.value,
+                large = true
+            )
+            val manageBtn = JButton("🔑 Manage License...").apply {
+                font = font.deriveFont(Font.PLAIN, 11f)
+                isFocusable = false
+                addActionListener {
+                    org.jormungandr.shell.license.LicenseDialog(currentProject).show()
+                }
+            }
+            add(badge)
+            add(manageBtn)
+        }
         header.add(iconLabel, BorderLayout.WEST)
         header.add(titleText, BorderLayout.CENTER)
+        header.add(licensePanel, BorderLayout.EAST)
         root.add(header, BorderLayout.NORTH)
 
         // Split Pane (List on Left, Details on Right)
@@ -235,6 +252,34 @@ class ExtensionsDialog(private val currentProject: Project? = null) : DialogWrap
                 border = EmptyBorder(3, 8, 3, 8)
             }
             add(badge)
+
+            // License Gate Badge
+            val licenseService = org.jormungandr.core.license.LicenseService.getInstance()
+            val isDesigned = licenseService.isDesignedExtension(ext.id.value)
+            if (isDesigned) {
+                val isUnlocked = licenseService.isExtensionUnlocked(ext.id.value)
+                val lockText = if (isUnlocked) "🔓 UNLOCKED (${licenseService.currentLicense.value.licenseType.name})" else "🔒 GATED (COMMERCIAL LICENSE REQUIRED)"
+                val lockColor = if (isUnlocked) Color(16, 185, 129) else Color(225, 29, 72)
+                val lockBadge = JLabel(" $lockText ").apply {
+                    font = font.deriveFont(Font.BOLD, 10.5f)
+                    foreground = Color.WHITE
+                    isOpaque = true
+                    background = lockColor
+                    border = EmptyBorder(3, 8, 3, 8)
+                }
+                add(Box.createHorizontalStrut(6))
+                add(lockBadge)
+            } else {
+                val freeBadge = JLabel(" 🌐 COMMUNITY / UNRESTRICTED ").apply {
+                    font = font.deriveFont(Font.BOLD, 10.5f)
+                    foreground = Color(71, 85, 105)
+                    isOpaque = true
+                    background = Color(226, 232, 240)
+                    border = EmptyBorder(3, 8, 3, 8)
+                }
+                add(Box.createHorizontalStrut(6))
+                add(freeBadge)
+            }
         }
         content.add(stateBadge)
         content.add(Box.createVerticalStrut(12))

@@ -46,7 +46,22 @@ class LakehouseStudioPanel(
                 foreground = JBColor.GRAY
                 font = font.deriveFont(Font.PLAIN, 11f)
             }
-            add(title, BorderLayout.NORTH)
+            val titleRow = JPanel(BorderLayout()).apply {
+                isOpaque = false
+                add(title, BorderLayout.WEST)
+                val lic = org.jormungandr.core.license.LicenseService.getInstance().currentLicense.value
+                val licLabel = JBLabel(" [${lic.licenseType.name}] ").apply {
+                    font = font.deriveFont(Font.BOLD, 10.5f)
+                    foreground = when (lic.licenseType) {
+                        org.jormungandr.core.license.LicenseType.ADMIN -> java.awt.Color(245, 158, 11)
+                        org.jormungandr.core.license.LicenseType.DEVELOPER -> java.awt.Color(168, 85, 247)
+                        org.jormungandr.core.license.LicenseType.USER -> java.awt.Color(16, 185, 129)
+                        org.jormungandr.core.license.LicenseType.TRIAL -> java.awt.Color(100, 116, 139)
+                    }
+                }
+                add(licLabel, BorderLayout.EAST)
+            }
+            add(titleRow, BorderLayout.NORTH)
             add(subtitle, BorderLayout.SOUTH)
         }
 
@@ -161,6 +176,15 @@ class LakehouseStudioPanel(
                 }
                 val copyBtn = JButton("📋 Copy Query").apply {
                     addActionListener {
+                        if (!org.jormungandr.core.license.LicenseService.getInstance().isLicensed()) {
+                            JOptionPane.showMessageDialog(
+                                this@LakehouseStudioPanel,
+                                "Lakehouse Time-Travel & ACID Log Export is locked in Trial Mode.\nA valid User, Developer, or Admin commercial license is required.",
+                                "Commercial License Required",
+                                JOptionPane.WARNING_MESSAGE
+                            )
+                            return@addActionListener
+                        }
                         Toolkit.getDefaultToolkit().systemClipboard.setContents(StringSelection(sqlArea.text), null)
                         JOptionPane.showMessageDialog(this@LakehouseStudioPanel, "Time-Travel SQL copied to clipboard!", "Copied", JOptionPane.INFORMATION_MESSAGE)
                     }
