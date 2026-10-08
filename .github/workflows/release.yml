@@ -120,40 +120,40 @@ jobs:
               $productInfoJson.launch[0].additionalJvmArguments = $newArgs
               $productInfoJson | ConvertTo-Json -Depth 10 | Set-Content $productInfoPath -Encoding UTF8
 
-              # Write portable bin/idea.properties (using single-quoted here-string so ${idea.home.path} is literal)
-              $propsContent = @'
-# Jörmungandr Standalone Portable IDE Configuration
-idea.config.path=${idea.home.path}/portable-data/config
-idea.system.path=${idea.home.path}/portable-data/system
-idea.plugins.path=${idea.home.path}/jormungandr-plugins
-idea.log.path=${idea.home.path}/portable-data/log
-idea.vendor.name=indoctrinatedrecluse
-idea.product.name=Jörmungandr
-idea.application.name=Jörmungandr
-'@
-              Set-Content -Path "$($stagingDir.FullName)\bin\idea.properties" -Value $propsContent -Encoding UTF8
+              # Write portable bin/idea.properties
+              $propsLines = @(
+                  "# Jörmungandr Standalone Portable IDE Configuration",
+                  "idea.config.path=`${idea.home.path}/portable-data/config",
+                  "idea.system.path=`${idea.home.path}/portable-data/system",
+                  "idea.plugins.path=`${idea.home.path}/jormungandr-plugins",
+                  "idea.log.path=`${idea.home.path}/portable-data/log",
+                  "idea.vendor.name=indoctrinatedrecluse",
+                  "idea.product.name=Jörmungandr",
+                  "idea.application.name=Jörmungandr"
+              )
+              $propsLines | Set-Content -Path "$($stagingDir.FullName)\bin\idea.properties" -Encoding UTF8
 
               # Append JVM properties to bin/idea64.exe.vmoptions
-              $vmOptionsToAppend = @"
-
--Didea.vendor.name=indoctrinatedrecluse
--Didea.product.name=Jörmungandr
--Didea.application.name=Jörmungandr
--Didea.platform.prefix=Idea
--Didea.paths.selector=Jormungandr1.0
--Didea.required.plugins.id=org.jormungandr.ide
--Djb.consents.confirmation.enabled=false
--Deua.consents.confirmation.enabled=false
--Didea.initially.ask.config=false
--Dide.show.tips.on.startup=false
--Dide.mac.message.dialogs.as.sheets=false
--Dwsl.use.remote.agent.for.nio.filesystem=false
--Dwsl.enabled=false
--Dide.ijent.wsldefault=false
--Didea.wsl.support.enabled=false
--Dsplash=true
-"@
-              Add-Content -Path "$($stagingDir.FullName)\bin\idea64.exe.vmoptions" -Value $vmOptionsToAppend -Encoding UTF8
+              $vmOptions = @(
+                  "",
+                  "-Didea.vendor.name=indoctrinatedrecluse",
+                  "-Didea.product.name=Jörmungandr",
+                  "-Didea.application.name=Jörmungandr",
+                  "-Didea.platform.prefix=Idea",
+                  "-Didea.paths.selector=Jormungandr1.0",
+                  "-Didea.required.plugins.id=org.jormungandr.ide",
+                  "-Djb.consents.confirmation.enabled=false",
+                  "-Deua.consents.confirmation.enabled=false",
+                  "-Didea.initially.ask.config=false",
+                  "-Dide.show.tips.on.startup=false",
+                  "-Dide.mac.message.dialogs.as.sheets=false",
+                  "-Dwsl.use.remote.agent.for.nio.filesystem=false",
+                  "-Dwsl.enabled=false",
+                  "-Dide.ijent.wsldefault=false",
+                  "-Didea.wsl.support.enabled=false",
+                  "-Dsplash=true"
+              )
+              $vmOptions | Add-Content -Path "$($stagingDir.FullName)\bin\idea64.exe.vmoptions" -Encoding UTF8
               Copy-Item "$($stagingDir.FullName)\bin\idea64.exe" -Destination "$($stagingDir.FullName)\bin\jormungandr64.exe" -Force
               Copy-Item "$($stagingDir.FullName)\bin\idea64.exe.vmoptions" -Destination "$($stagingDir.FullName)\bin\jormungandr64.exe.vmoptions" -Force
 
@@ -185,19 +185,19 @@ idea.application.name=Jörmungandr
                   Set-Content -Path (Join-Path $_ "cached") -Value $cachedJson -Encoding UTF8
               }
 
-              $otherXml = @"
-<application>
-  <component name="PropertyService"><![CDATA[{
-  "keyToString": {
-    "eua_accepted_version": "2.0",
-    "privacy_policy_accepted_version": "2.0",
-    "previous_eua_accepted_version": "2.0",
-    "ask.about.tip.of.the.day": "false",
-    "show.tips.on.startup": "false"
-  }
-}]]></component>
-</application>
-"@
+              $otherXml = @(
+                  "<application>",
+                  "  <component name=`"PropertyService`"><![CDATA[{",
+                  "  `"keyToString`": {",
+                  "    `"eua_accepted_version`": `"2.0`",",
+                  "    `"privacy_policy_accepted_version`": `"2.0`",",
+                  "    `"previous_eua_accepted_version`": `"2.0`",",
+                  "    `"ask.about.tip.of.the.day`": `"false`",",
+                  "    `"show.tips.on.startup`": `"false`"",
+                  "  }",
+                  "}]]></component>",
+                  "</application>"
+              ) -join "`r`n"
               Set-Content -Path "$($stagingDir.FullName)\portable-data\config\options\other.xml" -Value $otherXml -Encoding UTF8
 
               # Add root launcher script
