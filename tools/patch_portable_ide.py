@@ -134,20 +134,39 @@ def patch_portable_ide(staging_dir, resources_dir, tag_name="1.0.0"):
 
         shutil.move(tmp_app_jar, app_jar)
 
-    # 1.7 Ensure Jörmungandr plugins are integrated into the primary bundled plugins directory
+    # 1.7 Ensure Jörmungandr plugins are deployed into portable-data/plugins, jormungandr-plugins, and plugins
     plugins_dir = os.path.join(staging_dir, "plugins")
     jorm_plugins_dir = os.path.join(staging_dir, "jormungandr-plugins")
+    portable_plugins_dir = os.path.join(staging_dir, "portable-data", "plugins")
     os.makedirs(plugins_dir, exist_ok=True)
-    if os.path.exists(jorm_plugins_dir):
-        print(" -> Bundling Jörmungandr plugins into primary plugins directory...")
-        for item in os.listdir(jorm_plugins_dir):
-            src_item = os.path.join(jorm_plugins_dir, item)
-            dst_item = os.path.join(plugins_dir, item)
+    os.makedirs(portable_plugins_dir, exist_ok=True)
+    os.makedirs(jorm_plugins_dir, exist_ok=True)
+
+    # Determine available plugin source directory
+    src_dir = None
+    if os.path.exists(jorm_plugins_dir) and any(os.path.isdir(os.path.join(jorm_plugins_dir, d)) for d in os.listdir(jorm_plugins_dir)):
+        src_dir = jorm_plugins_dir
+    elif os.path.exists(portable_plugins_dir) and any(os.path.isdir(os.path.join(portable_plugins_dir, d)) for d in os.listdir(portable_plugins_dir)):
+        src_dir = portable_plugins_dir
+    elif os.path.exists(plugins_dir):
+        # Check if platform-shell or jupyter-integration is in plugins_dir
+        for cand in ["platform-shell", "jupyter-integration", "dataframe-viewer", "database-suite"]:
+            if os.path.isdir(os.path.join(plugins_dir, cand)):
+                src_dir = plugins_dir
+                break
+
+    if src_dir:
+        print(f" -> Deploying Jörmungandr plugins from {src_dir} to portable-data/plugins and backup directories...")
+        for item in ["platform-shell", "jupyter-integration", "dataframe-viewer", "database-suite"]:
+            src_item = os.path.join(src_dir, item)
             if os.path.isdir(src_item):
-                if os.path.exists(dst_item):
-                    shutil.rmtree(dst_item)
-                shutil.copytree(src_item, dst_item)
-                print(f"    [+] Successfully bundled plugin: {item}")
+                for dest in [portable_plugins_dir, jorm_plugins_dir, plugins_dir]:
+                    dest_item = os.path.join(dest, item)
+                    if os.path.abspath(src_item) != os.path.abspath(dest_item):
+                        if os.path.exists(dest_item):
+                            shutil.rmtree(dest_item)
+                        shutil.copytree(src_item, dest_item)
+                print(f"    [+] Successfully deployed plugin: {item}")
 
     # 2. Update product-info.json (strict UTF-8 without BOM)
     product_info_path = os.path.join(staging_dir, "product-info.json")
@@ -265,6 +284,14 @@ def patch_portable_ide(staging_dir, resources_dir, tag_name="1.0.0"):
             bat_lines = f.readlines()
         new_bat = []
         for line in bat_lines:
+            if line.strip().upper() == '@ECHO OFF':
+                new_bat.append(line)
+                new_bat.append('if not exist "%IDE_HOME%\\portable-data\\plugins\\platform-shell" (\n')
+                new_bat.append('    if exist "%IDE_HOME%\\jormungandr-plugins" (\n')
+                new_bat.append('        xcopy /E /I /Q /Y "%IDE_HOME%\\jormungandr-plugins" "%IDE_HOME%\\portable-data\\plugins" >nul 2>&1\n')
+                new_bat.append('    )\n')
+                new_bat.append(')\n')
+                continue
             new_bat.append(line)
             if 'SET "CLASS_PATH=%IDE_HOME%\\lib\\platform-loader.jar"' in line:
                 new_bat.append('SET "CLASS_PATH=%CLASS_PATH%;%IDE_HOME%\\lib\\jormungandr-bootstrap.jar"\n')
@@ -287,6 +314,7 @@ def patch_portable_ide(staging_dir, resources_dir, tag_name="1.0.0"):
     os.makedirs(options_dir, exist_ok=True)
     os.makedirs(os.path.join(portable_data, "system"), exist_ok=True)
     os.makedirs(os.path.join(portable_data, "log"), exist_ok=True)
+    os.makedirs(os.path.join(portable_data, "plugins"), exist_ok=True)
 
     now_ms = int(time.time() * 1000)
     accepted_str = f"rsch.send.usage.stat:1.1:0:{now_ms};eap:2021.2:0:{now_ms};\n"
@@ -328,10 +356,17 @@ def patch_portable_ide(staging_dir, resources_dir, tag_name="1.0.0"):
     with open(os.path.join(options_dir, "laf.xml"), 'w', encoding='utf-8', newline='\n') as f:
         f.write(laf_xml)
 
-    # 8. Create root launcher Jormungandr.bat
+    # 8. Create root launcher Jormungandr.bat with plugin auto-heal
     launcher_bat = os.path.join(staging_dir, "Jormungandr.bat")
-    bat_content = '@echo off\r\nstart "" "%~dp0bin\\idea64.exe" %*\r\n'
-    with open(launcher_bat, 'w', encoding='ascii', newline='') as f:
+    bat_content = '''@echo off
+if not exist "%~dp0portable-data\\plugins\\platform-shell" (
+    if exist "%~dp0jormungandr-plugins" (
+        xcopy /E /I /Q /Y "%~dp0jormungandr-plugins" "%~dp0portable-data\\plugins" >nul 2>&1
+    )
+)
+start "" "%~dp0bin\\idea64.exe" %*
+'''
+    with open(launcher_bat, 'w', encoding='ascii', newline='\r\n') as f:
         f.write(bat_content)
 
     print("[+] Staging patched successfully with 100% turnkey Jörmungandr branding and runtime config!")

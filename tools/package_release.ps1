@@ -16,11 +16,12 @@ if (Test-Path $distDir) {
 New-Item -ItemType Directory -Path $distDir -Force | Out-Null
 
 # 1. Modular Plugin Package
+Write-Host "Compiling plugins and preparing sandbox..." -ForegroundColor Yellow
+& "$ProjectRoot\gradlew.bat" prepareSandbox buildPlugin --no-daemon
+
 $pluginZip = Get-ChildItem -Path "$ProjectRoot\modules\platform-shell\build\distributions\*.zip" | Select-Object -First 1
 if (-not $pluginZip) {
-    Write-Host "Building plugin distribution..." -ForegroundColor Yellow
-    & "$ProjectRoot\gradlew.bat" buildPlugin --no-daemon
-    $pluginZip = Get-ChildItem -Path "$ProjectRoot\modules\platform-shell\build\distributions\*.zip" | Select-Object -First 1
+    Write-Error "Could not locate built plugin distribution zip!"
 }
 
 $destPlugin = Join-Path $distDir "Jormungandr-Plugin-$tag.zip"
@@ -47,16 +48,19 @@ $resourcesDir = (Resolve-Path "$ProjectRoot\modules\platform-shell\src\main\reso
 Write-Host "Copying IntelliJ platform base into staging..." -ForegroundColor Yellow
 Copy-Item -Path "$($ideaHome.FullName)\*" -Destination $stagingDir -Recurse -Force
 
-Write-Host "Copying Jormungandr plugins into bundled plugins directory..." -ForegroundColor Yellow
+Write-Host "Deploying Jormungandr plugins into distribution..." -ForegroundColor Yellow
 $bundledPluginsDir = Join-Path $stagingDir "plugins"
 $targetPluginsDir = Join-Path $stagingDir "jormungandr-plugins"
+$portablePluginsDir = Join-Path $stagingDir "portable-data\plugins"
 New-Item -ItemType Directory -Path $targetPluginsDir -Force | Out-Null
+New-Item -ItemType Directory -Path $portablePluginsDir -Force | Out-Null
 
 Get-ChildItem -Path $sandboxPlugins.FullName -Directory | ForEach-Object {
     $pluginName = $_.Name
-    Write-Host "  -> Bundling plugin: $pluginName" -ForegroundColor Cyan
+    Write-Host "  -> Deploying plugin: $pluginName" -ForegroundColor Cyan
     Copy-Item -Path $_.FullName -Destination (Join-Path $bundledPluginsDir $pluginName) -Recurse -Force
     Copy-Item -Path $_.FullName -Destination (Join-Path $targetPluginsDir $pluginName) -Recurse -Force
+    Copy-Item -Path $_.FullName -Destination (Join-Path $portablePluginsDir $pluginName) -Recurse -Force
 }
 
 Write-Host "Copying bundled samples directory into staging..." -ForegroundColor Yellow

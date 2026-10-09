@@ -26,6 +26,9 @@ if (Test-Path "$ideaHome\license") {
 
 Write-Host "Junctioning Jörmungandr plugins..."
 New-Item -ItemType Junction -Path "$staging\jormungandr-plugins" -Target $sandboxPlugins | Out-Null
+$testPortablePlugins = Join-Path $staging "portable-data\plugins"
+New-Item -ItemType Directory -Path $testPortablePlugins -Force | Out-Null
+Copy-Item "$sandboxPlugins\*" -Destination $testPortablePlugins -Recurse -Force
 
 Write-Host "Creating bin directory and copying launcher binaries..."
 New-Item -ItemType Directory -Path "$staging\bin" -Force | Out-Null
