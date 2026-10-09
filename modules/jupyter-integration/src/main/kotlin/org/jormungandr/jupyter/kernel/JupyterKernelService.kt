@@ -29,16 +29,26 @@ class JupyterKernelService : Disposable {
             return existing
         }
 
-        val session: KernelSession = if (preferZmq && KernelDiscovery.hasIpykernel()) {
-            LOG.info("Creating ZmqKernelSession for notebook: $notebookKey")
-            ZmqKernelSession(spec)
-        } else {
+        var session: KernelSession? = null
+        if (preferZmq && KernelDiscovery.hasIpykernel()) {
+            try {
+                LOG.info("Attempting ZmqKernelSession for notebook: $notebookKey")
+                val zmq = ZmqKernelSession(spec)
+                zmq.start()
+                session = zmq
+            } catch (e: Exception) {
+                LOG.warn("Failed to start ZmqKernelSession, falling back to SubprocessPythonSession: ${e.message}", e)
+            }
+        }
+
+        if (session == null) {
             LOG.info("Creating SubprocessPythonSession for notebook: $notebookKey")
-            SubprocessPythonSession(spec)
+            val fallback = SubprocessPythonSession(spec)
+            fallback.start()
+            session = fallback
         }
 
         sessions[notebookKey] = session
-        session.start()
         return session
     }
 

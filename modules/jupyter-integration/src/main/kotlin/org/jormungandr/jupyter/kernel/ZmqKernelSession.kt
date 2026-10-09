@@ -16,7 +16,6 @@ import org.zeromq.ZMQ
 import java.io.File
 import java.net.ServerSocket
 import java.nio.charset.StandardCharsets
-import java.security.MessageDigest
 import java.time.Instant
 import java.util.UUID
 import java.util.concurrent.ConcurrentHashMap
@@ -31,7 +30,8 @@ private val LOG = logger<ZmqKernelSession>()
  * Implements standard Jupyter Wire Protocol 5.3:
  * - 5 socket channels (Shell, IOPub, Control, Stdin, Heartbeat)
  * - HMAC-SHA256 message signing
- * - Asynchronous streaming outputs and rich MIME display data.
+ * - Asynchronous streaming outputs and rich MIME display data
+ * - Non-blocking process stream draining and race-free completion coordination.
  */
 class ZmqKernelSession(
     override val spec: JupyterKernelSpec
@@ -56,9 +56,11 @@ class ZmqKernelSession(
     private var connectionFile: File? = null
 
     private var hmacKey: String = ""
-    private var macInstance: Mac? = null
+    private var secretKeySpec: SecretKeySpec? = null
 
+    private data class ReplyHolder(val count: Int, val isOk: Boolean)
     private val pendingExecutions = ConcurrentHashMap<String, CompletableDeferred<ExecutionResult>>()
+    private val pendingReplies = ConcurrentHashMap<String, ReplyHolder>()
     private val outputListeners = ConcurrentHashMap<String, (CellOutput) -> Unit>()
     private val executionOutputs = ConcurrentHashMap<String, MutableList<CellOutput>>()
 
@@ -75,10 +77,7 @@ class ZmqKernelSession(
             val hbPort = findFreePort()
 
             hmacKey = UUID.randomUUID().toString()
-            val keySpec = SecretKeySpec(hmacKey.toByteArray(StandardCharsets.UTF_8), "HmacSHA256")
-            val mac = Mac.getInstance("HmacSHA256")
-            mac.init(keySpec)
-            macInstance = mac
+            secretKeySpec = SecretKeySpec(hmacKey.toByteArray(StandardCharsets.UTF_8), "HmacSHA256")
 
             // 2. Generate connection_file.json
             val connObj = JsonObject().apply {
@@ -98,15 +97,53 @@ class ZmqKernelSession(
             connFile.writeText(gson.toJson(connObj), Charsets.UTF_8)
             connectionFile = connFile
 
-            // 3. Spawn Kernel Process with connection file substitution
-            val cmd = spec.argv.map { it.replace("{connection_file}", connFile.absolutePath) }
+            // 3. Resolve python executable and spawn Kernel Process
+            val pyExe = KernelDiscovery.findPythonExecutable()
+            val resolvedArgv = spec.argv.mapIndexed { idx, arg ->
+                if (idx == 0 && (arg.equals("python", ignoreCase = true) || arg.equals("python3", ignoreCase = true) || arg.equals("py", ignoreCase = true))) {
+                    pyExe
+                } else {
+                    arg
+                }
+            }
+            val cmd = resolvedArgv.map { it.replace("{connection_file}", connFile.absolutePath) }
             val pb = ProcessBuilder(cmd)
             pb.environment().putAll(spec.env)
+            pb.environment()["PYTHONIOENCODING"] = "utf-8"
+            pb.environment()["PYTHONUTF8"] = "1"
             pb.redirectErrorStream(false)
 
             LOG.info("Launching Jupyter kernel process: ${cmd.joinToString(" ")}")
             val proc = pb.start()
             kernelProcess = proc
+
+            // Drain stdout and stderr asynchronously so pipes never buffer-lock
+            sessionScope.launch(Dispatchers.IO) {
+                runCatching {
+                    val r = proc.inputStream.bufferedReader(StandardCharsets.UTF_8)
+                    while (isActive && proc.isAlive) {
+                        val line = r.readLine() ?: break
+                        LOG.debug("Kernel stdout: $line")
+                    }
+                }
+            }
+            sessionScope.launch(Dispatchers.IO) {
+                runCatching {
+                    val r = proc.errorStream.bufferedReader(StandardCharsets.UTF_8)
+                    while (isActive && proc.isAlive) {
+                        val line = r.readLine() ?: break
+                        LOG.debug("Kernel stderr: $line")
+                    }
+                }
+            }
+
+            // Verify process stays alive
+            delay(400)
+            if (!proc.isAlive) {
+                LOG.error("Jupyter kernel process terminated prematurely with exit code: ${proc.exitValue()}")
+                _status.value = KernelStatus.DEAD
+                return@withContext false
+            }
 
             // 4. Initialize ZeroMQ sockets via JeroMQ
             val ctx = ZContext()
@@ -118,7 +155,7 @@ class ZmqKernelSession(
 
             val iopub = ctx.createSocket(SocketType.SUB)
             iopub.connect("tcp://127.0.0.1:$iopubPort")
-            iopub.subscribe("") // Subscribe to all IOPub topics
+            iopub.subscribe("") // Subscribe to all topics
             iopubSocket = iopub
 
             val control = ctx.createSocket(SocketType.DEALER)
@@ -183,19 +220,20 @@ class ZmqKernelSession(
         _status.value = KernelStatus.BUSY
 
         try {
-            // Await execution reply or timeout
-            val result = withTimeout(60_000L) {
+            // Await execution reply and all streamed outputs
+            val result = withTimeout(120_000L) {
                 deferred.await()
             }
             _status.value = KernelStatus.IDLE
             result
         } catch (e: TimeoutCancellationException) {
             _status.value = KernelStatus.IDLE
-            val err = CellOutput.ErrorOutput("TimeoutError", "Cell execution timed out after 60 seconds", emptyList())
+            val err = CellOutput.ErrorOutput("TimeoutError", "Cell execution timed out after 120 seconds", emptyList())
             onOutput(err)
             ExecutionResult(currentExecCount, false, listOf(err))
         } finally {
             pendingExecutions.remove(msgId)
+            pendingReplies.remove(msgId)
             outputListeners.remove(msgId)
             executionOutputs.remove(msgId)
         }
@@ -260,7 +298,6 @@ class ZmqKernelSession(
         sessionScope.launch(Dispatchers.IO) {
             while (isActive) {
                 val frames = receiveMultipartMessage(iopub) ?: continue
-                if (frames.size < 5) continue
 
                 val msgType = frames.header.get("msg_type")?.asString ?: continue
                 val parentMsgId = frames.parentHeader.get("msg_id")?.asString ?: ""
@@ -270,8 +307,18 @@ class ZmqKernelSession(
                 when (msgType) {
                     "status" -> {
                         val state = frames.content.get("execution_state")?.asString
-                        if (state == "idle") _status.value = KernelStatus.IDLE
-                        else if (state == "busy") _status.value = KernelStatus.BUSY
+                        if (state == "idle") {
+                            _status.value = KernelStatus.IDLE
+                            // If shell already replied, complete execution now that IOPub is idle
+                            val reply = pendingReplies[parentMsgId]
+                            val deferred = pendingExecutions[parentMsgId]
+                            if (reply != null && deferred != null && !deferred.isCompleted) {
+                                val outs = outputList?.toList() ?: emptyList()
+                                deferred.complete(ExecutionResult(reply.count, reply.isOk, outs))
+                            }
+                        } else if (state == "busy") {
+                            _status.value = KernelStatus.BUSY
+                        }
                     }
                     "stream" -> {
                         val name = frames.content.get("name")?.asString ?: "stdout"
@@ -322,9 +369,16 @@ class ZmqKernelSession(
                     val statusStr = frames.content.get("status")?.asString ?: "ok"
                     val count = frames.content.get("execution_count")?.asInt ?: 1
                     val deferred = pendingExecutions[parentMsgId]
-                    val outputs = executionOutputs[parentMsgId] ?: emptyList()
+                    val isOk = statusStr == "ok"
 
-                    deferred?.complete(ExecutionResult(count, statusStr == "ok", outputs))
+                    pendingReplies[parentMsgId] = ReplyHolder(count, isOk)
+
+                    // Grace delay: wait up to 250ms for IOPub status:idle to flush remaining outputs
+                    launch {
+                        delay(250)
+                        val outputs = executionOutputs[parentMsgId]?.toList() ?: emptyList()
+                        deferred?.complete(ExecutionResult(count, isOk, outputs))
+                    }
                 }
             }
         }
@@ -336,9 +390,7 @@ class ZmqKernelSession(
         val parentHeader: JsonObject,
         val metadata: JsonObject,
         val content: JsonObject
-    ) {
-        val size: Int get() = 5
-    }
+    )
 
     private fun receiveMultipartMessage(socket: ZMQ.Socket): ParsedJupyterMessage? {
         return runCatching {
@@ -354,6 +406,11 @@ class ZmqKernelSession(
             val parentHeaderStr = socket.recvStr() ?: return@runCatching null
             val metadataStr = socket.recvStr() ?: return@runCatching null
             val contentStr = socket.recvStr() ?: return@runCatching null
+
+            // Drain any extra raw binary buffers if present
+            while (socket.hasReceiveMore()) {
+                socket.recv()
+            }
 
             val header = JsonParser.parseString(headerStr).asJsonObject
             val parentHeader = if (parentHeaderStr.isNotBlank()) JsonParser.parseString(parentHeaderStr).asJsonObject else JsonObject()
@@ -387,13 +444,16 @@ class ZmqKernelSession(
     }
 
     private fun computeHmac(vararg parts: String): String {
-        val mac = macInstance ?: return ""
-        val cloneMac = mac.clone() as Mac
-        for (part in parts) {
-            cloneMac.update(part.toByteArray(StandardCharsets.UTF_8))
-        }
-        val digest = cloneMac.doFinal()
-        return digest.joinToString("") { "%02x".format(it) }
+        val key = secretKeySpec ?: return ""
+        return runCatching {
+            val mac = Mac.getInstance("HmacSHA256")
+            mac.init(key)
+            for (part in parts) {
+                mac.update(part.toByteArray(StandardCharsets.UTF_8))
+            }
+            val digest = mac.doFinal()
+            digest.joinToString("") { "%02x".format(it) }
+        }.getOrDefault("")
     }
 
     private fun parseData(obj: JsonObject?): Map<String, Any> {
