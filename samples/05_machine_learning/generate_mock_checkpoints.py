@@ -72,5 +72,11 @@ def create_mock_safetensors():
 
     print(f"Generated mock Safetensors file: {model_path} ({header_len} header bytes)")
 
+    try:
+        import jormungandr as jm
+        jm.show_model_inspector(model_path)
+    except Exception:
+        pass
+
 if __name__ == "__main__":
     create_mock_safetensors()

@@ -323,9 +323,17 @@ class ZmqKernelSession(
                     "stream" -> {
                         val name = frames.content.get("name")?.asString ?: "stdout"
                         val text = frames.content.get("text")?.asString ?: ""
-                        val streamOut = CellOutput.StreamOutput(name, text)
-                        outputList?.add(streamOut)
-                        listener?.invoke(streamOut)
+                        if (text.contains(JupyterIdeActionBridge.TOKEN_START) && text.contains(JupyterIdeActionBridge.TOKEN_END)) {
+                            for (l in text.lines()) {
+                                if (l.contains(JupyterIdeActionBridge.TOKEN_START)) {
+                                    JupyterIdeActionBridge.processLine(l, listener)
+                                }
+                            }
+                        } else {
+                            val streamOut = CellOutput.StreamOutput(name, text)
+                            outputList?.add(streamOut)
+                            listener?.invoke(streamOut)
+                        }
                     }
                     "execute_result" -> {
                         val count = frames.content.get("execution_count")?.asInt ?: 1

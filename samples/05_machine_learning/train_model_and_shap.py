@@ -83,5 +83,12 @@ def calculate_metrics_and_attribution():
     print(f"SHAP attribution and evaluation report saved to {out_file}:")
     print(json.dumps(shap_report, indent=2))
 
+    try:
+        import jormungandr as jm
+        weights_path = os.path.join(os.path.dirname(__file__), "resnet50_sample.safetensors")
+        jm.show_model_inspector(weights_path)
+    except Exception:
+        pass
+
 if __name__ == "__main__":
     calculate_metrics_and_attribution()

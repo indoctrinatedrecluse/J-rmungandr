@@ -9,11 +9,13 @@ This directory provides pre-configured test artifacts, datasets, notebooks, SQL 
 ```
 samples/
 ├── README.md                                 # This testing and evaluation guide
-├── 01_notebooks/                             # Reactive Jupyter Notebook test cases
-│   ├── 01_reactive_dag_demo.ipynb            # Variable dependency tracking & topological execution
-│   ├── 02_rich_outputs_and_math.ipynb        # LaTeX math, collapsible JSON trees, HTML formatting
+├── 01_notebooks/                             # Reactive Jupyter Notebook test cases & product showcases
+│   ├── 01_reactive_dag_demo.ipynb            # Variable dependency tracking, AST analysis & topological run
+│   ├── 02_rich_outputs_and_math.ipynb        # LaTeX math, collapsible JSON trees, HTML formatting & plot viewer
 │   ├── 03_audio_video_multimedia.ipynb       # Java Sound waveform card & video player launcher
-│   └── 04_data_science_workflow.ipynb        # End-to-end Pandas, DuckDB in-memory queries & stats
+│   ├── 04_data_science_workflow.ipynb        # End-to-end Pandas, DuckDB in-memory queries & DataFrame Studio
+│   ├── 05_lakehouse_and_pipeline_showcase.ipynb # Lakehouse Parquet Inspector, DuckDB queries & Pipeline DAG
+│   └── 06_ai_ml_and_gpu_showcase.ipynb       # Safetensors Checkpoint Inspector, GPU monitor & Prompt Studio
 ├── 02_datasets/                              # Tabular data & distribution drift testing
 │   ├── generate_datasets.py                  # Python generator script for synthetic datasets
 │   ├── customers.csv                         # 250 customer rows for Data Grid & correlation matrix
@@ -36,16 +38,17 @@ samples/
 │   │       ├── staging/                      # Staging views (stg_customers, stg_orders)
 │   │       └── marts/                        # Mart tables (fct_daily_revenue, dim_customer_churn)
 │   └── airflow_dags/                         # Apache Airflow DAGs
-│       └── customer_etl_dag.py               # Airflow DAG with task dependency operators
+│       └── customer_etl_dag.py               # Airflow DAG with task dependency operators & lineage launcher
 ├── 05_machine_learning/                      # AI/ML Studio & Model Inspection
-│   ├── train_model_and_shap.py               # Model evaluation & SHAP waterfall calculations
+│   ├── train_model_and_shap.py               # Model evaluation, SHAP waterfall calculations & checkpoint inspector
 │   ├── ml_evaluation_report.json             # Model metrics & feature attribution output
 │   ├── resnet50_sample.safetensors           # Binary Safetensors checkpoint for Neural Graph Inspector
 │   ├── generate_mock_checkpoints.py          # Safetensors mock binary generator
 │   └── sample_model_metadata.json            # Metadata for 1-Click model deployment packaging
-└── 06_r_statistical/                         # R REPL & ggplot2 Visual Interception
-    └── ggplot2_statistical_analysis.R        # Observational cohort study & ggplot2 visual test
-```
+├── 06_r_statistical/                         # R REPL & ggplot2 Visual Interception
+│   └── ggplot2_statistical_analysis.R        # Observational cohort study & ggplot2 visual test
+└── jormungandr/                              # Standalone Python SDK for programmatic IDE UI triggers
+    └── __init__.py                           # Programmatic API: jm.show_dataframe, jm.show_lakehouse, etc.
 
 ---
 
@@ -105,3 +108,46 @@ samples/
 - **Open**: `samples/06_r_statistical/ggplot2_statistical_analysis.R`.
   - Send lines or selections to the R REPL (`Ctrl+Enter` / `Alt+Shift+E`).
   - Verify linear regression model summaries print to console and plot output is captured into the Scientific Plot Viewer.
+
+### 7. 🌊 Flagship Showcase Notebooks
+- **Open**: `samples/01_notebooks/05_lakehouse_and_pipeline_showcase.ipynb`.
+  - Inspects Delta Lake transaction log commits (`_delta_log/*.json`).
+  - Runs in-memory vectorized DuckDB aggregations over Lakehouse CSV/Parquet data.
+  - Automatically launches the **Lakehouse Parquet Inspector** dialog and **Pipeline Studio Lineage DAG** visualizer.
+- **Open**: `samples/01_notebooks/06_ai_ml_and_gpu_showcase.ipynb`.
+  - Parses binary `.safetensors` header weights with zero-copy dissection.
+  - Automatically launches the **Neural Checkpoint Inspector**, real-time **GPU Hardware Telemetry Monitor**, and the **Local AI & Prompt Engineering Studio**.
+
+### 8. ⚡ Programmatic IDE Action Bridge (`jormungandr` SDK)
+Any notebook cell or Python script can programmatically trigger and focus Jörmungandr UI suites without manual navigation:
+```python
+import jormungandr as jm
+
+# 1. Launch Virtualized DataFrame Viewer with filters & stats
+jm.show_dataframe(df, title="Customer Directory")
+
+# 2. Inspect Parquet / Delta Lake columnar block chunks
+jm.show_lakehouse("samples/03_lakehouse_and_sql/mock_delta_table")
+
+# 3. Open interactive cubic-bezier Pipeline Lineage DAG
+jm.show_pipeline_lineage("lakehouse_customer_hourly_sync")
+
+# 4. Open Multi-Dialect SQL Console in Database Studio
+jm.show_database_studio(connection="DuckDB In-Memory Mart", query="SELECT * FROM df")
+
+# 5. Zero-copy Safetensors / GGUF neural graph inspector
+jm.show_model_inspector("samples/05_machine_learning/resnet50_sample.safetensors")
+
+# 6. Real-time GPU & VRAM telemetry monitor
+jm.show_gpu_monitor()
+
+# 7. Local AI & Prompt Engineering Playground
+jm.show_prompt_studio(model="llama-3-8b-instruct", system_prompt="You are an expert AI data scientist.")
+
+# 8. Reactive Execution DAG canvas & dependency tracker
+jm.show_dag()
+
+# 9. Scientific Plot Viewer tool window
+jm.show_plots()
+```
+
