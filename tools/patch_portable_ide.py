@@ -92,21 +92,62 @@ def patch_portable_ide(staging_dir, resources_dir, tag_name="1.0.0"):
                 zout.writestr(item, content)
         shutil.move(tmp_jar, descriptors_jar)
 
-    # 1.6 Patch lib/app.jar with Jörmungandr ApplicationInfo
+    # 1.6 Patch lib/app.jar with Jörmungandr ApplicationInfo and Splash/Branding
     app_jar = os.path.join(staging_dir, "lib", "app.jar")
     if os.path.exists(app_jar):
         print(" -> Patching lib/app.jar...")
         tmp_app_jar = app_jar + ".tmp"
+        splash_file = os.path.join(resources_dir, "splash", "splash.png")
+        splash2x_file = os.path.join(resources_dir, "splash", "splash@2x.png")
+        icon_file = os.path.join(resources_dir, "icons", "jormungandr.svg")
+        icon16_file = os.path.join(resources_dir, "icons", "jormungandr_16.svg")
+
+        splash_data = open(splash_file, 'rb').read() if os.path.exists(splash_file) else None
+        splash2x_data = open(splash2x_file, 'rb').read() if os.path.exists(splash2x_file) else None
+        icon_data = open(icon_file, 'rb').read() if os.path.exists(icon_file) else None
+        icon16_data = open(icon16_file, 'rb').read() if os.path.exists(icon16_file) else None
+
         with zipfile.ZipFile(app_jar, 'r') as zin, zipfile.ZipFile(tmp_app_jar, 'w', compression=zipfile.ZIP_DEFLATED) as zout:
             for item in zin.infolist():
                 if item.filename == 'idea/IdeaApplicationInfo.xml':
                     zout.writestr(item.filename, app_info_xml.encode('utf-8'))
                     print("    [+] Replaced idea/IdeaApplicationInfo.xml in app.jar")
+                elif item.filename == 'idea_community_logo.png' and splash_data:
+                    zout.writestr(item.filename, splash_data)
+                    print("    [+] Replaced idea_community_logo.png with splash.png in app.jar")
+                elif item.filename == 'idea_community_logo@2x.png' and splash2x_data:
+                    zout.writestr(item.filename, splash2x_data)
+                    print("    [+] Replaced idea_community_logo@2x.png with splash@2x.png in app.jar")
                 elif item.filename == '__index__':
                     pass
                 else:
                     zout.writestr(item, zin.read(item.filename))
+
+            if splash_data:
+                zout.writestr('splash/splash.png', splash_data)
+            if splash2x_data:
+                zout.writestr('splash/splash@2x.png', splash2x_data)
+            if icon_data:
+                zout.writestr('icons/jormungandr.svg', icon_data)
+            if icon16_data:
+                zout.writestr('icons/jormungandr_16.svg', icon16_data)
+
         shutil.move(tmp_app_jar, app_jar)
+
+    # 1.7 Ensure Jörmungandr plugins are integrated into the primary bundled plugins directory
+    plugins_dir = os.path.join(staging_dir, "plugins")
+    jorm_plugins_dir = os.path.join(staging_dir, "jormungandr-plugins")
+    os.makedirs(plugins_dir, exist_ok=True)
+    if os.path.exists(jorm_plugins_dir):
+        print(" -> Bundling Jörmungandr plugins into primary plugins directory...")
+        for item in os.listdir(jorm_plugins_dir):
+            src_item = os.path.join(jorm_plugins_dir, item)
+            dst_item = os.path.join(plugins_dir, item)
+            if os.path.isdir(src_item):
+                if os.path.exists(dst_item):
+                    shutil.rmtree(dst_item)
+                shutil.copytree(src_item, dst_item)
+                print(f"    [+] Successfully bundled plugin: {item}")
 
     # 2. Update product-info.json (strict UTF-8 without BOM)
     product_info_path = os.path.join(staging_dir, "product-info.json")
@@ -164,7 +205,7 @@ def patch_portable_ide(staging_dir, resources_dir, tag_name="1.0.0"):
         "# Jörmungandr Standalone Portable IDE Configuration",
         "idea.config.path=${idea.home.path}/portable-data/config",
         "idea.system.path=${idea.home.path}/portable-data/system",
-        "idea.plugins.path=${idea.home.path}/jormungandr-plugins",
+        "idea.plugins.path=${idea.home.path}/portable-data/plugins",
         "idea.log.path=${idea.home.path}/portable-data/log",
         "idea.vendor.name=indoctrinatedrecluse",
         "idea.product.name=Jörmungandr",

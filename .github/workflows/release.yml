@@ -70,10 +70,13 @@ jobs:
               # Copy IntelliJ base platform
               Copy-Item -Path "$($ideaHome.FullName)\*" -Destination $stagingDir.FullName -Recurse -Force
               
-              # Copy Jörmungandr plugins into isolated jormungandr-plugins directory
+              # Copy Jörmungandr plugins into both bundled plugins and jormungandr-plugins directories
               $targetPluginsDir = Join-Path $stagingDir.FullName "jormungandr-plugins"
               New-Item -ItemType Directory -Path $targetPluginsDir -Force | Out-Null
               Copy-Item -Path "$($sandboxPlugins.FullName)\*" -Destination $targetPluginsDir -Recurse -Force
+
+              $bundledPluginsDir = Join-Path $stagingDir.FullName "plugins"
+              Copy-Item -Path "$($sandboxPlugins.FullName)\*" -Destination $bundledPluginsDir -Recurse -Force
 
               # Patch portable distribution with bootstrap jar, module descriptors, app.jar, and branding
               python tools/patch_portable_ide.py "$($stagingDir.FullName)" "$resourcesDir" "$tag"
