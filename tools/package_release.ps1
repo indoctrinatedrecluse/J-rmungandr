@@ -59,6 +59,14 @@ Get-ChildItem -Path $sandboxPlugins.FullName -Directory | ForEach-Object {
     Copy-Item -Path $_.FullName -Destination (Join-Path $targetPluginsDir $pluginName) -Recurse -Force
 }
 
+Write-Host "Copying bundled samples directory into staging..." -ForegroundColor Yellow
+$samplesSource = Join-Path $ProjectRoot "samples"
+if (Test-Path $samplesSource) {
+    $targetSamples = Join-Path $stagingDir "samples"
+    Copy-Item -Path $samplesSource -Destination $targetSamples -Recurse -Force
+    Write-Host "[OK] Bundled samples into $targetSamples" -ForegroundColor Green
+}
+
 Write-Host "Patching portable distribution via patch_portable_ide.py..." -ForegroundColor Yellow
 python "$ProjectRoot\tools\patch_portable_ide.py" "$stagingDir" "$resourcesDir" "$tag"
 

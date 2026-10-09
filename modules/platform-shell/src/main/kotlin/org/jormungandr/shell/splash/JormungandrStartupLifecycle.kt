@@ -38,6 +38,9 @@ class JormungandrAppInitializer : ApplicationInitializedListener {
         if (themeManager != null) {
             themeManager.applyTheme(themeManager.currentTheme.value.id)
         }
+
+        // Initialize default samples project on first run if no projects exist
+        org.jormungandr.shell.samples.DefaultSamplesInitializer.initializeDefaultSamples()
     }
 }
 

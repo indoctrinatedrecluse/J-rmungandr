@@ -78,6 +78,14 @@ jobs:
               $bundledPluginsDir = Join-Path $stagingDir.FullName "plugins"
               Copy-Item -Path "$($sandboxPlugins.FullName)\*" -Destination $bundledPluginsDir -Recurse -Force
 
+              # Copy bundled samples directory
+              $samplesSource = (Resolve-Path "samples").Path
+              if (Test-Path $samplesSource) {
+                  $targetSamples = Join-Path $stagingDir.FullName "samples"
+                  Copy-Item -Path $samplesSource -Destination $targetSamples -Recurse -Force
+                  Write-Host "Bundled samples into $targetSamples"
+              }
+
               # Patch portable distribution with bootstrap jar, module descriptors, app.jar, and branding
               python tools/patch_portable_ide.py "$($stagingDir.FullName)" "$resourcesDir" "$tag"
 
