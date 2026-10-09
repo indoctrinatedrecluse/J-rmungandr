@@ -142,7 +142,10 @@ class SubprocessPythonSession(
 
                     // Programmatic IDE Action Triggers
                     if (line.contains(JupyterIdeActionBridge.TOKEN_START) && line.contains(JupyterIdeActionBridge.TOKEN_END)) {
-                        JupyterIdeActionBridge.processLine(line, onOutput)
+                        JupyterIdeActionBridge.processLine(line) { cardOutput ->
+                            outputs.add(cardOutput)
+                            onOutput(cardOutput)
+                        }
                         continue
                     }
 

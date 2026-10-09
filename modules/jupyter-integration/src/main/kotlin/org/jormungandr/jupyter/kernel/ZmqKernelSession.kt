@@ -169,6 +169,7 @@ class ZmqKernelSession(
             // 5. Start background listeners for IOPub and Shell channels
             startIopubListener(iopub)
             startShellListener(shell)
+            bootstrapKernel()
 
             _status.value = KernelStatus.IDLE
             LOG.info("ZmqKernelSession connected successfully (PID=${proc.pid()}).")
@@ -323,11 +324,23 @@ class ZmqKernelSession(
                     "stream" -> {
                         val name = frames.content.get("name")?.asString ?: "stdout"
                         val text = frames.content.get("text")?.asString ?: ""
-                        if (text.contains(JupyterIdeActionBridge.TOKEN_START) && text.contains(JupyterIdeActionBridge.TOKEN_END)) {
+                        if (text.contains(JupyterIdeActionBridge.TOKEN_START)) {
+                            val nonTokenLines = mutableListOf<String>()
                             for (l in text.lines()) {
-                                if (l.contains(JupyterIdeActionBridge.TOKEN_START)) {
-                                    JupyterIdeActionBridge.processLine(l, listener)
+                                if (l.contains(JupyterIdeActionBridge.TOKEN_START) && l.contains(JupyterIdeActionBridge.TOKEN_END)) {
+                                    JupyterIdeActionBridge.processLine(l) { cardOutput ->
+                                        outputList?.add(cardOutput)
+                                        listener?.invoke(cardOutput)
+                                    }
+                                } else if (l.isNotBlank()) {
+                                    nonTokenLines.add(l)
                                 }
+                            }
+                            if (nonTokenLines.isNotEmpty()) {
+                                val remaining = nonTokenLines.joinToString("\n") + "\n"
+                                val streamOut = CellOutput.StreamOutput(name, remaining)
+                                outputList?.add(streamOut)
+                                listener?.invoke(streamOut)
                             }
                         } else {
                             val streamOut = CellOutput.StreamOutput(name, text)
@@ -479,6 +492,122 @@ class ZmqKernelSession(
             socket.reuseAddress = true
             return socket.localPort
         }
+    }
+
+    private fun bootstrapKernel() {
+        val bootstrapScript = """
+import sys, os, json, types, builtins
+
+_curr_dir = os.path.abspath(os.getcwd())
+for _p in [_curr_dir, os.path.abspath(os.path.join(_curr_dir, "..")), os.path.abspath(os.path.join(_curr_dir, "../.."))]:
+    if _p not in sys.path:
+        sys.path.insert(0, _p)
+
+class _JormungandrSdk:
+    @staticmethod
+    def _trigger(action, **kwargs):
+        payload = {"action": action, **kwargs}
+        print("__JG_IDE_ACTION__" + json.dumps(payload) + "__JG_IDE_ACTION_END__", flush=True)
+        t = kwargs.get("title") or action
+        p = kwargs.get("path") or ""
+        desc = (" [" + p + "]") if p else ""
+        try:
+            print("[Jormungandr Studio Trigger] " + t + desc + " -> Studio activated.", flush=True)
+        except Exception:
+            pass
+
+    @classmethod
+    def show_dataframe(cls, data=None, path=None, title="Dataset Explorer", **kwargs):
+        if path is not None:
+            cls._trigger("show_dataframe", path=os.path.abspath(str(path)), title=title, **kwargs)
+            return
+        if data is not None:
+            if hasattr(data, "to_dict"):
+                try:
+                    records = data.head(500).to_dict(orient="records")
+                    cols = list(data.columns)
+                    cls._trigger("show_dataframe", data={"columns": cols, "records": records}, title=title, **kwargs)
+                    return
+                except Exception:
+                    pass
+            if isinstance(data, list) and len(data) > 0 and isinstance(data[0], dict):
+                cols = list(data[0].keys())
+                cls._trigger("show_dataframe", data={"columns": cols, "records": data[:500]}, title=title, **kwargs)
+                return
+            if isinstance(data, str) and os.path.exists(data):
+                cls._trigger("show_dataframe", path=os.path.abspath(data), title=title, **kwargs)
+                return
+        cls._trigger("show_dataframe", title=title, **kwargs)
+
+    @classmethod
+    def show_lakehouse(cls, path=None, **kwargs):
+        p = os.path.abspath(str(path)) if path else None
+        cls._trigger("show_lakehouse", path=p, **kwargs)
+
+    @classmethod
+    def show_pipeline_lineage(cls, path=None, dag_id=None, **kwargs):
+        p = os.path.abspath(str(path)) if path and os.path.exists(str(path)) else (path or dag_id)
+        cls._trigger("show_pipeline_lineage", path=p, dag_id=dag_id, **kwargs)
+
+    @classmethod
+    def show_database_studio(cls, connection=None, dialect=None, query=None, **kwargs):
+        conn = connection or dialect
+        cls._trigger("show_database_studio", dialect=conn, query=query, **kwargs)
+
+    @classmethod
+    def show_model_inspector(cls, path=None, **kwargs):
+        p = os.path.abspath(str(path)) if path else None
+        cls._trigger("show_model_inspector", path=p, **kwargs)
+
+    @classmethod
+    def show_gpu_monitor(cls, **kwargs):
+        cls._trigger("show_gpu_monitor", **kwargs)
+
+    @classmethod
+    def show_prompt_studio(cls, prompt=None, model=None, system_prompt=None, **kwargs):
+        cls._trigger("show_prompt_studio", prompt=prompt, model=model, system_prompt=system_prompt, **kwargs)
+
+    @classmethod
+    def show_r_console(cls, **kwargs):
+        cls._trigger("show_r_console", **kwargs)
+
+    @classmethod
+    def show_plots(cls, **kwargs):
+        cls._trigger("show_plots", **kwargs)
+
+    @classmethod
+    def show_dag(cls, **kwargs):
+        cls._trigger("show_dag", **kwargs)
+
+_jm_mod = types.ModuleType("jormungandr")
+for _attr in dir(_JormungandrSdk):
+    if not _attr.startswith("_"):
+        setattr(_jm_mod, _attr, getattr(_JormungandrSdk, _attr))
+setattr(_jm_mod, "_trigger", _JormungandrSdk._trigger)
+sys.modules["jormungandr"] = _jm_mod
+sys.modules["jm"] = _jm_mod
+builtins.jormungandr = _jm_mod
+builtins.jm = _jm_mod
+""".trimIndent()
+
+        val msgId = UUID.randomUUID().toString()
+        val header = JsonObject().apply {
+            addProperty("msg_id", msgId)
+            addProperty("username", "jormungandr")
+            addProperty("session", id)
+            addProperty("date", Instant.now().toString())
+            addProperty("msg_type", "execute_request")
+            addProperty("version", "5.3")
+        }
+        val content = JsonObject().apply {
+            addProperty("code", bootstrapScript)
+            addProperty("silent", true)
+            addProperty("store_history", false)
+            add("user_expressions", JsonObject())
+            addProperty("allow_stdin", false)
+            addProperty("stop_on_error", false)
+        }
+        shellSocket?.let { sendMessage(it, header, content) }
     }
 
     companion object {

@@ -43,7 +43,8 @@ object JupyterIdeActionBridge {
             val dataObj = if (json.has("data") && json.get("data").isJsonObject) json.getAsJsonObject("data") else null
 
             ApplicationManager.getApplication().invokeLater {
-                val project = ProjectManager.getInstance().openProjects.firstOrNull { !it.isDisposed }
+                val project = com.intellij.openapi.wm.IdeFocusManager.getGlobalInstance().lastFocusedFrame?.project
+                    ?: ProjectManager.getInstance().openProjects.firstOrNull { !it.isDisposed }
                     ?: ProjectManager.getInstance().defaultProject
 
                 when (action) {
@@ -68,7 +69,17 @@ object JupyterIdeActionBridge {
         }
     }
 
+    private fun activateToolWindow(project: Project, id: String) {
+        val twm = ToolWindowManager.getInstance(project)
+        val tw = twm.getToolWindow(id)
+        if (tw != null) {
+            tw.isAvailable = true
+            tw.activate(null, true)
+        }
+    }
+
     private fun openDataFrame(project: Project, path: String?, dataObj: JsonObject?, title: String) {
+        activateToolWindow(project, "DataFrame Viewer")
         if (!path.isNullOrBlank()) {
             val vFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(path.replace('\\', '/'))
             if (vFile != null) {
@@ -78,8 +89,10 @@ object JupyterIdeActionBridge {
         }
         if (dataObj != null) {
             runCatching {
-                val tempFile = File.createTempFile("jg_df_viewer_", ".csv")
-                tempFile.deleteOnExit()
+                val baseDir = project.basePath ?: "."
+                val cacheDir = File(baseDir, ".jormungandr")
+                cacheDir.mkdirs()
+                val tempFile = File(cacheDir, "dataframe_preview.csv")
                 val cols = dataObj.getAsJsonArray("columns").map { it.asString }
                 val records = dataObj.getAsJsonArray("records")
                 val sb = StringBuilder()
@@ -98,35 +111,50 @@ object JupyterIdeActionBridge {
                 val vFile = LocalFileSystem.getInstance().refreshAndFindFileByIoFile(tempFile)
                 if (vFile != null) {
                     FileEditorManager.getInstance(project).openFile(vFile, true)
-                    return
                 }
             }
         }
-        ToolWindowManager.getInstance(project).getToolWindow("DataFrame Viewer")?.show()
     }
 
     private fun openLakehouse(project: Project, path: String?) {
-        ToolWindowManager.getInstance(project).getToolWindow("DuckDB Lakehouse")?.show()
+        activateToolWindow(project, "DuckDB Lakehouse")
         if (!path.isNullOrBlank()) {
             val file = File(path)
             if (file.exists()) {
-                runCatching {
-                    val clazz = Class.forName("org.jormungandr.dataframe.lakehouse.LakehouseInspectorDialog")
+                val opened = runCatching {
+                    val plugin = com.intellij.ide.plugins.PluginManagerCore.getPlugin(com.intellij.openapi.extensions.PluginId.getId("org.jormungandr.dataframe"))
+                    val cl = plugin?.pluginClassLoader ?: project.javaClass.classLoader
+                    val clazz = Class.forName("org.jormungandr.dataframe.lakehouse.LakehouseInspectorDialog", true, cl)
                     val ctor = clazz.getConstructor(Project::class.java, File::class.java)
                     val dialog = ctor.newInstance(project, file)
-                    val showMethod = clazz.getMethod("show")
-                    showMethod.invoke(dialog)
+                    clazz.getMethod("show").invoke(dialog)
+                    true
+                }.getOrDefault(false)
+
+                if (!opened) {
+                    val action = ActionManager.getInstance().getAction("Jormungandr.Lakehouse.Inspector")
+                    if (action != null) {
+                        val event = AnActionEvent.createFromAnAction(action, null, ActionPlaces.UNKNOWN, DataContext.EMPTY_CONTEXT)
+                        action.actionPerformed(event)
+                    }
                 }
             }
         }
     }
 
     private fun openPipelineLineage(project: Project) {
-        ToolWindowManager.getInstance(project).getToolWindow("Data Pipelines")?.show()
+        activateToolWindow(project, "Data Pipelines")
+        runCatching {
+            val action = ActionManager.getInstance().getAction("org.jormungandr.database.orchestration.ShowPipelineLineageAction")
+            if (action != null) {
+                val event = AnActionEvent.createFromAnAction(action, null, ActionPlaces.UNKNOWN, DataContext.EMPTY_CONTEXT)
+                action.actionPerformed(event)
+            }
+        }
     }
 
     private fun openDatabaseStudio(project: Project) {
-        ToolWindowManager.getInstance(project).getToolWindow("Database Studio")?.show()
+        activateToolWindow(project, "Database Studio")
     }
 
     private fun openModelInspector(project: Project, path: String?) {
@@ -149,29 +177,27 @@ object JupyterIdeActionBridge {
     }
 
     private fun openPromptStudio(project: Project) {
-        ToolWindowManager.getInstance(project).getToolWindow("Prompt Studio")?.show()
+        activateToolWindow(project, "Prompt Studio")
     }
 
     private fun openRConsole(project: Project) {
-        ToolWindowManager.getInstance(project).getToolWindow("R Console")?.show()
+        activateToolWindow(project, "R Console")
     }
 
     private fun openPlots(project: Project) {
-        ToolWindowManager.getInstance(project).getToolWindow("Scientific Plots")?.show()
+        activateToolWindow(project, "Scientific Plots")
     }
 
     private fun openDag(project: Project) {
         runCatching {
             val editorManager = FileEditorManager.getInstance(project)
             val activeEditor = editorManager.selectedEditors.firstOrNull {
-                it.javaClass.simpleName == "JupyterNotebookFileEditor"
+                it is org.jormungandr.jupyter.ui.editor.JupyterNotebookFileEditor
+            } ?: editorManager.allEditors.firstOrNull {
+                it is org.jormungandr.jupyter.ui.editor.JupyterNotebookFileEditor
             }
-            if (activeEditor != null) {
-                val modelProp = activeEditor.javaClass.getMethod("getModel").invoke(activeEditor)
-                val dialogClass = Class.forName("org.jormungandr.jupyter.dag.NotebookDependencyGraphDialog")
-                val ctor = dialogClass.constructors.first()
-                val dialog = ctor.newInstance(project, modelProp)
-                dialogClass.getMethod("show").invoke(dialog)
+            if (activeEditor is org.jormungandr.jupyter.ui.editor.JupyterNotebookFileEditor) {
+                activeEditor.showDag()
             }
         }
     }

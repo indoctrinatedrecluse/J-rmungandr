@@ -758,6 +758,15 @@ class NotebookPanel(
         }
     }
 
+    fun showDag() {
+        rightTabs.isVisible = true
+        rightTabs.selectedIndex = 1
+        dagPanel.updateModel(notebookModel)
+        mainSplitPane.dividerLocation = (width - 380).coerceAtLeast(100)
+        revalidate()
+        repaint()
+    }
+
     fun dispose() {
         panelScope.cancel()
         cellComponents.forEach { it.dispose() }

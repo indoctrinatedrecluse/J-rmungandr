@@ -1,11 +1,12 @@
 """
 Script to update and generate all showcase notebooks in samples/01_notebooks/
-Ensures all notebooks compile, execute cleanly, and contain programmatic UI triggers
-with ASCII-safe console output for cross-platform compatibility.
+Ensures all notebooks compile, execute cleanly, and contain bulletproof programmatic UI triggers
+with automatic sys.path resolution and inline fallbacks.
 """
 
 import json
 import os
+import shutil
 import uuid
 
 def make_code_cell(source_lines, execution_count=None, outputs=None):
@@ -26,22 +27,61 @@ def make_markdown_cell(source_lines):
         "source": [line + "\n" for line in source_lines[:-1]] + [source_lines[-1]] if source_lines else []
     }
 
+IMPORT_HEADER = [
+    "# Ensure samples directory is in sys.path",
+    "import sys, os",
+    "for _p in [os.path.abspath('..'), os.path.abspath('.'), os.path.abspath('../..')]:",
+    "    if _p not in sys.path:",
+    "        sys.path.insert(0, _p)",
+    "try:",
+    "    import jormungandr as jm",
+    "except ImportError:",
+    "    import json",
+    "    class _FallbackJm:",
+    "        @staticmethod",
+    "        def _trigger(action, **kwargs):",
+    "            payload = {'action': action, **kwargs}",
+    "            print('__JG_IDE_ACTION__' + json.dumps(payload) + '__JG_IDE_ACTION_END__', flush=True)",
+    "            print(f\"[Jormungandr Studio Trigger] {kwargs.get('title', action)} -> Studio activated.\")",
+    "        @classmethod",
+    "        def show_dataframe(cls, *a, **kw): cls._trigger('show_dataframe', **kw)",
+    "        @classmethod",
+    "        def show_lakehouse(cls, *a, **kw): cls._trigger('show_lakehouse', **kw)",
+    "        @classmethod",
+    "        def show_pipeline_lineage(cls, *a, **kw): cls._trigger('show_pipeline_lineage', **kw)",
+    "        @classmethod",
+    "        def show_database_studio(cls, *a, **kw): cls._trigger('show_database_studio', **kw)",
+    "        @classmethod",
+    "        def show_model_inspector(cls, *a, **kw): cls._trigger('show_model_inspector', **kw)",
+    "        @classmethod",
+    "        def show_gpu_monitor(cls, *a, **kw): cls._trigger('show_gpu_monitor', **kw)",
+    "        @classmethod",
+    "        def show_prompt_studio(cls, *a, **kw): cls._trigger('show_prompt_studio', **kw)",
+    "        @classmethod",
+    "        def show_r_console(cls, *a, **kw): cls._trigger('show_r_console', **kw)",
+    "        @classmethod",
+    "        def show_plots(cls, *a, **kw): cls._trigger('show_plots', **kw)",
+    "        @classmethod",
+    "        def show_dag(cls, *a, **kw): cls._trigger('show_dag', **kw)",
+    "    jm = _FallbackJm()",
+    "    sys.modules['jormungandr'] = jm",
+    "    sys.modules['jm'] = jm"
+]
+
 def update_01_reactive_dag():
     path = os.path.abspath("samples/01_notebooks/01_reactive_dag_demo.ipynb")
     with open(path, "r", encoding="utf-8") as f:
         nb = json.load(f)
     
-    # Filter out previous trigger cells if any
-    nb["cells"] = [c for c in nb["cells"] if "show_dag" not in "".join(c.get("source", [])) and "Programmatic Reactive DAG Activation" not in "".join(c.get("source", []))]
+    nb["cells"] = [c for c in nb["cells"] if "show_dag" not in "".join(c.get("source", [])) and "Reactive DAG Activation" not in "".join(c.get("source", []))]
     
     nb["cells"].append(make_markdown_cell([
         "### [DAG] Programmatic Reactive DAG Activation",
         "Run the cell below to programmatically open and focus the interactive Jormungandr Reactive DAG canvas."
     ]))
-    nb["cells"].append(make_code_cell([
-        "# Trigger Jormungandr Reactive DAG tool window",
-        "import jormungandr as jm",
+    nb["cells"].append(make_code_cell(IMPORT_HEADER + [
         "",
+        "# Trigger Jormungandr Reactive DAG tool window",
         "jm.show_dag()",
         "print('[Jormungandr] Reactive DAG tool window successfully activated!')"
     ], execution_count=5))
@@ -60,11 +100,11 @@ def update_02_rich_outputs():
         "## 3. Scientific Visualization & Plot Interception",
         "Jormungandr intercepts matplotlib and scientific graphics and routes them to the centralized Scientific Plot Viewer."
     ]))
-    nb["cells"].append(make_code_cell([
+    nb["cells"].append(make_code_cell(IMPORT_HEADER + [
+        "",
         "# Generate publication-quality scientific visualization and trigger Plot Viewer",
         "import matplotlib.pyplot as plt",
         "import numpy as np",
-        "import jormungandr as jm",
         "",
         "x = np.linspace(0, 10, 200)",
         "y1 = np.sin(x)",
@@ -101,8 +141,7 @@ def update_04_data_science_workflow():
         "## Programmatic IDE Extension Showcase",
         "The cell below uses the `jormungandr` SDK to programmatically launch the **DataFrame Studio** virtualized grid and the **Database Studio** query console."
     ]))
-    nb["cells"].append(make_code_cell([
-        "import jormungandr as jm",
+    nb["cells"].append(make_code_cell(IMPORT_HEADER + [
         "",
         "# 1. Launch Jormungandr DataFrame Studio with sorting, filtering, and stats",
         "jm.show_dataframe(df_employees, title='Employee Directory - DataFrame Studio')",
@@ -174,10 +213,7 @@ def create_05_lakehouse_and_pipeline():
             "### Programmatic Lakehouse & Pipeline Studio Triggers",
             "Executing the cell below programmatically launches both the **Lakehouse Parquet Inspector** and the **Pipeline Studio Lineage DAG** visualizer."
         ]),
-        make_code_cell([
-            "# Cell 3: Launch Lakehouse Parquet Inspector and Pipeline Lineage DAG",
-            "import os",
-            "import jormungandr as jm",
+        make_code_cell(IMPORT_HEADER + [
             "",
             "# 1. Launch Lakehouse Parquet Inspector for mock delta table",
             "delta_table_dir = os.path.abspath('../03_lakehouse_and_sql/mock_delta_table')",
@@ -248,10 +284,7 @@ def create_06_ai_ml_and_gpu():
             "### Programmatic Launchers for AI/ML Suite",
             "The cell below uses `jormungandr` to launch the **Model Checkpoint Inspector**, **GPU Resource Monitor**, and **Prompt Engineering Studio**."
         ]),
-        make_code_cell([
-            "# Cell 2: Programmatically launch Model Inspector, GPU Monitor & Prompt Studio",
-            "import os",
-            "import jormungandr as jm",
+        make_code_cell(IMPORT_HEADER + [
             "",
             "checkpoint_path = os.path.abspath('../05_machine_learning/resnet50_sample.safetensors')",
             "",
@@ -293,7 +326,17 @@ def create_06_ai_ml_and_gpu():
         json.dump(nb, f, indent=2)
     print(f"Created {path}")
 
+def sync_jormungandr_package():
+    src = os.path.abspath("samples/jormungandr")
+    dst = os.path.abspath("samples/01_notebooks/jormungandr")
+    if os.path.exists(src):
+        if os.path.exists(dst):
+            shutil.rmtree(dst)
+        shutil.copytree(src, dst)
+        print(f"Synced {src} -> {dst}")
+
 def main():
+    sync_jormungandr_package()
     update_01_reactive_dag()
     update_02_rich_outputs()
     update_04_data_science_workflow()

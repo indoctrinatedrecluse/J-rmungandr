@@ -49,6 +49,7 @@ samples/
 │   └── ggplot2_statistical_analysis.R        # Observational cohort study & ggplot2 visual test
 └── jormungandr/                              # Standalone Python SDK for programmatic IDE UI triggers
     └── __init__.py                           # Programmatic API: jm.show_dataframe, jm.show_lakehouse, etc.
+```
 
 ---
 

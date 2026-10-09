@@ -20,6 +20,10 @@ class JupyterNotebookFileEditor(
 
     private val panel = NotebookPanel(project, file)
 
+    fun showDag() {
+        panel.showDag()
+    }
+
     override fun getComponent(): JComponent = panel
 
     override fun getPreferredFocusedComponent(): JComponent? = panel
